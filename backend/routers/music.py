@@ -6,6 +6,8 @@ from schemas.music import (
     ArtistDetail,
     SearchAlbumsResponse,
     SearchArtistsResponse,
+    SearchTracksResponse,
+    TrackSearchItem,
 )
 
 router = APIRouter(prefix="/api/music", tags=["music"])
@@ -58,3 +60,24 @@ async def get_album_tracks(
 ):
     service = request.app.state.music_service
     return await service.get_album_tracks(album_id, market=market)
+
+
+@router.get("/artists/{artist_id}/top-tracks", response_model=list[TrackSearchItem])
+async def get_artist_top_tracks(
+    request: Request,
+    artist_id: str,
+    market: str = Query("KR", description="마켓 코드"),
+):
+    service = request.app.state.music_service
+    return await service.get_artist_top_tracks(artist_id, market=market)
+
+
+@router.get("/search/tracks", response_model=SearchTracksResponse)
+async def search_tracks(
+    request: Request,
+    q: str = Query(..., min_length=1, description="검색어"),
+    market: str = Query("KR", description="마켓 코드 (예: KR, JP, US)"),
+    limit: int = Query(20, ge=1, le=50, description="최대 결과 수"),
+):
+    service = request.app.state.music_service
+    return await service.search_tracks(q, market=market, limit=limit)

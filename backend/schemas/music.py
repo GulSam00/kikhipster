@@ -46,3 +46,25 @@ class SearchArtistsResponse(BaseModel):
 class SearchAlbumsResponse(BaseModel):
     items: list[AlbumSummary]
     total: int = 0
+
+
+class TrackAlbumInfo(BaseModel):
+    id: str
+    name: str
+    cover_url: str | None = None
+
+
+class TrackSearchItem(BaseModel):
+    id: str
+    name: str
+    artists: list[str] = []
+    album: TrackAlbumInfo
+    duration_ms: int = 0
+    popularity: int = 0
+    explicit: bool = False
+    preview_url: str | None = None
+
+
+class SearchTracksResponse(BaseModel):
+    items: list[TrackSearchItem]
+    total: int = 0

@@ -5,8 +5,14 @@ import httpx
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+import models  # noqa: F401 — Alembic이 Base.metadata에서 테이블 인식하도록 등록
 from config import settings
+from routers.auth import router as auth_router
+from routers.comment import router as comment_router
+from routers.like import router as like_router
 from routers.music import router as music_router
+from routers.topster import router as topster_router
+from routers.tournament import router as tournament_router
 from services.music_api import SpotifyMusicService
 from services.spotify_auth import SpotifyTokenManager
 
@@ -42,7 +48,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.include_router(auth_router)
 app.include_router(music_router)
+app.include_router(topster_router)
+app.include_router(comment_router)
+app.include_router(like_router)
+app.include_router(tournament_router)
 
 
 @app.get("/")

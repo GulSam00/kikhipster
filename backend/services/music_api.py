@@ -169,3 +169,64 @@ class SpotifyMusicService:
             })
 
         return {"album": album, "tracks": tracks}
+
+    async def search_tracks(
+        self, query: str, market: str = "KR", limit: int = 20
+    ) -> dict:
+        """곡 이름으로 트랙 검색."""
+        data = await self._request(
+            "GET",
+            "/search",
+            params={"type": "track", "q": query, "market": market, "limit": min(limit, 50)},
+        )
+        tracks_data = data.get("tracks", {})
+        items = []
+        for t in tracks_data.get("items", []):
+            track_artists = [a.get("name", "") for a in t.get("artists", [])]
+            album = t.get("album", {})
+            album_images = album.get("images", [])
+            items.append({
+                "id": t.get("id", ""),
+                "name": t.get("name", ""),
+                "artists": track_artists,
+                "album": {
+                    "id": album.get("id", ""),
+                    "name": album.get("name", ""),
+                    "cover_url": album_images[0]["url"] if album_images else None,
+                },
+                "duration_ms": t.get("duration_ms", 0),
+                "popularity": t.get("popularity", 0),
+                "explicit": t.get("explicit", False),
+                "preview_url": t.get("preview_url"),
+            })
+        return {"items": items, "total": tracks_data.get("total", 0)}
+
+    async def get_artist_top_tracks(
+        self, artist_id: str, market: str = "KR"
+    ) -> list[dict]:
+        """아티스트 인기 트랙 조회 (Spotify top-tracks)."""
+        data = await self._request(
+            "GET",
+            f"/artists/{artist_id}/top-tracks",
+            params={"market": market},
+        )
+        items = []
+        for t in data.get("tracks", []):
+            track_artists = [a.get("name", "") for a in t.get("artists", [])]
+            album = t.get("album", {})
+            album_images = album.get("images", [])
+            items.append({
+                "id": t.get("id", ""),
+                "name": t.get("name", ""),
+                "artists": track_artists,
+                "album": {
+                    "id": album.get("id", ""),
+                    "name": album.get("name", ""),
+                    "cover_url": album_images[0]["url"] if album_images else None,
+                },
+                "duration_ms": t.get("duration_ms", 0),
+                "popularity": t.get("popularity", 0),
+                "explicit": t.get("explicit", False),
+                "preview_url": t.get("preview_url"),
+            })
+        return items
