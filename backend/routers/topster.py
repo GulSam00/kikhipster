@@ -136,6 +136,24 @@ def delete_topster(
     db.commit()
 
 
+@router.get("/user/{user_id}", response_model=list[TopsterResponse])
+def list_user_topsters(
+    user_id: str,
+    limit: int = Query(20, ge=1, le=100),
+    offset: int = Query(0, ge=0),
+    db: Session = Depends(get_db),
+):
+    topsters = (
+        db.query(Topster)
+        .filter_by(user_id=user_id, is_public=True)
+        .order_by(Topster.created_at.desc())
+        .offset(offset)
+        .limit(limit)
+        .all()
+    )
+    return [_build_response(t, db) for t in topsters]
+
+
 @router.get("/me/list", response_model=list[TopsterResponse])
 def list_my_topsters(
     limit: int = Query(20, ge=1, le=100),

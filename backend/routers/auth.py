@@ -149,3 +149,15 @@ async def get_me(current_user: User = Depends(get_current_user)):
         "nickname": current_user.nickname,
         "provider": current_user.provider,
     }
+
+
+@router.get("/users/{user_id}")
+async def get_user_public(user_id: str, db: Session = Depends(get_db)):
+    user = db.query(User).filter_by(id=user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="유저를 찾을 수 없습니다")
+    return {
+        "id": str(user.id),
+        "nickname": user.nickname,
+        "provider": user.provider,
+    }
