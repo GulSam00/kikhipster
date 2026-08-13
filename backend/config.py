@@ -2,7 +2,7 @@ from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
-    database_url: str = "postgresql://user:password@localhost:5432/kikhipster"
+    database_url: str
     spotify_client_id: str = ""
     spotify_client_secret: str = ""
     spotify_default_market: str = "KR"
@@ -20,6 +20,9 @@ class Settings(BaseSettings):
     kakao_client_secret: str = ""
     oauth_redirect_base_url: str = "http://localhost:8000"
     frontend_url: str = "http://localhost:3000"
+
+    # CORS 허용 origin (콤마로 구분된 목록)
+    cors_origins: str = "http://localhost:3000"
 
     model_config = {"env_file": ".env", "env_file_encoding": "utf-8"}
 
