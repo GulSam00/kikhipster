@@ -28,8 +28,9 @@ fi
 date=$(git log -1 --format='%ad' --date=short)
 # 표 셀을 깨뜨리지 않도록 파이프 문자를 이스케이프
 subject=$(git log -1 --format='%s' | sed 's/|/\\|/g')
-# 변경된 최상위 디렉토리(또는 루트 파일명)를 "대상" 칸에 넣는다
-scope=$(git show --name-only --format='' HEAD | awk -F/ 'NF{print $1}' | sort -u | paste -sd'·' -)
+# 변경된 최상위 디렉토리(또는 루트 파일명)를 "대상" 칸에 넣는다.
+# paste -d 는 1바이트 구분자만 받으므로 멀티바이트 문자(·)를 쓰면 깨진다. ASCII 쉼표로 합친다.
+scope=$(git show --name-only --format='' HEAD | awk -F/ 'NF{print $1}' | sort -u | paste -sd',' - | sed 's/,/, /g')
 [ -n "$scope" ] || scope='-'
 
 printf '| %s | %s | %s | 커밋 `%s` |\n' "$date" "$subject" "$scope" "$hash" >> "$MD"
