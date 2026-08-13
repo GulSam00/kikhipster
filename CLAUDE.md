@@ -8,22 +8,16 @@
 
 ## 현재 상태 (2026-08-13 기준)
 
-**브랜치:** `feat/shadcn-ui-migration` — origin에 푸시됨, `main` 미병합
-**직전 작업:** 프론트 UI를 순수 Tailwind 유틸리티 → shadcn/ui 프리미티브로 전면 이관 (`2bcb79b`..`7844c90`)
+**브랜치:** `main` (`feat/shadcn-ui-migration` 는 PR #1로 병합 후 삭제됨)
+**직전 작업:** 배포 전 선행 작업 4건 코드 작업 완료 — DB 설정 일원화, Alembic 도입(초기 리비전), CORS 환경변수화, 백엔드 Dockerfile (`2ad8388`)
 
-> ⚠️ **백엔드의 DB 기반 API가 현재 전부 500이다.** Alembic 마이그레이션이 없고 `create_all()` 호출도 없어서 테이블 생성 수단 자체가 존재하지 않는다. 탑스터·댓글·좋아요·토너먼트·인증이 전부 해당된다. 아래 #1~#2가 끝나야 해소된다.
+> ⚠️ **DB 기반 API는 아직 검증되지 않았다.** Alembic 초기 리비전은 작성됐지만 로컬 `backend/.env` 가 없어서 `alembic upgrade head` 를 한 번도 실행해보지 못했다. 테이블이 실제로 생기는 걸 확인하기 전까지는 탑스터·댓글·좋아요·토너먼트·인증 API가 여전히 500이라고 가정할 것.
 > 프론트는 호출 실패를 전부 `catch` 로 삼키므로 화면은 에러 없이 빈 상태로 렌더링된다 — 정상 동작으로 오인하지 말 것.
 
-### 대기 중인 작업 — 배포 전 선행 작업
+### 다음 작업
 
-순서 의존이 있다. 상세 배경은 루트 `README.md` 와 Notion §11.4 참조.
-
-| # | 작업 | 선행 | 요점 |
-|---|------|------|------|
-| 1 | `database.py` 설정 일원화 | – | 평문 기본값 제거(미설정 시 즉시 실패), `os.getenv` → `settings` 일원화, `pool_pre_ping=True`, `sslmode=require` 지원. `config.py` 의 `database_url` 은 현재 **아무도 읽지 않는 죽은 설정**이라 그쪽만 고치면 조용히 무시됨 |
-| 2 | Alembic 도입 + 초기 리비전 | #1 | `alembic init`, `env.py` 에 `models` import + `Base.metadata` + `settings.database_url` 연결, 테이블 7종 리비전 생성 |
-| 3 | CORS·배포 환경변수화 | – | `main.py` 의 `allow_origins=["http://localhost:3000"]` 하드코딩 제거, `frontend_url`·`oauth_redirect_base_url` 기본값 정리 |
-| 4 | 백엔드 Dockerfile | #1 #2 #3 | `python:3.9-slim`, `backend/` 내용을 워킹 디렉토리 루트로(절대 경로 import), `uvicorn --host 0.0.0.0 --port 8000` |
+- [ ] `backend/.env` 구성 후 로컬 검증: `docker compose up -d` → `cd backend && alembic upgrade head` → `uvicorn main:app --reload`
+- [ ] 인프라 프로비저닝 (RDS·ECS·ALB·ACM 등) — 도메인명·AWS 리전·크레딧 잔액 미결. 상세는 Notion §11
 
 ### 확정된 배포 스택 (2026-08-13)
 
@@ -50,3 +44,4 @@
 | 2026-08-13 | docs: CLAUDE.md에 현재 작업 상태 및 대기 작업 기록 | CLAUDE.md | 커밋 `c529622` |
 | 2026-08-13 | chore: git commit 후 CLAUDE.md 변경 이력 자동 갱신 hook 추가 | .claude, CLAUDE.md | 커밋 `d1385d7` |
 | 2026-08-13 | fix: 변경 이력 hook의 대상 칸 구분자 깨짐 수정 | .claude, CLAUDE.md | 커밋 `0df850b` |
+| 2026-08-13 | chore(backend): 배포 전 선행 작업 완료 - DB 설정 일원화, Alembic 도입, CORS 환경변수화, Dockerfile | backend | 커밋 `2ad8388` |
