@@ -22,7 +22,7 @@ frontend/
 │   │   └── [id]/page.tsx       # 토너먼트 진행
 │   └── profile/[userId]/page.tsx
 ├── components/
-│   ├── ui/                     # 공용 (Button, Card, Modal, Badge)
+│   ├── ui/                     # shadcn/ui 프리미티브 (직접 수정 지양, CLI로 추가)
 │   ├── music/
 │   │   ├── ArtistCard.tsx
 │   │   ├── AlbumCard.tsx
@@ -117,12 +117,35 @@ export interface Like {
 }
 ```
 
-## Tailwind 스타일링 원칙
+## 스타일링 원칙 (shadcn/ui + Tailwind)
 
-- 인라인 `className` 사용, 별도 `.css` 파일 금지
+**UI는 shadcn/ui 프리미티브 위에서 조립한다.** 버튼·카드·인풋·탭 등을 raw `<button>` + Tailwind 클래스로 새로 만들지 말고 `@/components/ui/*` 를 먼저 찾는다. 없으면 `pnpm dlx shadcn@latest add <name>` 으로 추가한다.
+
+- 설정: `frontend/components.json` (style `radix-nova`, baseColor `zinc`, 아이콘 `lucide`)
+- 클래스 병합은 `cn()` (`@/lib/utils`) 사용 — 조건부 스타일에 템플릿 리터럴 금지
+- 인라인 `className` 사용, 별도 `.css` 파일 금지 (`app/globals.css` 만 예외)
 - 모바일 퍼스트: `sm:`, `md:`, `lg:` 순서
-- 다크모드: `dark:` 접두사 (루트에 `dark` 클래스 토글)
-- 음악 테마: 짙은 배경 `bg-zinc-900`, 강조 `text-violet-400`
+
+### 색상은 하드코딩하지 않고 시맨틱 토큰을 쓴다
+
+`app/globals.css` 에 정의된 CSS 변수 토큰을 사용한다. `bg-zinc-900`, `text-violet-400` 같은 팔레트 직접 지정은 금지.
+
+| 용도 | 토큰 |
+|------|------|
+| 페이지 배경 | `bg-background` |
+| 카드/패널 | `bg-card` |
+| 강조 (브랜드 violet) | `bg-primary` / `text-primary` |
+| 보조 텍스트 | `text-muted-foreground` |
+| hover 배경 | `bg-accent` |
+| 구분선/테두리 | `border` (기본값이 `border-border`) |
+
+다크 테마 고정이다. `<html>` 에 `dark` 클래스가 항상 붙어 있으므로 `dark:` 접두사는 쓰지 않는다. 라이트 팔레트도 `:root` 에 정의돼 있어 나중에 토글을 붙일 수 있다.
+
+### 아이콘·상태 컴포넌트
+
+- 아이콘은 `lucide-react`. 이모지(`♥ ♫ ▶ ✕`)를 아이콘으로 쓰지 않는다
+- 로딩 → `<Spinner>`, 빈 상태 → `<Empty>` 계열, 알림 → `sonner` 의 `toast()`
+- 목록 카드는 `<Card size="sm">` + `<CardContent>` 조합
 
 ## OpenAPI 플레이스홀더 패턴
 

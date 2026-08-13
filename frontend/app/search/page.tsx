@@ -1,13 +1,24 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import { SearchIcon } from 'lucide-react';
 import { apiFetch } from '@/lib/api';
 import ArtistCard from '@/components/music/ArtistCard';
 import AlbumCard from '@/components/music/AlbumCard';
 import TrackRow from '@/components/music/TrackRow';
+import { Input } from '@/components/ui/input';
+import { Spinner } from '@/components/ui/spinner';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty';
 import type { ArtistSummary, AlbumSummary, TrackSearchItem } from '@/types/music';
 
 type Tab = 'artists' | 'albums' | 'tracks';
+
+const tabs: { key: Tab; label: string }[] = [
+  { key: 'artists', label: '아티스트' },
+  { key: 'albums', label: '앨범' },
+  { key: 'tracks', label: '곡' },
+];
 
 function useDebounce<T>(value: T, ms: number): T {
   const [debounced, setDebounced] = useState(value);
@@ -56,68 +67,78 @@ export default function SearchPage() {
     search(debouncedQuery, tab);
   }, [debouncedQuery, tab, search]);
 
-  const tabs: { key: Tab; label: string }[] = [
-    { key: 'artists', label: '아티스트' },
-    { key: 'albums', label: '앨범' },
-    { key: 'tracks', label: '곡' },
-  ];
+  const isEmpty =
+    !loading && !!query && artists.length === 0 && albums.length === 0 && tracks.length === 0;
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-8">
-      <input
-        type="text"
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-        placeholder="아티스트, 앨범, 곡 검색..."
-        className="w-full px-4 py-3 rounded-xl bg-zinc-800 text-white placeholder-zinc-500 outline-none focus:ring-2 focus:ring-violet-500 mb-4"
-        autoFocus
-      />
-
-      <div className="flex gap-1 mb-6 border-b border-zinc-800">
-        {tabs.map(({ key, label }) => (
-          <button
-            key={key}
-            onClick={() => setTab(key)}
-            className={`px-4 py-2 text-sm font-medium transition-colors border-b-2 -mb-px ${
-              tab === key
-                ? 'border-violet-500 text-violet-400'
-                : 'border-transparent text-zinc-400 hover:text-white'
-            }`}
-          >
-            {label}
-          </button>
-        ))}
+    <div className="mx-auto w-full max-w-6xl px-4 py-8">
+      <div className="relative mb-4">
+        <SearchIcon className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
+        <Input
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="아티스트, 앨범, 곡 검색..."
+          className="h-11 pl-9"
+          autoFocus
+        />
       </div>
 
-      {loading && <p className="text-zinc-500 text-sm">검색 중...</p>}
-
-      {!loading && tab === 'artists' && (
-        <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 gap-3">
-          {artists.map((a) => <ArtistCard key={a.id} artist={a} />)}
-        </div>
-      )}
-
-      {!loading && tab === 'albums' && (
-        <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 gap-3">
-          {albums.map((a) => <AlbumCard key={a.id} album={a} />)}
-        </div>
-      )}
-
-      {!loading && tab === 'tracks' && (
-        <div className="flex flex-col">
-          {tracks.map((t) => (
-            <TrackRow
-              key={t.id}
-              track={{ ...t, explicit: t.explicit }}
-              artist={t.artists.join(', ')}
-              albumCover={t.album.cover_url}
-            />
+      <Tabs value={tab} onValueChange={(v) => setTab(v as Tab)}>
+        <TabsList variant="line" className="mb-2 border-b">
+          {tabs.map(({ key, label }) => (
+            <TabsTrigger key={key} value={key}>
+              {label}
+            </TabsTrigger>
           ))}
-        </div>
-      )}
+        </TabsList>
 
-      {!loading && query && artists.length === 0 && albums.length === 0 && tracks.length === 0 && (
-        <p className="text-zinc-500 text-sm">검색 결과가 없습니다.</p>
+        {loading && (
+          <div className="flex items-center gap-2 py-8 text-sm text-muted-foreground">
+            <Spinner />
+            검색 중...
+          </div>
+        )}
+
+        {!loading && (
+          <>
+            <TabsContent value="artists">
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 md:grid-cols-5">
+                {artists.map((a) => <ArtistCard key={a.id} artist={a} />)}
+              </div>
+            </TabsContent>
+
+            <TabsContent value="albums">
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 md:grid-cols-5">
+                {albums.map((a) => <AlbumCard key={a.id} album={a} />)}
+              </div>
+            </TabsContent>
+
+            <TabsContent value="tracks">
+              <div className="flex flex-col">
+                {tracks.map((t) => (
+                  <TrackRow
+                    key={t.id}
+                    track={{ ...t, explicit: t.explicit }}
+                    artist={t.artists.join(', ')}
+                    albumCover={t.album.cover_url}
+                  />
+                ))}
+              </div>
+            </TabsContent>
+          </>
+        )}
+      </Tabs>
+
+      {isEmpty && (
+        <Empty className="border">
+          <EmptyHeader>
+            <EmptyMedia variant="icon">
+              <SearchIcon />
+            </EmptyMedia>
+            <EmptyTitle>검색 결과가 없습니다</EmptyTitle>
+            <EmptyDescription>다른 키워드로 검색해보세요.</EmptyDescription>
+          </EmptyHeader>
+        </Empty>
       )}
     </div>
   );

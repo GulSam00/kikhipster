@@ -2,17 +2,30 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
+import { Music2, Trophy, X } from 'lucide-react';
 import { apiFetch } from '@/lib/api';
+import TrackRow from '@/components/music/TrackRow';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
+import { cn } from '@/lib/utils';
 import type { TrackSearchItem } from '@/types/music';
 import type { Tournament, TournamentRound } from '@/types/tournament';
-import TrackRow from '@/components/music/TrackRow';
 
 type Phase = 'setup' | 'playing' | 'done';
+type Size = 8 | 16 | 32;
+
+const SIZES: Size[] = [8, 16, 32];
 
 export default function TournamentPage() {
   const router = useRouter();
   const [phase, setPhase] = useState<Phase>('setup');
-  const [size, setSize] = useState<8 | 16 | 32>(8);
+  const [size, setSize] = useState<Size>(8);
   const [searchQ, setSearchQ] = useState('');
   const [searchResults, setSearchResults] = useState<TrackSearchItem[]>([]);
   const [selected, setSelected] = useState<TrackSearchItem[]>([]);
@@ -79,44 +92,92 @@ export default function TournamentPage() {
 
   if (phase === 'setup') {
     return (
-      <div className="mx-auto max-w-4xl px-4 py-8">
-        <h1 className="text-2xl font-bold text-white mb-6">노래 토너먼트</h1>
-        <div className="flex gap-2 items-center mb-4">
-          <span className="text-sm text-zinc-400">규모:</span>
-          {([8, 16, 32] as const).map((s) => (
-            <button key={s} onClick={() => { setSize(s); setSelected([]); }}
-              className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${size === s ? 'bg-violet-600 text-white' : 'bg-zinc-800 text-zinc-400 hover:text-white'}`}>
-              {s}강
-            </button>
-          ))}
-          <span className="ml-auto text-sm text-zinc-400">{selected.length}/{size} 선택</span>
+      <div className="mx-auto w-full max-w-4xl px-4 py-8">
+        <h1 className="mb-6 font-heading text-2xl font-bold">노래 토너먼트</h1>
+
+        <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
+          <div className="grid gap-2">
+            <Label>규모</Label>
+            <ToggleGroup
+              type="single"
+              variant="outline"
+              value={String(size)}
+              onValueChange={(v) => {
+                if (!v) return;
+                setSize(Number(v) as Size);
+                setSelected([]);
+              }}
+            >
+              {SIZES.map((s) => (
+                <ToggleGroupItem key={s} value={String(s)}>
+                  {s}강
+                </ToggleGroupItem>
+              ))}
+            </ToggleGroup>
+          </div>
+          <p className="text-sm text-muted-foreground tabular-nums">
+            {selected.length}/{size} 선택
+          </p>
         </div>
-        <input value={searchQ} onChange={(e) => setSearchQ(e.target.value)}
+
+        <Input
+          value={searchQ}
+          onChange={(e) => setSearchQ(e.target.value)}
           placeholder="곡 검색..."
-          className="w-full px-4 py-2 rounded-lg bg-zinc-800 text-white placeholder-zinc-500 outline-none focus:ring-2 focus:ring-violet-500 mb-3" />
-        <div className="flex flex-col gap-1 max-h-64 overflow-y-auto mb-4">
-          {searchResults.map((t) => (
-            <button key={t.id} onClick={() => toggleTrack(t)}
-              className={`flex items-center gap-2 px-3 py-2 rounded-lg text-left transition-colors ${selected.find((s) => s.id === t.id) ? 'bg-violet-900/50 border border-violet-500' : 'bg-zinc-800 hover:bg-zinc-700'}`}>
-              <span className="text-sm text-white truncate flex-1">{t.name}</span>
-              <span className="text-xs text-zinc-400 shrink-0">{t.artists[0]}</span>
-            </button>
-          ))}
-        </div>
+          className="mb-3 h-10"
+        />
+
+        {searchResults.length > 0 && (
+          <ScrollArea className="mb-4 h-64 rounded-lg border">
+            <div className="flex flex-col gap-1 p-1">
+              {searchResults.map((t) => {
+                const picked = !!selected.find((s) => s.id === t.id);
+                return (
+                  <button
+                    key={t.id}
+                    type="button"
+                    onClick={() => toggleTrack(t)}
+                    aria-pressed={picked}
+                    className={cn(
+                      'flex items-center gap-2 rounded-md px-3 py-2 text-left transition-colors',
+                      picked ? 'bg-primary/15 ring-1 ring-primary ring-inset' : 'hover:bg-accent',
+                    )}
+                  >
+                    <span className="flex-1 truncate text-sm">{t.name}</span>
+                    <span className="shrink-0 text-xs text-muted-foreground">{t.artists[0]}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </ScrollArea>
+        )}
+
         {selected.length > 0 && (
-          <div className="mb-4 flex flex-wrap gap-1">
+          <div className="mb-4 flex flex-wrap gap-1.5">
             {selected.map((t) => (
-              <span key={t.id} onClick={() => toggleTrack(t)}
-                className="px-2 py-0.5 rounded-full bg-violet-900/50 border border-violet-700 text-xs text-violet-300 cursor-pointer hover:bg-red-900/50 hover:border-red-700 hover:text-red-300 transition-colors">
-                {t.name}
-              </span>
+              <Badge
+                key={t.id}
+                variant="secondary"
+                asChild
+                className="cursor-pointer transition-colors hover:bg-destructive/20 hover:text-destructive"
+              >
+                <button type="button" onClick={() => toggleTrack(t)}>
+                  {t.name}
+                  <X className="size-3" />
+                </button>
+              </Badge>
             ))}
           </div>
         )}
-        <button onClick={startTournament} disabled={selected.length !== size || loading}
-          className="w-full py-3 rounded-xl bg-violet-600 text-white font-medium hover:bg-violet-500 disabled:opacity-40 transition-colors">
+
+        <Button
+          onClick={startTournament}
+          disabled={selected.length !== size || loading}
+          size="lg"
+          className="h-11 w-full"
+        >
           {loading ? '생성 중...' : `${size}강 토너먼트 시작`}
-        </button>
+        </Button>
       </div>
     );
   }
@@ -127,30 +188,48 @@ export default function TournamentPage() {
     const remaining = tournament!.rounds.filter((r) => !r.winner_id).length;
 
     return (
-      <div className="mx-auto max-w-2xl px-4 py-8">
-        <p className="text-center text-sm text-zinc-400 mb-2">남은 경기 {remaining}개</p>
-        <h2 className="text-center text-xl font-bold text-white mb-8">어느 곡이 더 좋으신가요?</h2>
+      <div className="mx-auto w-full max-w-2xl px-4 py-8">
+        <p className="mb-2 text-center text-sm text-muted-foreground">남은 경기 {remaining}개</p>
+        <h2 className="mb-8 text-center font-heading text-xl font-bold">어느 곡이 더 좋으신가요?</h2>
+
         <div className="grid grid-cols-2 gap-4">
           {[trackA, trackB].map((t) => t ? (
-            <button key={t.id} onClick={() => vote(t.id)}
-              className="flex flex-col items-center gap-3 p-6 rounded-2xl bg-zinc-900 hover:bg-violet-900/30 border border-transparent hover:border-violet-500 transition-all">
-              <div className="w-24 h-24 rounded-lg bg-zinc-700 overflow-hidden">
-                {t.album.cover_url && <img src={t.album.cover_url} alt={t.name} className="w-full h-full object-cover" />}
-              </div>
-              <div className="text-center">
-                <p className="text-white font-medium text-sm">{t.name}</p>
-                <p className="text-zinc-400 text-xs">{t.artists[0]}</p>
-              </div>
-              {t.preview_url && (
-                <div onClick={(e) => e.stopPropagation()}>
-                  <TrackRow
-                    track={{ id: t.id, name: t.name, duration_ms: t.duration_ms, explicit: t.explicit, preview_url: t.preview_url }}
-                    artist={t.artists[0]}
-                    albumCover={t.album.cover_url}
-                  />
-                </div>
-              )}
-            </button>
+            <Card
+              key={t.id}
+              className="transition-colors hover:bg-accent has-focus-visible:ring-2 has-focus-visible:ring-ring"
+            >
+              <CardContent className="flex flex-col items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => vote(t.id)}
+                  className="flex flex-col items-center gap-3 rounded-lg outline-none"
+                >
+                  <div className="relative size-24 overflow-hidden rounded-lg bg-muted">
+                    {t.album.cover_url ? (
+                      <Image src={t.album.cover_url} alt={t.name} fill className="object-cover" />
+                    ) : (
+                      <div className="flex size-full items-center justify-center text-muted-foreground">
+                        <Music2 className="size-6" />
+                      </div>
+                    )}
+                  </div>
+                  <div className="text-center">
+                    <p className="text-sm font-medium">{t.name}</p>
+                    <p className="text-xs text-muted-foreground">{t.artists[0]}</p>
+                  </div>
+                </button>
+
+                {t.preview_url && (
+                  <div className="w-full">
+                    <TrackRow
+                      track={{ id: t.id, name: t.name, duration_ms: t.duration_ms, explicit: t.explicit, preview_url: t.preview_url }}
+                      artist={t.artists[0]}
+                      albumCover={t.album.cover_url}
+                    />
+                  </div>
+                )}
+              </CardContent>
+            </Card>
           ) : null)}
         </div>
       </div>
@@ -160,14 +239,18 @@ export default function TournamentPage() {
   if (phase === 'done' && tournament) {
     const winner = trackMap[tournament.winner_track_id ?? ''];
     return (
-      <div className="mx-auto max-w-md px-4 py-16 text-center">
-        <p className="text-violet-400 text-sm mb-2">최종 우승</p>
-        <h2 className="text-2xl font-bold text-white mb-1">{winner?.name ?? '알 수 없음'}</h2>
-        <p className="text-zinc-400 mb-8">{winner?.artists[0]}</p>
-        <button onClick={() => { setPhase('setup'); setTournament(null); setSelected([]); }}
-          className="px-6 py-3 rounded-full bg-violet-600 text-white font-medium hover:bg-violet-500 transition-colors">
+      <div className="mx-auto w-full max-w-md px-4 py-16 text-center">
+        <Trophy className="mx-auto mb-3 size-10 text-primary" />
+        <p className="mb-2 text-sm text-primary">최종 우승</p>
+        <h2 className="mb-1 font-heading text-2xl font-bold">{winner?.name ?? '알 수 없음'}</h2>
+        <p className="mb-8 text-muted-foreground">{winner?.artists[0]}</p>
+        <Button
+          size="lg"
+          className="h-11 rounded-full"
+          onClick={() => { setPhase('setup'); setTournament(null); setSelected([]); }}
+        >
           다시 하기
-        </button>
+        </Button>
       </div>
     );
   }

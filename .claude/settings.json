@@ -1,0 +1,18 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "if": "Bash(git commit*)",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/update-changelog.sh\" 2>/dev/null || true",
+            "timeout": 15,
+            "statusMessage": "CLAUDE.md 변경 이력 갱신 중"
+          }
+        ]
+      }
+    ]
+  }
+}

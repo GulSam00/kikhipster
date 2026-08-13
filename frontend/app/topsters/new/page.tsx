@@ -4,13 +4,25 @@ import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
+import { Plus, X } from 'lucide-react';
 import { apiFetch } from '@/lib/api';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Textarea } from '@/components/ui/textarea';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
+import { cn } from '@/lib/utils';
 import type { AlbumSummary } from '@/types/music';
 
 interface GridItem {
   position: number;
   album: AlbumSummary | null;
 }
+
+const GRID_SIZES = [3, 4, 5];
 
 export default function NewTopsterPage() {
   const router = useRouter();
@@ -87,113 +99,152 @@ export default function NewTopsterPage() {
   }
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-8">
-      <h1 className="text-2xl font-bold text-white mb-6">새 탑스터</h1>
+    <div className="mx-auto w-full max-w-6xl px-4 py-8">
+      <h1 className="mb-6 font-heading text-2xl font-bold">새 탑스터</h1>
 
-      <div className="grid lg:grid-cols-2 gap-8">
+      <div className="grid gap-8 lg:grid-cols-2">
         <div className="flex flex-col gap-4">
-          <input
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder="제목"
-            className="w-full px-4 py-2 rounded-lg bg-zinc-800 text-white placeholder-zinc-500 outline-none focus:ring-2 focus:ring-violet-500"
-          />
-          <textarea
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            placeholder="설명 (선택)"
-            rows={2}
-            className="w-full px-4 py-2 rounded-lg bg-zinc-800 text-white placeholder-zinc-500 outline-none focus:ring-2 focus:ring-violet-500 resize-none"
-          />
-          <div className="flex gap-2 items-center">
-            <span className="text-sm text-zinc-400">격자 크기:</span>
-            {[3, 4, 5].map((s) => (
-              <button
-                key={s}
-                onClick={() => setGridSize(s)}
-                className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${gridSize === s ? 'bg-violet-600 text-white' : 'bg-zinc-800 text-zinc-400 hover:text-white'}`}
-              >
-                {s}×{s}
-              </button>
-            ))}
+          <div className="grid gap-2">
+            <Label htmlFor="topster-title">제목</Label>
+            <Input
+              id="topster-title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="예: 2026 상반기 베스트"
+              className="h-10"
+              aria-invalid={!!error && !title.trim()}
+            />
           </div>
-          <label className="flex items-center gap-2 text-sm text-zinc-400 cursor-pointer">
-            <input type="checkbox" checked={isPublic} onChange={(e) => setIsPublic(e.target.checked)} className="accent-violet-500" />
-            공개
-          </label>
-          <div>
-            <input
+
+          <div className="grid gap-2">
+            <Label htmlFor="topster-description">설명 (선택)</Label>
+            <Textarea
+              id="topster-description"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="이 차트에 대한 한마디"
+              rows={2}
+              className="resize-none"
+            />
+          </div>
+
+          <div className="grid gap-2">
+            <Label>격자 크기</Label>
+            <ToggleGroup
+              type="single"
+              variant="outline"
+              value={String(gridSize)}
+              onValueChange={(v) => v && setGridSize(Number(v))}
+            >
+              {GRID_SIZES.map((s) => (
+                <ToggleGroupItem key={s} value={String(s)} aria-label={`${s}×${s} 격자`}>
+                  {s}×{s}
+                </ToggleGroupItem>
+              ))}
+            </ToggleGroup>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Checkbox
+              id="topster-public"
+              checked={isPublic}
+              onCheckedChange={(v) => setIsPublic(v === true)}
+            />
+            <Label htmlFor="topster-public" className="font-normal text-muted-foreground">
+              공개
+            </Label>
+          </div>
+
+          <div className="grid gap-2">
+            <Label htmlFor="album-search">앨범 검색</Label>
+            <Input
+              id="album-search"
               value={searchQ}
               onChange={(e) => setSearchQ(e.target.value)}
-              placeholder="앨범 검색..."
-              className="w-full px-4 py-2 rounded-lg bg-zinc-800 text-white placeholder-zinc-500 outline-none focus:ring-2 focus:ring-violet-500 mb-2"
+              placeholder="앨범 이름을 입력하세요"
+              className="h-10"
             />
-            <div className="flex flex-col gap-1 max-h-48 overflow-y-auto">
-              {searchResults.map((a) => (
-                <button
-                  key={a.id}
-                  onClick={() => placeAlbum(a)}
-                  className="flex items-center gap-2 px-3 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-left transition-colors"
-                >
-                  {a.cover_url && (
-                    <Image src={a.cover_url} alt={a.name} width={32} height={32} className="rounded" />
-                  )}
-                  <div className="min-w-0">
-                    <p className="text-sm text-white truncate">{a.name}</p>
-                    <p className="text-xs text-zinc-400 truncate">{a.artist_name}</p>
-                  </div>
-                </button>
-              ))}
-            </div>
+            {searchResults.length > 0 && (
+              <ScrollArea className="h-48 rounded-lg border">
+                <div className="flex flex-col gap-1 p-1">
+                  {searchResults.map((a) => (
+                    <button
+                      key={a.id}
+                      type="button"
+                      onClick={() => placeAlbum(a)}
+                      className="flex items-center gap-2 rounded-md px-2 py-1.5 text-left transition-colors hover:bg-accent"
+                    >
+                      {a.cover_url ? (
+                        <Image src={a.cover_url} alt={a.name} width={32} height={32} className="size-8 rounded object-cover" />
+                      ) : (
+                        <div className="size-8 shrink-0 rounded bg-muted" />
+                      )}
+                      <div className="min-w-0">
+                        <p className="truncate text-sm">{a.name}</p>
+                        <p className="truncate text-xs text-muted-foreground">{a.artist_name}</p>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </ScrollArea>
+            )}
           </div>
-          {error && <p className="text-red-400 text-sm">{error}</p>}
-          <button
-            onClick={handleSave}
-            disabled={saving}
-            className="w-full py-3 rounded-xl bg-violet-600 text-white font-medium hover:bg-violet-500 disabled:opacity-50 transition-colors"
-          >
+
+          {error && <p className="text-sm text-destructive">{error}</p>}
+
+          <Button onClick={handleSave} disabled={saving} size="lg" className="h-11 w-full">
             {saving ? '저장 중...' : '탑스터 저장'}
-          </button>
+          </Button>
         </div>
 
-        <DragDropContext onDragEnd={onDragEnd}>
-          <Droppable droppableId="grid" direction="horizontal">
-            {(provided) => (
-              <div
-                ref={provided.innerRef}
-                {...provided.droppableProps}
-                className="grid gap-1 self-start"
-                style={{ gridTemplateColumns: `repeat(${gridSize}, 1fr)` }}
-              >
-                {grid.map((cell, idx) => (
-                  <Draggable key={`cell-${idx}`} draggableId={`cell-${idx}`} index={idx}>
-                    {(drag) => (
-                      <div
-                        ref={drag.innerRef}
-                        {...drag.draggableProps}
-                        {...drag.dragHandleProps}
-                        onClick={() => cell.album && removeAlbum(cell.position)}
-                        className="aspect-square rounded bg-zinc-800 relative overflow-hidden cursor-pointer group"
-                      >
-                        {cell.album?.cover_url ? (
-                          <Image src={cell.album.cover_url} alt={cell.album.name} fill className="object-cover" />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center text-zinc-600 text-xs">+</div>
-                        )}
-                        {cell.album && (
-                          <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-xs transition-opacity">
-                            제거
+        <Card className="self-start">
+          <CardContent>
+            <DragDropContext onDragEnd={onDragEnd}>
+              <Droppable droppableId="grid" direction="horizontal">
+                {(provided) => (
+                  <div
+                    ref={provided.innerRef}
+                    {...provided.droppableProps}
+                    className="grid gap-1"
+                    style={{ gridTemplateColumns: `repeat(${gridSize}, minmax(0, 1fr))` }}
+                  >
+                    {grid.map((cell, idx) => (
+                      <Draggable key={`cell-${idx}`} draggableId={`cell-${idx}`} index={idx}>
+                        {(drag) => (
+                          <div
+                            ref={drag.innerRef}
+                            {...drag.draggableProps}
+                            {...drag.dragHandleProps}
+                            onClick={() => cell.album && removeAlbum(cell.position)}
+                            className={cn(
+                              'group relative aspect-square cursor-pointer overflow-hidden rounded-md bg-muted',
+                              !cell.album && 'ring-1 ring-border ring-inset',
+                            )}
+                          >
+                            {cell.album?.cover_url ? (
+                              <Image src={cell.album.cover_url} alt={cell.album.name} fill className="object-cover" />
+                            ) : (
+                              <div className="flex size-full items-center justify-center text-muted-foreground">
+                                <Plus className="size-4" />
+                              </div>
+                            )}
+                            {cell.album && (
+                              <div className="absolute inset-0 flex items-center justify-center gap-1 bg-black/60 text-xs text-white opacity-0 transition-opacity group-hover:opacity-100">
+                                <X className="size-3" />
+                                제거
+                              </div>
+                            )}
                           </div>
                         )}
-                      </div>
-                    )}
-                  </Draggable>
-                ))}
-                {provided.placeholder}
-              </div>
-            )}
-          </Droppable>
-        </DragDropContext>
+                      </Draggable>
+                    ))}
+                    {provided.placeholder}
+                  </div>
+                )}
+              </Droppable>
+            </DragDropContext>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

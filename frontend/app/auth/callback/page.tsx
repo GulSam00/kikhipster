@@ -1,9 +1,19 @@
 'use client';
 
-import { useEffect } from 'react';
+import { Suspense, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { Spinner } from '@/components/ui/spinner';
 
-export default function AuthCallbackPage() {
+function CallbackStatus() {
+  return (
+    <div className="flex flex-1 items-center justify-center gap-2 text-muted-foreground">
+      <Spinner />
+      로그인 처리 중...
+    </div>
+  );
+}
+
+function AuthCallbackHandler() {
   const router = useRouter();
   const params = useSearchParams();
 
@@ -20,9 +30,14 @@ export default function AuthCallbackPage() {
     router.replace('/');
   }, [params, router]);
 
+  return <CallbackStatus />;
+}
+
+export default function AuthCallbackPage() {
+  // useSearchParams()는 CSR bailout을 유발하므로 Suspense 경계가 필요하다.
   return (
-    <div className="flex flex-1 items-center justify-center">
-      <p className="text-zinc-400">로그인 처리 중...</p>
-    </div>
+    <Suspense fallback={<CallbackStatus />}>
+      <AuthCallbackHandler />
+    </Suspense>
   );
 }

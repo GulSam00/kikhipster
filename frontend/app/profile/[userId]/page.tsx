@@ -3,7 +3,15 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
+import { LayoutGrid, UserX } from 'lucide-react';
 import { apiFetch } from '@/lib/api';
+import TopsterCard from '@/components/music/TopsterCard';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Empty, EmptyContent, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty';
+import { Spinner } from '@/components/ui/spinner';
 import type { Topster } from '@/types/topster';
 
 interface PublicUser {
@@ -40,67 +48,65 @@ export default function UserProfilePage() {
 
   if (loading) {
     return (
-      <div className="flex flex-1 items-center justify-center">
-        <p className="text-zinc-500">불러오는 중...</p>
+      <div className="flex flex-1 items-center justify-center gap-2 text-muted-foreground">
+        <Spinner />
+        불러오는 중...
       </div>
     );
   }
 
   if (notFound || !user) {
     return (
-      <div className="flex flex-1 flex-col items-center justify-center gap-4">
-        <p className="text-zinc-400 text-lg">존재하지 않는 유저입니다</p>
-        <Link href="/" className="text-violet-400 hover:text-violet-300 text-sm">
-          홈으로 →
-        </Link>
+      <div className="flex flex-1 items-center justify-center px-4">
+        <Empty>
+          <EmptyHeader>
+            <EmptyMedia variant="icon">
+              <UserX />
+            </EmptyMedia>
+            <EmptyTitle>존재하지 않는 유저입니다</EmptyTitle>
+          </EmptyHeader>
+          <EmptyContent>
+            <Button asChild variant="secondary">
+              <Link href="/">홈으로</Link>
+            </Button>
+          </EmptyContent>
+        </Empty>
       </div>
     );
   }
 
   return (
-    <div className="mx-auto max-w-4xl px-4 py-8">
-      <div className="flex items-center gap-4 mb-8 p-6 rounded-2xl bg-zinc-900">
-        <div className="w-16 h-16 rounded-full bg-violet-700 flex items-center justify-center text-2xl font-bold text-white shrink-0">
-          {user.nickname[0]?.toUpperCase()}
-        </div>
-        <div>
-          <h1 className="text-xl font-bold text-white">{user.nickname}</h1>
-          <span className="inline-block mt-1 px-2 py-0.5 rounded-full bg-zinc-800 text-xs text-zinc-400 capitalize">
-            {user.provider}
-          </span>
-        </div>
-      </div>
+    <div className="mx-auto w-full max-w-4xl px-4 py-8">
+      <Card className="mb-8">
+        <CardContent className="flex items-center gap-4">
+          <Avatar size="lg" className="size-16">
+            <AvatarFallback className="bg-primary text-xl font-bold text-primary-foreground">
+              {user.nickname[0]?.toUpperCase()}
+            </AvatarFallback>
+          </Avatar>
+          <div className="min-w-0">
+            <h1 className="font-heading text-xl font-bold">{user.nickname}</h1>
+            <Badge variant="outline" className="mt-1 capitalize">{user.provider}</Badge>
+          </div>
+        </CardContent>
+      </Card>
 
       <section>
-        <h2 className="text-lg font-bold text-white mb-4">
-          탑스터 {topsters.length}
-        </h2>
+        <h2 className="mb-4 font-heading text-lg font-bold">탑스터 {topsters.length}</h2>
 
         {topsters.length === 0 ? (
-          <div className="text-center py-12 rounded-xl bg-zinc-900">
-            <p className="text-zinc-500">공개된 탑스터가 없습니다</p>
-          </div>
+          <Empty className="border">
+            <EmptyHeader>
+              <EmptyMedia variant="icon">
+                <LayoutGrid />
+              </EmptyMedia>
+              <EmptyTitle>공개된 탑스터가 없습니다</EmptyTitle>
+            </EmptyHeader>
+          </Empty>
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
             {topsters.map((t) => (
-              <Link
-                key={t.id}
-                href={`/topsters/${t.id}`}
-                className="flex flex-col gap-2 p-3 rounded-xl bg-zinc-900 hover:bg-zinc-800 transition-colors"
-              >
-                <div
-                  className="grid gap-0.5 rounded-lg overflow-hidden aspect-square bg-zinc-800"
-                  style={{ gridTemplateColumns: `repeat(${t.grid_size}, 1fr)` }}
-                >
-                  {Array.from({ length: t.grid_size * t.grid_size }).map((_, i) => (
-                    <div key={i} className="aspect-square bg-zinc-700" />
-                  ))}
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-white truncate">{t.title}</p>
-                  <p className="text-xs text-zinc-400">♥ {t.like_count}</p>
-                </div>
-              </Link>
+              <TopsterCard key={t.id} topster={t} showAuthor={false} />
             ))}
           </div>
         )}
