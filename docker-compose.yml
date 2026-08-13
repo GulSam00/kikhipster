@@ -1,0 +1,35 @@
+# kikhipster 로컬 개발용 인프라.
+# 앱(FastAPI/Next.js)은 hot reload를 위해 호스트에서 직접 실행하고,
+# 여기서는 의존 서비스인 PostgreSQL만 띄운다.
+#
+#   docker compose up -d      # 기동
+#   docker compose ps         # 상태 확인 (healthy 여부)
+#   docker compose down       # 중지 (데이터는 볼륨에 유지)
+#   docker compose down -v    # 중지 + 데이터 삭제
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: kikhipster-db
+    restart: unless-stopped
+    environment:
+      # POSTGRES_DB가 지정되면 컨테이너 최초 기동 시 해당 데이터베이스를 자동 생성한다.
+      POSTGRES_USER: ${POSTGRES_USER:-kikhipster}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-devpassword}
+      POSTGRES_DB: ${POSTGRES_DB:-kikhipster}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      # pg_isready가 통과해야 alembic upgrade를 걸 수 있다.
+      test:
+        ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-kikhipster} -d ${POSTGRES_DB:-kikhipster}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+volumes:
+  pgdata:
+    name: kikhipster-pgdata
