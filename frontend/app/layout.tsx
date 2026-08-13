@@ -3,10 +3,11 @@ import { Geist } from "next/font/google";
 import Navbar from "@/components/layout/Navbar";
 import MiniPlayer from "@/components/layout/MiniPlayer";
 import { PlayerProvider } from "@/contexts/PlayerContext";
+import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 
 const geistSans = Geist({
-  variable: "--font-geist-sans",
+  variable: "--font-sans",
   subsets: ["latin"],
 });
 
@@ -23,13 +24,15 @@ export default function RootLayout({
   return (
     <html
       lang="ko"
-      className={`${geistSans.variable} h-full antialiased`}
+      className={`dark ${geistSans.variable} h-full antialiased`}
+      suppressHydrationWarning
     >
-      <body className="min-h-full flex flex-col bg-zinc-950 text-zinc-100">
+      <body className="flex min-h-full flex-col">
         <PlayerProvider>
           <Navbar />
-          <main className="flex-1 pb-16 sm:pb-0">{children}</main>
+          <main className="flex flex-1 flex-col pb-16 sm:pb-0">{children}</main>
           <MiniPlayer />
+          <Toaster />
         </PlayerProvider>
       </body>
     </html>
