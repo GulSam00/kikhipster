@@ -1,8 +1,11 @@
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
+import { Mic2 } from 'lucide-react';
 import { apiFetch } from '@/lib/api';
 import AlbumCard from '@/components/music/AlbumCard';
 import TrackRow from '@/components/music/TrackRow';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
 import type { ArtistDetail, TrackItem } from '@/types/music';
 
 async function getArtist(id: string): Promise<ArtistDetail | null> {
@@ -28,30 +31,34 @@ export default async function ArtistPage({ params }: { params: Promise<{ id: str
   if (!artist) notFound();
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-8">
-      <div className="flex items-end gap-6 mb-8">
-        <div className="relative w-32 h-32 rounded-full overflow-hidden bg-zinc-800 shrink-0">
+    <div className="mx-auto w-full max-w-6xl px-4 py-8">
+      <div className="mb-8 flex flex-col items-start gap-6 sm:flex-row sm:items-end">
+        <div className="relative size-32 shrink-0 overflow-hidden rounded-full bg-muted">
           {artist.image_url ? (
             <Image src={artist.image_url} alt={artist.name} fill className="object-cover" />
           ) : (
-            <div className="w-full h-full flex items-center justify-center text-4xl text-zinc-500">♪</div>
+            <div className="flex size-full items-center justify-center text-muted-foreground">
+              <Mic2 className="size-10" />
+            </div>
           )}
         </div>
-        <div>
-          <p className="text-xs text-zinc-400 mb-1">아티스트</p>
-          <h1 className="text-3xl font-bold text-white mb-2">{artist.name}</h1>
-          <div className="flex flex-wrap gap-2 text-sm text-zinc-400">
+        <div className="min-w-0">
+          <p className="mb-1 text-xs text-muted-foreground">아티스트</p>
+          <h1 className="mb-2 font-heading text-3xl font-bold">{artist.name}</h1>
+          <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
             {artist.genres.slice(0, 3).map((g) => (
-              <span key={g} className="px-2 py-0.5 rounded-full bg-zinc-800">{g}</span>
+              <Badge key={g} variant="secondary">{g}</Badge>
             ))}
             <span>{artist.followers.toLocaleString()} 팔로워</span>
           </div>
         </div>
       </div>
 
+      <Separator className="mb-6" />
+
       {topTracks.length > 0 && (
         <section className="mb-8">
-          <h2 className="text-lg font-bold text-white mb-3">인기 트랙</h2>
+          <h2 className="mb-3 font-heading text-lg font-bold">인기 트랙</h2>
           <div className="flex flex-col">
             {topTracks.map((t, i) => (
               <TrackRow
@@ -67,8 +74,8 @@ export default async function ArtistPage({ params }: { params: Promise<{ id: str
 
       {artist.albums.length > 0 && (
         <section>
-          <h2 className="text-lg font-bold text-white mb-3">앨범 · 싱글</h2>
-          <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-3">
+          <h2 className="mb-3 font-heading text-lg font-bold">앨범 · 싱글</h2>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6">
             {artist.albums.map((a) => (
               <AlbumCard key={a.id} album={a} />
             ))}

@@ -1,6 +1,10 @@
 'use client';
 
+import { Pause, Play } from 'lucide-react';
 import { usePlayer } from '@/contexts/PlayerContext';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
 interface Props {
   track: {
@@ -37,29 +41,42 @@ export default function TrackRow({ track, artist, albumCover }: Props) {
 
   return (
     <div
-      className={`flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-zinc-800 transition-colors ${isActive ? 'bg-zinc-800' : ''}`}
+      className={cn(
+        'flex items-center gap-3 rounded-lg px-3 py-2 transition-colors hover:bg-accent',
+        isActive && 'bg-accent',
+      )}
     >
-      <span className="w-6 text-xs text-zinc-500 text-right shrink-0">
+      <span className="w-6 shrink-0 text-right text-xs text-muted-foreground">
         {track.track_number ?? ''}
       </span>
-      <div className="flex-1 min-w-0">
-        <p className={`text-sm truncate ${isActive ? 'text-violet-400' : 'text-white'}`}>
-          {track.name}
-          {track.explicit && <span className="ml-1 text-xs text-zinc-500">E</span>}
+
+      <div className="min-w-0 flex-1">
+        <p className={cn('flex items-center gap-1.5 truncate text-sm', isActive && 'text-primary')}>
+          <span className="truncate">{track.name}</span>
+          {track.explicit && (
+            <Badge variant="outline" className="shrink-0 px-1 text-[10px]">
+              E
+            </Badge>
+          )}
         </p>
-        <p className="text-xs text-zinc-400 truncate">{artist}</p>
+        <p className="truncate text-xs text-muted-foreground">{artist}</p>
       </div>
-      <span className="text-xs text-zinc-500 shrink-0">{formatMs(track.duration_ms)}</span>
+
+      <span className="shrink-0 text-xs text-muted-foreground tabular-nums">
+        {formatMs(track.duration_ms)}
+      </span>
+
       {track.preview_url ? (
-        <button
+        <Button
+          size="icon-xs"
+          className="shrink-0 rounded-full"
           onClick={handlePlay}
-          className="w-7 h-7 flex items-center justify-center rounded-full bg-violet-600 hover:bg-violet-500 text-white text-xs shrink-0 transition-colors"
-          aria-label="미리듣기"
+          aria-label={`${track.name} 미리듣기`}
         >
-          {isActive && isPlaying ? '⏸' : '▶'}
-        </button>
+          {isActive && isPlaying ? <Pause /> : <Play />}
+        </Button>
       ) : (
-        <div className="w-7 h-7 shrink-0" />
+        <div className="size-6 shrink-0" />
       )}
     </div>
   );
