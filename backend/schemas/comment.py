@@ -2,6 +2,8 @@ from datetime import datetime
 
 from pydantic import BaseModel
 
+from schemas.common import UUIDStr
+
 
 class CommentCreate(BaseModel):
     content: str
@@ -12,15 +14,15 @@ class CommentUpdate(BaseModel):
 
 
 class CommentUserInfo(BaseModel):
-    id: str
+    id: UUIDStr
     nickname: str
 
     model_config = {"from_attributes": True}
 
 
 class CommentResponse(BaseModel):
-    id: str
-    topster_id: str
+    id: UUIDStr
+    topster_id: UUIDStr
     content: str
     created_at: datetime
     updated_at: datetime

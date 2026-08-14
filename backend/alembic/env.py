@@ -17,6 +17,10 @@ config = context.config
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
+# 접속 URL은 alembic.ini가 아니라 여기서 주입한다 — ini에 비밀값을 두지 않기 위함.
+# alembic.ini는 ASCII 전용으로 유지할 것. Python 3.9의 alembic은 ini를 인코딩 지정 없이
+# 읽어서 OS 로케일 코덱(한국어 Windows면 cp949)으로 디코딩하므로, 한글 주석을 넣으면
+# 명령 실행 전에 UnicodeDecodeError가 난다. 한글 설명은 이 파일에 둔다.
 config.set_main_option("sqlalchemy.url", settings.database_url)
 
 target_metadata = Base.metadata
