@@ -3,7 +3,7 @@ from datetime import datetime
 
 from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import backref, relationship
 
 from database import Base
 
@@ -19,8 +19,16 @@ class Topster(Base):
     is_public = Column(Boolean, nullable=False, default=True)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
 
-    user = relationship("User", backref="topsters")
-    items = relationship("TopsterItem", back_populates="topster", cascade="all, delete-orphan")
+    user = relationship(
+        "User",
+        backref=backref("topsters", cascade="all, delete-orphan", passive_deletes=True),
+    )
+    items = relationship(
+        "TopsterItem",
+        back_populates="topster",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+    )
 
 
 class TopsterItem(Base):

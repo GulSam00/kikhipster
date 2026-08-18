@@ -4,13 +4,16 @@ from datetime import datetime
 
 from pydantic import BaseModel
 
+from schemas.common import UUIDStr
+
 
 class TournamentCreate(BaseModel):
     track_ids: list[str]  # 8 | 16 | 32개
 
 
 class TournamentRoundResponse(BaseModel):
-    id: str
+    # track_a_id / track_b_id / winner_id 는 Spotify 트랙 ID(String 컬럼)라 UUID가 아니다.
+    id: UUIDStr
     round_num: int
     match_num: int
     track_a_id: str
@@ -21,7 +24,7 @@ class TournamentRoundResponse(BaseModel):
 
 
 class TournamentResponse(BaseModel):
-    id: str
+    id: UUIDStr
     size: int
     status: str
     winner_track_id: str | None

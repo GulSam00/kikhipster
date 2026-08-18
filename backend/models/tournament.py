@@ -3,7 +3,7 @@ from datetime import datetime
 
 from sqlalchemy import Column, DateTime, ForeignKey, Integer, String
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import backref, relationship
 
 from database import Base
 
@@ -18,8 +18,16 @@ class Tournament(Base):
     winner_track_id = Column(String, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
 
-    user = relationship("User", backref="tournaments")
-    rounds = relationship("TournamentRound", back_populates="tournament", cascade="all, delete-orphan")
+    user = relationship(
+        "User",
+        backref=backref("tournaments", cascade="all, delete-orphan", passive_deletes=True),
+    )
+    rounds = relationship(
+        "TournamentRound",
+        back_populates="tournament",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+    )
 
 
 class TournamentRound(Base):

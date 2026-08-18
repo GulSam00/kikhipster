@@ -4,6 +4,8 @@ from datetime import datetime
 
 from pydantic import BaseModel
 
+from schemas.common import UUIDStr
+
 
 class TopsterItemCreate(BaseModel):
     album_spotify_id: str
@@ -11,7 +13,7 @@ class TopsterItemCreate(BaseModel):
 
 
 class TopsterItemResponse(BaseModel):
-    id: str
+    id: UUIDStr
     album_spotify_id: str
     position: int
 
@@ -35,14 +37,14 @@ class TopsterUpdate(BaseModel):
 
 
 class TopsterUserInfo(BaseModel):
-    id: str
+    id: UUIDStr
     nickname: str
 
     model_config = {"from_attributes": True}
 
 
 class TopsterResponse(BaseModel):
-    id: str
+    id: UUIDStr
     title: str
     description: str
     grid_size: int
