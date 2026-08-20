@@ -22,7 +22,10 @@ export default function TopsterCard({ topster, showAuthor = true, showVisibility
   const cellCount = topster.grid_size * topster.grid_size;
 
   return (
-    <Link href={`/topsters/${topster.id}`} className="group block">
+    <Link
+      href={`/topsters/${topster.id}`}
+      className="group block rounded-xl outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+    >
       <Card size="sm" className="h-full gap-2 transition-colors group-hover:bg-accent">
         <CardContent className="flex flex-col gap-2">
           <div

@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { SearchIcon } from 'lucide-react';
+import { toast } from 'sonner';
 import { apiFetch } from '@/lib/api';
 import ArtistCard from '@/components/music/ArtistCard';
 import AlbumCard from '@/components/music/AlbumCard';
@@ -57,7 +58,7 @@ export default function SearchPage() {
         setTracks(res.items);
       }
     } catch {
-      /* ignore */
+      toast.error('검색에 실패했습니다');
     } finally {
       setLoading(false);
     }

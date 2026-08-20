@@ -7,11 +7,7 @@ import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTi
 import type { Topster } from '@/types/topster';
 
 async function getTopsters(): Promise<Topster[]> {
-  try {
-    return await apiFetch<Topster[]>('/api/topsters/?limit=20&offset=0');
-  } catch {
-    return [];
-  }
+  return apiFetch<Topster[]>('/api/topsters/?limit=20&offset=0');
 }
 
 export default async function TopstersPage() {

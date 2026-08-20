@@ -8,11 +8,7 @@ import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTi
 import type { Topster } from '@/types/topster';
 
 async function getTopsters(): Promise<Topster[]> {
-  try {
-    return await apiFetch<Topster[]>('/api/topsters/?limit=12&offset=0');
-  } catch {
-    return [];
-  }
+  return apiFetch<Topster[]>('/api/topsters/?limit=12&offset=0');
 }
 
 const shortcuts = [
@@ -63,7 +59,11 @@ export default async function HomePage() {
         <h2 className="mb-4 font-heading text-lg font-bold">둘러보기</h2>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
           {shortcuts.map(({ href, label, desc, icon: Icon }) => (
-            <Link key={href} href={href} className="group block">
+            <Link
+              key={href}
+              href={href}
+              className="group block rounded-xl outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+            >
               <Card className="h-full transition-colors group-hover:bg-accent">
                 <CardContent className="flex flex-col gap-1">
                   <Icon className="mb-1 size-5 text-primary" />

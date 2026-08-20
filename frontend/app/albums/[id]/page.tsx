@@ -1,7 +1,7 @@
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import { Disc3 } from 'lucide-react';
-import { apiFetch } from '@/lib/api';
+import { apiFetch, ApiError } from '@/lib/api';
 import TrackRow from '@/components/music/TrackRow';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
@@ -10,8 +10,9 @@ import type { AlbumWithTracks } from '@/types/music';
 async function getAlbum(id: string): Promise<AlbumWithTracks | null> {
   try {
     return await apiFetch<AlbumWithTracks>(`/api/music/albums/${id}/tracks`);
-  } catch {
-    return null;
+  } catch (err) {
+    if (err instanceof ApiError && err.status === 404) return null;
+    throw err;
   }
 }
 

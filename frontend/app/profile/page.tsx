@@ -3,14 +3,15 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { LayoutGrid, Plus } from 'lucide-react';
-import { apiFetch } from '@/lib/api';
+import { LayoutGrid, Plus, TriangleAlert } from 'lucide-react';
+import { toast } from 'sonner';
+import { apiFetch, ApiError } from '@/lib/api';
 import TopsterCard from '@/components/music/TopsterCard';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Empty, EmptyContent, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty';
+import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty';
 import { Spinner } from '@/components/ui/spinner';
 import type { Topster } from '@/types/topster';
 
@@ -26,6 +27,7 @@ export default function ProfilePage() {
   const [me, setMe] = useState<Me | null>(null);
   const [topsters, setTopsters] = useState<Topster[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
 
   useEffect(() => {
     if (!localStorage.getItem('access_token')) { router.push('/login'); return; }
@@ -38,8 +40,13 @@ export default function ProfilePage() {
         setMe(user);
         localStorage.setItem('user_id', user.id);
         setTopsters(ts);
-      } catch {
-        router.push('/login');
+      } catch (err) {
+        if (err instanceof ApiError && err.status === 401) {
+          router.push('/login');
+          return;
+        }
+        toast.error('프로필을 불러오지 못했습니다');
+        setLoadError(true);
       } finally {
         setLoading(false);
       }
@@ -52,6 +59,25 @@ export default function ProfilePage() {
       <div className="flex flex-1 items-center justify-center gap-2 text-muted-foreground">
         <Spinner />
         불러오는 중...
+      </div>
+    );
+  }
+
+  if (loadError) {
+    return (
+      <div className="flex flex-1 items-center justify-center px-4">
+        <Empty className="border">
+          <EmptyHeader>
+            <EmptyMedia variant="icon">
+              <TriangleAlert />
+            </EmptyMedia>
+            <EmptyTitle>불러오지 못했습니다</EmptyTitle>
+            <EmptyDescription>일시적인 오류일 수 있습니다. 다시 시도해주세요.</EmptyDescription>
+          </EmptyHeader>
+          <EmptyContent>
+            <Button onClick={() => window.location.reload()}>다시 시도</Button>
+          </EmptyContent>
+        </Empty>
       </div>
     );
   }

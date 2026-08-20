@@ -1,7 +1,7 @@
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import { Mic2 } from 'lucide-react';
-import { apiFetch } from '@/lib/api';
+import { apiFetch, ApiError } from '@/lib/api';
 import AlbumCard from '@/components/music/AlbumCard';
 import TrackRow from '@/components/music/TrackRow';
 import { Badge } from '@/components/ui/badge';
@@ -11,8 +11,9 @@ import type { ArtistDetail, TrackItem } from '@/types/music';
 async function getArtist(id: string): Promise<ArtistDetail | null> {
   try {
     return await apiFetch<ArtistDetail>(`/api/music/artists/${id}`);
-  } catch {
-    return null;
+  } catch (err) {
+    if (err instanceof ApiError && err.status === 404) return null;
+    throw err;
   }
 }
 

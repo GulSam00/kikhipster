@@ -3,8 +3,9 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import { LayoutGrid, UserX } from 'lucide-react';
-import { apiFetch } from '@/lib/api';
+import { LayoutGrid, TriangleAlert, UserX } from 'lucide-react';
+import { toast } from 'sonner';
+import { apiFetch, ApiError } from '@/lib/api';
 import TopsterCard from '@/components/music/TopsterCard';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
@@ -26,6 +27,7 @@ export default function UserProfilePage() {
   const [topsters, setTopsters] = useState<Topster[]>([]);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+  const [loadError, setLoadError] = useState(false);
 
   useEffect(() => {
     if (!userId) return;
@@ -37,8 +39,13 @@ export default function UserProfilePage() {
         ]);
         setUser(u);
         setTopsters(ts);
-      } catch {
-        setNotFound(true);
+      } catch (err) {
+        if (err instanceof ApiError && err.status === 404) {
+          setNotFound(true);
+        } else {
+          toast.error('프로필을 불러오지 못했습니다');
+          setLoadError(true);
+        }
       } finally {
         setLoading(false);
       }
@@ -51,6 +58,24 @@ export default function UserProfilePage() {
       <div className="flex flex-1 items-center justify-center gap-2 text-muted-foreground">
         <Spinner />
         불러오는 중...
+      </div>
+    );
+  }
+
+  if (loadError) {
+    return (
+      <div className="flex flex-1 items-center justify-center px-4">
+        <Empty className="border">
+          <EmptyHeader>
+            <EmptyMedia variant="icon">
+              <TriangleAlert />
+            </EmptyMedia>
+            <EmptyTitle>불러오지 못했습니다</EmptyTitle>
+          </EmptyHeader>
+          <EmptyContent>
+            <Button onClick={() => window.location.reload()}>다시 시도</Button>
+          </EmptyContent>
+        </Empty>
       </div>
     );
   }

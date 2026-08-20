@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 import { Plus, X } from 'lucide-react';
+import { toast } from 'sonner';
 import { apiFetch } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -52,7 +53,9 @@ export default function NewTopsterPage() {
       try {
         const res = await apiFetch<{ items: AlbumSummary[] }>(`/api/music/search/albums?q=${encodeURIComponent(searchQ)}&limit=10`);
         setSearchResults(res.items);
-      } catch { /* ignore */ }
+      } catch {
+        toast.error('앨범 검색에 실패했습니다');
+      }
     }, 300);
     return () => clearTimeout(t);
   }, [searchQ]);

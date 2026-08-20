@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { Music2, Trophy, X } from 'lucide-react';
+import { toast } from 'sonner';
 import { apiFetch } from '@/lib/api';
 import TrackRow from '@/components/music/TrackRow';
 import { Badge } from '@/components/ui/badge';
@@ -43,7 +44,9 @@ export default function TournamentPage() {
       try {
         const res = await apiFetch<{ items: TrackSearchItem[] }>(`/api/music/search/tracks?q=${encodeURIComponent(searchQ)}&limit=20`);
         setSearchResults(res.items);
-      } catch { /* ignore */ }
+      } catch {
+        toast.error('곡 검색에 실패했습니다');
+      }
     }, 300);
     return () => clearTimeout(t);
   }, [searchQ]);
@@ -69,7 +72,9 @@ export default function TournamentPage() {
       const firstMatch = t.rounds.find((r) => r.round_num === maxRound && r.match_num === 0) ?? null;
       setCurrentRound(firstMatch);
       setPhase('playing');
-    } catch { /* ignore */ } finally {
+    } catch {
+      toast.error('토너먼트 생성에 실패했습니다');
+    } finally {
       setLoading(false);
     }
   }
@@ -85,7 +90,9 @@ export default function TournamentPage() {
       if (updated.status === 'completed') { setPhase('done'); return; }
       const nextMatch = updated.rounds.find((r) => !r.winner_id) ?? null;
       setCurrentRound(nextMatch);
-    } catch { /* ignore */ }
+    } catch {
+      toast.error('투표 처리에 실패했습니다');
+    }
   }
 
   const trackMap = Object.fromEntries(selected.map((t) => [t.id, t]));

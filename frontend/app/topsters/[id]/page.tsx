@@ -5,7 +5,7 @@ import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { Heart, Link2, Music2, Send, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
-import { apiFetch } from '@/lib/api';
+import { apiFetch, ApiError } from '@/lib/api';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -39,7 +39,11 @@ export default function TopsterDetailPage() {
         setTopster(t);
         setComments(c);
         setLike(l);
-      } catch { /* ignore */ } finally {
+      } catch (err) {
+        if (!(err instanceof ApiError && err.status === 404)) {
+          toast.error('탑스터를 불러오지 못했습니다');
+        }
+      } finally {
         setLoading(false);
       }
     }
