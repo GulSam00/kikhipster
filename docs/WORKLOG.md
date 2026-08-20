@@ -65,3 +65,4 @@ Spotify 연동 백엔드, 프론트 기획(`_workspace/planning.md`), QA 리뷰(
 | 2026-08-13 | chore : CLAUDE.md 수정 | CLAUDE.md | 커밋 `0e6cbf4` |
 | 2026-08-14 | fix(backend): 로컬 DB 검증에서 드러난 DB API 장애 3건 수정 | backend | 커밋 `fb651dc` |
 | 2026-08-19 | Merge pull request #2 from GulSam00/fix/db-api-local-verification | - | 커밋 `a913c75` |
+| 2026-08-20 | docs: 작업 로그·과제를 CLAUDE.md에서 분리해 전용 파일로 이관 | .claude, CLAUDE.md, docs | 커밋 `a70d0b8` |
