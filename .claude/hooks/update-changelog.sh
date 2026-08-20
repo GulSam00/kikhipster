@@ -23,6 +23,13 @@ if grep -qF "\`$hash\`" "$MD"; then
   exit 0
 fi
 
+# 이 훅이 남긴 행을 그대로 커밋한 것뿐이라면 기록하지 않는다.
+# 기록하면 그 커밋이 또 새 행을 낳아 커밋되지 않은 한 줄이 영원히 떠돈다.
+changed=$(git show --name-only --format='' HEAD | awk 'NF')
+if [ "$changed" = "$MD" ]; then
+  exit 0
+fi
+
 date=$(git log -1 --format='%ad' --date=short)
 # 표 셀을 깨뜨리지 않도록 파이프 문자를 이스케이프
 subject=$(git log -1 --format='%s' | sed 's/|/\|/g')
