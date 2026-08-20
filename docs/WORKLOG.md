@@ -95,3 +95,4 @@ Spotify 연동 백엔드, 프론트 기획(`_workspace/planning.md`), QA 리뷰(
 | 2026-08-20 | fix(hooks): 이력 행만 담은 커밋은 이력에 기록하지 않도록 수정 | .claude | 커밋 `68dce41` |
 | 2026-08-20 | Merge branch 'docs/split-worklog-and-tasks' | - | 커밋 `1ad2940` |
 | 2026-08-20 | feat(frontend): 디자인 시스템 정립 + API 에러 처리 정리 | .reviews, DESIGN.md, docs, frontend | 커밋 `d3300ba` |
+| 2026-08-20 | chore: oh-my-design shim 동기화 + 토너먼트 기획 변경 반영 | .cursor, .omd, AGENTS.md, CLAUDE.md, docs | 커밋 `03fbb7d` |
