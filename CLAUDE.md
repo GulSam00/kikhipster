@@ -50,8 +50,8 @@ cd frontend && npm run dev                                      # :3000
 - **Spotify 403을 자격증명 문제로 오진하지 말 것.** 토큰 발급은 성공하고 `api.spotify.com` 에서 막힌다. 원인과 대응은 `docs/TASKS.md` 차단 항목.
 
 **판단 기준**
-- **화면만 보고 정상 동작을 판단하지 않는다.** 프론트가 호출 실패를 전부 `catch` 로 삼켜서(`frontend/app/` 내 18곳) 에러 없이 빈 화면으로 렌더링된다. 반드시 `curl` 이나 백엔드 로그로 확인한다.
-- **프론트 UI는 shadcn/ui 위에서 조립한다.** raw `<button>` + Tailwind로 새로 만들지 말고 `@/components/ui/*` 를 먼저 찾는다. 색상은 하드코딩(`bg-zinc-900`, `text-violet-400`) 대신 시맨틱 토큰(`bg-card`, `text-primary`, `text-muted-foreground`, `bg-accent`)을 쓴다. 상세는 `kikhipster-frontend` 스킬.
+- **화면만 보고 정상 동작을 판단하지 않는다.** (2026-08-20 이전엔 프론트가 호출 실패를 전부 `catch` 로 삼켜 에러 없이 빈 화면으로 렌더링됐다 — Server Component는 `app/error.tsx` 경계, Client Component는 `sonner` 토스트로 정리됨. 새 코드에서 같은 패턴을 반복하지 않는다.) 화면이 정상으로 보여도 `curl` 이나 백엔드 로그로 한 번 더 확인한다.
+- **프론트 UI는 shadcn/ui 위에서 조립한다.** raw `<button>` + Tailwind로 새로 만들지 말고 `@/components/ui/*` 를 먼저 찾는다. 색상은 하드코딩(`bg-zinc-900`, `text-amber-400`) 대신 시맨틱 토큰(`bg-card`, `text-primary`, `text-muted-foreground`, `bg-accent`)을 쓴다. 토큰 정의·레퍼런스 근거는 `DESIGN.md`, 컴포넌트 조립 컨벤션은 `kikhipster-frontend` 스킬.
 
 ---
 
@@ -65,3 +65,21 @@ cd frontend && npm run dev                                      # :3000
 스택: 프론트 **Vercel Hobby**, 백엔드 **ECS Fargate**(퍼블릭 서브넷 + 공인 IP, **NAT 미사용**) + **ALB**, DB **RDS PostgreSQL** `db.t4g.micro`, 리전 **`us-east-1`**. 상시 월 ~$48이지만 실습 단위(주 2회 × 4시간)로는 **월 ~$2~4**. 전체 근거·비용표·주의점·로드맵은 Notion §11.
 
 실습 단계별 과제는 `docs/TASKS.md` T4.
+
+---
+
+<!-- omd:start v=1 hash=a0905ab87d60 -->
+# Design System (oh-my-design)
+
+Read the standalone design contract at **@./DESIGN.md** before any UI,
+styling, microcopy, or motion work. When a valid adopted Core v2
+`.omd/system/manifest.json` declares `profile: portable-core` and binds exact
+graph/projection hashes, the System Graph is machine authority and DESIGN.md is
+its standalone projection. A migration candidate is never adopted authority.
+
+Preference log (pending corrections): @./.omd/preferences.md
+
+Precedence: pending explicit preference corrections > adopted Bound System
+graph/standalone DESIGN.md > your defaults. Fold pending corrections into the
+graph and regenerate the projection before clearing them.
+<!-- omd:end -->

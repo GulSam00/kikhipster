@@ -8,6 +8,18 @@
 
 ## 세션 기록
 
+### 2026-08-20 (계속) — 토너먼트 기획 변경, omd 스킬 3종 적용
+
+**omd 스킬 적용**
+- `omd-init` 시도했으나 중단 — 이번 세션에 코드 역추출로 이미 작성한 `DESIGN.md`(Netflix/Watcha 근거 포함)가 omd-init의 Core v2 그래프 파이프라인보다 이 프로젝트엔 더 정확해서, 새로 만들지 않고 기존 문서를 그대로 유지하기로 결정
+- `omd-sync` 실행 — `CLAUDE.md`/`AGENTS.md`/`.cursor/rules/omd-design.mdc` shim 3종을 전부 신규 생성(기존에 하나도 없었음), `.omd/sync.lock.json`에 해시 기록. 김에 `CLAUDE.md`의 stale한 내용(catch{} 18곳·`text-violet-400` 예시)도 같이 정리
+- `omd-reference-capture`는 후보로 검토했으나 보류 — Netflix/Watcha가 카탈로그 상 `legacy_snapshot`(재검증 필요) 상태지만 지금 급한 우선순위가 아니라고 판단
+
+**토너먼트 백엔드 착수 → 기획 변경으로 보류**
+- 현재 `tournament_rounds`가 트랙 ID만 저장하고 메타데이터가 없어 새로고침 시 복구가 안 된다는 문제로 서버 측 라운드 저장 + 복구 API를 설계하려 했으나, 실제 검증해보니 `GET /api/music/search/tracks`가 이미 500(Spotify 차단 여파)이라 착수 시점 자체가 안 맞다는 게 드러남
+- 이 과정에서 사용자가 토너먼트 기획을 통째로 바꾸기로 결정: 서버에 라운드별 대진 기록을 저장하지 않고, **진행 상태는 프론트 `localStorage`에만**(새로고침은 견디되 기기 간 동기화는 포기), **완료 시엔 승패 기록이 아니라 트랙별 선택률/도달 라운드 기반 스코어만 서버에 POST**하는 방식으로 전환. 여러 유저 플레이가 쌓여 트랙 랭킹으로 집계되는 걸 노리는 설계. 정확한 스코어 산식은 미정
+- **착수 시점을 T1(음악 API 교체) 이후로 명시적으로 미룸** — 지금 Spotify ID 기준으로 스키마를 짜봐야 곧 갈아엎어야 하기 때문. 코드 변경은 없었음(설계 단계에서 방향 전환), 상세는 `docs/TASKS.md` T3
+
 ### 2026-08-20 — 로컬 기동, OAuth 연결, Spotify 차단 확인, 문서 구조 개편
 
 **로컬 3종 기동 검증**
@@ -82,3 +94,4 @@ Spotify 연동 백엔드, 프론트 기획(`_workspace/planning.md`), QA 리뷰(
 | 2026-08-20 | docs: 작업 로그·과제를 CLAUDE.md에서 분리해 전용 파일로 이관 | .claude, CLAUDE.md, docs | 커밋 `a70d0b8` |
 | 2026-08-20 | fix(hooks): 이력 행만 담은 커밋은 이력에 기록하지 않도록 수정 | .claude | 커밋 `68dce41` |
 | 2026-08-20 | Merge branch 'docs/split-worklog-and-tasks' | - | 커밋 `1ad2940` |
+| 2026-08-20 | feat(frontend): 디자인 시스템 정립 + API 에러 처리 정리 | .reviews, DESIGN.md, docs, frontend | 커밋 `d3300ba` |
