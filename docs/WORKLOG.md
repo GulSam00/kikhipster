@@ -133,3 +133,4 @@ Spotify 연동 백엔드, 프론트 기획(`_workspace/planning.md`), QA 리뷰(
 | 2026-08-20 | feat(frontend): 디자인 시스템 정립 + API 에러 처리 정리 | .reviews, DESIGN.md, docs, frontend | 커밋 `d3300ba` |
 | 2026-08-20 | chore: oh-my-design shim 동기화 + 토너먼트 기획 변경 반영 | .cursor, .omd, AGENTS.md, CLAUDE.md, docs | 커밋 `03fbb7d` |
 | 2026-08-21 | feat(music): T1 음악 API를 iTunes Search로 결정, 팔로워 기능 제거 | backend, docs, frontend | 커밋 `052e1bc` |
+| 2026-08-21 | feat(music): T1 착수 — Spotify를 iTunes Search API로 실제 교체 | CLAUDE.md, backend, docs, frontend | 커밋 `4e54aca` |
