@@ -3,9 +3,7 @@ from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
     database_url: str
-    spotify_client_id: str = ""
-    spotify_client_secret: str = ""
-    spotify_default_market: str = "KR"
+    music_default_market: str = "KR"
 
     # JWT
     jwt_secret_key: str = "change-me-in-production"

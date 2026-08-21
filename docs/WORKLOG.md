@@ -8,6 +8,29 @@
 
 ## 세션 기록
 
+### 2026-08-21 (계속) — T1 착수: Spotify → iTunes Search 실제 교체
+
+**백엔드 교체**
+- `services/music_api.py`를 `SpotifyMusicService` → `ITunesMusicService`로 전면 재작성. 인증이 필요 없어 `services/spotify_auth.py`(`SpotifyTokenManager`) 삭제, `main.py`/`config.py`에서 관련 배선(`token_manager`, `spotify_client_id/secret`) 전부 제거. `schemas/music.py`는 어댑터 계층에서 흡수해 구조 변경 없음
+- `.env`/`.env.example`의 `SPOTIFY_*` 3개 변수를 `MUSIC_DEFAULT_MARKET` 하나로 교체
+
+**실제 호출하며 발견한 iTunes API 특이사항 2건 (문서만으론 안 보이던 것)**
+- `/lookup?id={albumId}&entity=song`에서 `limit`을 생략하면 트랙이 0개로 온다(collection 레코드만) — `limit=200`으로 고정해 해결
+- 여기에 `country` 파라미터까지 같이 넘기면 `limit`을 줘도 트랙이 다시 0개로 잘린다(재현 확인, 원인 불명 — Apple 쪽 지역 카탈로그 스코핑 버그로 추정). `collectionId`가 전역 고유값이라 `country` 없이 호출하는 걸로 우회. `CLAUDE.md` "과거에 실제로 터진 함정"에 등재해 재발 방지
+
+**프론트 이미지 도메인**
+- `next.config.ts`의 `remotePatterns`가 `*.scdn.co`(Spotify)로 고정돼 있어 그대로 뒀으면 아트워크가 전부 깨졌을 것. `*.mzstatic.com`(Apple 아트워크 CDN)으로 교체
+
+**진짜 실행해보고서야 드러난 기존 버그**
+- `artists/[id]/page.tsx`가 `artist.albums.length`를 호출하는데, `ArtistDetail` 스키마(백엔드·프론트 둘 다)엔 애초에 `albums` 필드가 없었다 — Spotify가 403으로 막혀 있던 내내 이 코드가 한 번도 실행된 적이 없어 안 걸린 순수 사전 존재 버그. `docs/TASKS.md` T2의 "아티스트 앨범 목록 API 프론트 미사용" 항목과 정확히 같은 원인이라 이번에 같이 고침 — `getAlbums()`를 신설해 `GET /api/music/artists/{id}/albums`를 병렬로 호출하도록 변경, `types/music.ts`의 `ArtistDetail`에서 존재한 적 없던 `albums` 필드 제거
+
+**검증**
+- 백엔드: 아티스트/앨범/트랙 검색, 아티스트 상세·앨범 목록·트랙 목록, 앨범 트랙 목록, 존재하지 않는 ID(404) 전부 curl로 직접 확인. 한글/일문 검색도 재확인
+- 프론트: `/`, `/search`, `/artists/[id]`, `/albums/[id]`, `/topsters`, `/tournament` 전부 실제 iTunes 데이터로 200 렌더링 확인, `tsc --noEmit` 통과
+
+**문서 정리**
+- `docs/TASKS.md`에서 ⛔ 차단됨(Spotify 403) 섹션과 T1 전체를 제거(완료), T2에서 "아티스트 앨범 목록" 항목 제거(완료), T3 토너먼트 항목의 "T1 이후" 표현을 "T1 완료, 착수 가능"으로 갱신, 현재 구현 범위 표를 iTunes 기준으로 갱신
+
 ### 2026-08-21 — T1 음악 API 결정 (iTunes Search), 팔로워 기능 제거
 
 **Deezer vs iTunes Search 실제 쿼리 비교**
@@ -109,3 +132,4 @@ Spotify 연동 백엔드, 프론트 기획(`_workspace/planning.md`), QA 리뷰(
 | 2026-08-20 | Merge branch 'docs/split-worklog-and-tasks' | - | 커밋 `1ad2940` |
 | 2026-08-20 | feat(frontend): 디자인 시스템 정립 + API 에러 처리 정리 | .reviews, DESIGN.md, docs, frontend | 커밋 `d3300ba` |
 | 2026-08-20 | chore: oh-my-design shim 동기화 + 토너먼트 기획 변경 반영 | .cursor, .omd, AGENTS.md, CLAUDE.md, docs | 커밋 `03fbb7d` |
+| 2026-08-21 | feat(music): T1 음악 API를 iTunes Search로 결정, 팔로워 기능 제거 | backend, docs, frontend | 커밋 `052e1bc` |

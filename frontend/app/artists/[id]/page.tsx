@@ -6,7 +6,7 @@ import AlbumCard from '@/components/music/AlbumCard';
 import TrackRow from '@/components/music/TrackRow';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import type { ArtistDetail, TrackItem } from '@/types/music';
+import type { AlbumSummary, ArtistDetail, TrackItem } from '@/types/music';
 
 async function getArtist(id: string): Promise<ArtistDetail | null> {
   try {
@@ -25,9 +25,21 @@ async function getTopTracks(id: string): Promise<TrackItem[]> {
   }
 }
 
+async function getAlbums(id: string): Promise<AlbumSummary[]> {
+  try {
+    return await apiFetch<AlbumSummary[]>(`/api/music/artists/${id}/albums`);
+  } catch {
+    return [];
+  }
+}
+
 export default async function ArtistPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const [artist, topTracks] = await Promise.all([getArtist(id), getTopTracks(id)]);
+  const [artist, topTracks, albums] = await Promise.all([
+    getArtist(id),
+    getTopTracks(id),
+    getAlbums(id),
+  ]);
 
   if (!artist) notFound();
 
@@ -72,11 +84,11 @@ export default async function ArtistPage({ params }: { params: Promise<{ id: str
         </section>
       )}
 
-      {artist.albums.length > 0 && (
+      {albums.length > 0 && (
         <section>
           <h2 className="mb-3 font-heading text-lg font-bold">앨범 · 싱글</h2>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6">
-            {artist.albums.map((a) => (
+            {albums.map((a) => (
               <AlbumCard key={a.id} album={a} />
             ))}
           </div>

@@ -13,8 +13,7 @@ from routers.like import router as like_router
 from routers.music import router as music_router
 from routers.topster import router as topster_router
 from routers.tournament import router as tournament_router
-from services.music_api import SpotifyMusicService
-from services.spotify_auth import SpotifyTokenManager
+from services.music_api import ITunesMusicService
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -23,16 +22,9 @@ logger = logging.getLogger(__name__)
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     http_client = httpx.AsyncClient(timeout=httpx.Timeout(30.0))
-    token_manager = SpotifyTokenManager(
-        client_id=settings.spotify_client_id,
-        client_secret=settings.spotify_client_secret,
-    )
     app.state.http_client = http_client
-    app.state.token_manager = token_manager
-    app.state.music_service = SpotifyMusicService(
-        client=http_client, token_manager=token_manager
-    )
-    logger.info("Spotify music service initialized (market=%s)", settings.spotify_default_market)
+    app.state.music_service = ITunesMusicService(client=http_client)
+    logger.info("iTunes music service initialized (market=%s)", settings.music_default_market)
     yield
     await http_client.aclose()
     logger.info("HTTP client closed")

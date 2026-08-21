@@ -6,9 +6,9 @@ export interface ArtistSummary {
   popularity: number;
 }
 
-export interface ArtistDetail extends ArtistSummary {
-  albums: AlbumSummary[];
-}
+// 백엔드 스키마(ArtistDetail(ArtistSummary): pass)와 동일 — 앨범 목록은
+// 별도 엔드포인트(GET /api/music/artists/{id}/albums)로 조회한다.
+export type ArtistDetail = ArtistSummary;
 
 export interface AlbumSummary {
   id: string;

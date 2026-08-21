@@ -47,7 +47,7 @@ cd frontend && npm run dev                                      # :3000
 - **`alembic.ini` 는 ASCII 전용으로 유지한다.** 한글 주석을 넣으면 Python 3.9 alembic이 ini를 OS 로케일(cp949)로 읽어 `UnicodeDecodeError` 가 난다. 한글 설명은 `alembic/env.py` 에.
 - **응답 스키마에서 UUID PK를 `id: str` 로 선언하지 않는다.** Pydantic v2가 `UUID` → `str` 변환을 거부해 행이 생기는 순간 전수 500이 된다. `schemas/common.py` 의 `UUIDStr` 을 쓸 것.
 - **모든 관계에 `cascade="all, delete-orphan", passive_deletes=True` 를 건다.** 빠뜨리면 부모 삭제 시 자식 FK를 NULL로 UPDATE하려다 `IntegrityError`.
-- **Spotify 403을 자격증명 문제로 오진하지 말 것.** 토큰 발급은 성공하고 `api.spotify.com` 에서 막힌다. 원인과 대응은 `docs/TASKS.md` 차단 항목.
+- **iTunes `/lookup`에 앨범 ID + `entity=song`으로 트랙을 조회할 때 `country` 파라미터를 같이 넘기지 않는다.** 실제로 트랙이 0개로 잘리는 걸 확인함(`limit`도 생략하면 마찬가지). `collectionId`는 전역 고유값이라 country 없이도 정확히 찾힌다. `backend/services/music_api.py`의 `get_album_tracks` 참조.
 
 **판단 기준**
 - **화면만 보고 정상 동작을 판단하지 않는다.** (2026-08-20 이전엔 프론트가 호출 실패를 전부 `catch` 로 삼켜 에러 없이 빈 화면으로 렌더링됐다 — Server Component는 `app/error.tsx` 경계, Client Component는 `sonner` 토스트로 정리됨. 새 코드에서 같은 패턴을 반복하지 않는다.) 화면이 정상으로 보여도 `curl` 이나 백엔드 로그로 한 번 더 확인한다.
