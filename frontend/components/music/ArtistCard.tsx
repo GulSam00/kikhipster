@@ -27,9 +27,6 @@ export default function ArtistCard({ artist }: Props) {
             {artist.genres[0] && (
               <p className="truncate text-xs text-muted-foreground">{artist.genres[0]}</p>
             )}
-            <p className="text-xs text-muted-foreground">
-              {artist.followers.toLocaleString()} 팔로워
-            </p>
           </div>
         </CardContent>
       </Card>

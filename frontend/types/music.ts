@@ -3,7 +3,6 @@ export interface ArtistSummary {
   name: string;
   image_url: string | null;
   genres: string[];
-  followers: number;
   popularity: number;
 }
 

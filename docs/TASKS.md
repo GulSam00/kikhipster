@@ -22,15 +22,20 @@
 
 ## 진행 예정
 
-### T1. 음악 API 교체 (Spotify → 대체 API)
+### T1. 음악 API 교체 (Spotify → iTunes Search API, 결정 완료 2026-08-21)
 
-| 후보 | 키 | 30초 미리듣기 | 비고 |
-|------|-----|--------------|------|
-| **Deezer** (유력) | 불필요 | O | `nb_fan`, 앨범 `genres` 등 필드 구조가 Spotify와 가장 유사해 스키마 변경 최소 |
-| iTunes Search | 불필요 | O | 더 확실히 개방적이나 popularity/followers 부재 → UI 일부 표시 제거 필요 |
+**결정: iTunes Search API.** Deezer와 실제 쿼리로 직접 비교 검증함 — 상세는 `docs/WORKLOG.md` 세션 기록.
+
+- 결정적 근거: Deezer는 한글+영문 혼합 쿼리(`"아이유 Blueming"`)와 순수 한글 쿼리(`"아이유 블루밍"`) 둘 다 **0건**을 반환함. iTunes는 두 경우 다 정확히 매칭. 케이팝처럼 아티스트명 한글 + 곡명 영문 조합이 흔한 도메인이라 이 차이가 치명적
+- 트랙/아티스트 검색 관련도도 iTunes가 전반적으로 더 정확함(일문 "米津玄師 Lemon" 테스트 등)
+- 30초 미리듣기(`previewUrl`), 앨범 커버(`artworkUrl100`, URL의 `100x100bb`→`600x600bb` 치환으로 고해상도 획득 가능) 정상 확인
+- **iTunes의 제약 2건, 둘 다 처리 완료/합의됨:**
+  - `followers`(팔로워 수) 필드 없음 → **기능 자체를 제거함**(`ArtistCard.tsx`, `artists/[id]/page.tsx`, `schemas/music.py`, `music_api.py`, `types/music.ts`에서 전부 삭제, 커밋 대기)
+  - 아티스트 엔티티에 **인물 사진 필드가 없음**(앨범/트랙 아트워크는 있음) → 앨범 위주 도메인이라 수용하기로 함. `ArtistCard.tsx`가 이미 `image_url` null일 때 마이크 아이콘 폴백을 갖고 있어 추가 작업 없이 그대로 둠(앨범 커버로 대체하는 우회로는 검토했으나 채택 안 함)
+  - `primaryGenreName`이 배열이 아니라 단일 문자열 — `genres: list[str]` 스키마와 안 맞아 매핑 시 `[primaryGenreName]`으로 감싸야 함(착수 시 처리)
 
 - 교체 범위: `backend/services/music_api.py` + `backend/schemas/music.py`
-- 저장되는 앨범/트랙 ID 체계가 Spotify ID → 대체 API ID로 바뀐다. **현재 DB가 비어 있어 마이그레이션 부담은 없다** (`topster_items.album_spotify_id`, `tournament_rounds.track_a_id/track_b_id` 컬럼명은 리네이밍 검토)
+- 저장되는 앨범/트랙 ID 체계가 Spotify ID → iTunes ID(`trackId`/`collectionId`/`artistId`, 전부 숫자)로 바뀐다. **현재 DB가 비어 있어 마이그레이션 부담은 없다** (`topster_items.album_spotify_id`, `tournament_rounds.track_a_id/track_b_id` 컬럼명은 리네이밍 검토)
 - 착수 시점 미정
 
 ### T2. 백엔드에 있는데 UI가 없는 기능 붙이기 — 가장 값싼 확장

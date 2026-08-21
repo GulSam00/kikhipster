@@ -9,7 +9,6 @@ class ArtistSummary(BaseModel):
     image_url: str | None = None
     genres: list[str] = []
     popularity: int = 0
-    followers: int = 0
 
 
 class ArtistDetail(ArtistSummary):

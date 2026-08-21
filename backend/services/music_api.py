@@ -76,7 +76,6 @@ class SpotifyMusicService:
                 "image_url": images[0]["url"] if images else None,
                 "genres": a.get("genres", []),
                 "popularity": a.get("popularity", 0),
-                "followers": a.get("followers", {}).get("total", 0),
             })
         return {"items": items, "total": artists_data.get("total", 0)}
 
@@ -115,7 +114,6 @@ class SpotifyMusicService:
             "image_url": images[0]["url"] if images else None,
             "genres": a.get("genres", []),
             "popularity": a.get("popularity", 0),
-            "followers": a.get("followers", {}).get("total", 0),
         }
 
     async def get_artist_albums(

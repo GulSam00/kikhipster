@@ -50,7 +50,6 @@ export default async function ArtistPage({ params }: { params: Promise<{ id: str
             {artist.genres.slice(0, 3).map((g) => (
               <Badge key={g} variant="secondary">{g}</Badge>
             ))}
-            <span>{artist.followers.toLocaleString()} 팔로워</span>
           </div>
         </div>
       </div>

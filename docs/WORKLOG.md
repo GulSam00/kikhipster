@@ -8,6 +8,19 @@
 
 ## 세션 기록
 
+### 2026-08-21 — T1 음악 API 결정 (iTunes Search), 팔로워 기능 제거
+
+**Deezer vs iTunes Search 실제 쿼리 비교**
+- 둘 다 공개 API라 인증 없이 직접 curl로 검증. 한글 아티스트명 단독 검색(`김광석`)은 둘 다 정확했지만, **혼합 표기 쿼리에서 갈림** — Deezer는 `"아이유 Blueming"`(한글+영문), `"아이유 블루밍"`(순한글) 둘 다 0건. iTunes는 둘 다 정확 매칭
+- 일본어도 확인: `"米津玄師 Lemon"` 검색 시 Deezer 1위는 로마자 `Kenshi Yonezu`+노래방 커버 노이즈, iTunes 1위는 네이티브 표기 `米津玄師` 정곡
+- **결정: iTunes Search API.** 케이팝/제이팝처럼 아티스트명 원어 + 곡명 영문 조합이 흔한 도메인에서 혼합 쿼리 실패는 치명적이라고 판단
+- 30초 미리듣기(`previewUrl`), 앨범 아트워크(`artworkUrl100`, `600x600bb` 치환으로 고해상도) 정상 확인. `primaryGenreName`은 배열이 아니라 단일 문자열이라 매핑 시 처리 필요
+
+**iTunes 제약 2건 확인 및 처리**
+- `followers` 필드가 iTunes엔 없음 → 필드 자체 죽은 코드 여부부터 확인(`popularity`는 프론트 어디서도 안 쓰여 죽은 데이터, `followers`는 `ArtistCard.tsx`·`artists/[id]/page.tsx`에서 실제 렌더링 중이었음). 사용자가 팔로워 기능 자체를 제거하기로 결정 → 프론트 2곳 + `types/music.ts` + 백엔드 `schemas/music.py`·`music_api.py`(3곳)에서 전부 삭제
+- 아티스트 엔티티에 인물 사진 필드가 아예 없음(앨범/트랙 아트워크는 있음) — `/lookup?id={artistId}&entity=album`으로 최신 앨범 커버를 대신 가져오는 우회로를 검증까지 했으나, 사용자가 "앨범 위주 도메인이니 인물 사진은 필수 아니다"로 판단해 채택 안 함. 기존 마이크 아이콘 폴백(`ArtistCard.tsx`) 그대로 유지
+- 상세는 `docs/TASKS.md` T1
+
 ### 2026-08-20 (계속) — 토너먼트 기획 변경, omd 스킬 3종 적용
 
 **omd 스킬 적용**
