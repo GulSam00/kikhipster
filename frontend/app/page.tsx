@@ -1,25 +1,25 @@
 import Link from 'next/link';
-import { LayoutGrid, LogIn, Search, Trophy } from 'lucide-react';
+import { LayoutGrid, Trophy } from 'lucide-react';
 import { apiFetch } from '@/lib/api';
 import TopsterCard from '@/components/music/TopsterCard';
+import TournamentCard from '@/components/music/TournamentCard';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardTitle } from '@/components/ui/card';
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty';
 import type { Topster } from '@/types/topster';
+import type { TournamentSummary } from '@/types/tournament';
 
+/** 공개 탑스터 전체를 최신순으로 (백엔드가 created_at desc 로 정렬). */
 async function getTopsters(): Promise<Topster[]> {
   return apiFetch<Topster[]>('/api/topsters/?limit=12&offset=0');
 }
 
-const shortcuts = [
-  { href: '/search', label: '음악 검색', desc: '아티스트·앨범·곡 탐색', icon: Search },
-  { href: '/topsters', label: '탑스터', desc: '나만의 앨범 차트 만들기', icon: LayoutGrid },
-  { href: '/tournament', label: '토너먼트', desc: '최애 곡 결정전', icon: Trophy },
-  { href: '/login', label: '로그인', desc: '좋아요·댓글·탑스터 저장', icon: LogIn },
-];
+/** 모든 사용자의 월드컵을 최신순으로. */
+async function getTournaments(): Promise<TournamentSummary[]> {
+  return apiFetch<TournamentSummary[]>('/api/tournaments/?sort=recent&limit=6&offset=0');
+}
 
 export default async function HomePage() {
-  const topsters = await getTopsters();
+  const [topsters, tournaments] = await Promise.all([getTopsters(), getTournaments()]);
 
   return (
     <div className="mx-auto w-full max-w-6xl px-4 py-8">
@@ -27,7 +27,7 @@ export default async function HomePage() {
         <div className="mb-4 flex items-center justify-between">
           <h2 className="font-heading text-lg font-bold">최근 탑스터</h2>
           <Button asChild variant="link" size="sm">
-            <Link href="/topsters">전체 보기</Link>
+            <Link href="/topsters">더보기</Link>
           </Button>
         </div>
 
@@ -56,24 +56,35 @@ export default async function HomePage() {
       </section>
 
       <section>
-        <h2 className="mb-4 font-heading text-lg font-bold">둘러보기</h2>
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-          {shortcuts.map(({ href, label, desc, icon: Icon }) => (
-            <Link
-              key={href}
-              href={href}
-              className="group block rounded-xl outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
-            >
-              <Card className="h-full transition-colors group-hover:bg-accent">
-                <CardContent className="flex flex-col gap-1">
-                  <Icon className="mb-1 size-5 text-primary" />
-                  <CardTitle>{label}</CardTitle>
-                  <CardDescription className="text-xs">{desc}</CardDescription>
-                </CardContent>
-              </Card>
-            </Link>
-          ))}
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="font-heading text-lg font-bold">최근 월드컵</h2>
+          <Button asChild variant="link" size="sm">
+            <Link href="/tournament">더보기</Link>
+          </Button>
         </div>
+
+        {tournaments.length === 0 ? (
+          <Empty className="border">
+            <EmptyHeader>
+              <EmptyMedia variant="icon">
+                <Trophy />
+              </EmptyMedia>
+              <EmptyTitle>아직 월드컵이 없습니다</EmptyTitle>
+              <EmptyDescription>좋아하는 곡이나 앨범을 모아 최애를 가려보세요.</EmptyDescription>
+            </EmptyHeader>
+            <EmptyContent>
+              <Button asChild>
+                <Link href="/tournament/new">첫 월드컵 만들기</Link>
+              </Button>
+            </EmptyContent>
+          </Empty>
+        ) : (
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {tournaments.map((t) => (
+              <TournamentCard key={t.id} tournament={t} />
+            ))}
+          </div>
+        )}
       </section>
     </div>
   );
