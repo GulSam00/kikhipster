@@ -1,25 +1,86 @@
-export interface TournamentRound {
+export type TournamentItemType = 'track' | 'album';
+
+export interface TournamentUser {
   id: string;
-  round_num: number;
-  match_num: number;
-  track_a_id: string;
-  track_b_id: string;
-  winner_id: string | null;
+  nickname: string;
 }
 
-export interface Tournament {
+/** 대시보드 카드용. 풀 전체 대신 개수와 미리보기 id만 온다. */
+export interface TournamentSummary {
   id: string;
-  size: number;
-  status: 'in_progress' | 'completed';
-  winner_track_id: string | null;
+  title: string;
+  description: string;
+  item_type: TournamentItemType;
+  item_count: number;
+  play_count: number;
   created_at: string;
-  rounds: TournamentRound[];
+  user: TournamentUser;
+  preview_item_ids: string[];
+}
+
+export interface TournamentDetail {
+  id: string;
+  title: string;
+  description: string;
+  item_type: TournamentItemType;
+  item_ids: string[];
+  item_count: number;
+  play_count: number;
+  created_at: string;
+  user: TournamentUser;
+  /** 풀 크기 이하인 강수만 온다. 풀이 5개면 [4]. */
+  available_sizes: number[];
 }
 
 export interface TournamentCreateBody {
-  track_ids: string[];
+  title: string;
+  description: string;
+  item_type: TournamentItemType;
+  item_ids: string[];
 }
 
-export interface TournamentVoteBody {
-  winner_id: string;
+export interface PlayRound {
+  id: string;
+  round_num: number;
+  match_num: number;
+  item_a_id: string;
+  item_b_id: string;
+  winner_id: string | null;
 }
+
+export interface Play {
+  id: string;
+  tournament_id: string;
+  tournament_title: string;
+  item_type: TournamentItemType;
+  size: number;
+  status: 'in_progress' | 'completed';
+  winner_item_id: string | null;
+  created_at: string;
+  rounds: PlayRound[];
+}
+
+export interface TournamentRankingItem {
+  rank: number;
+  item_id: string;
+  play_count: number;
+  championship_count: number;
+  championship_rate: number;
+  match_count: number;
+  match_win_count: number;
+  match_win_rate: number;
+  previous_rank: number | null;
+  rank_delta: number | null;
+}
+
+export interface TournamentRanking {
+  tournament_id: string;
+  title: string;
+  item_type: TournamentItemType;
+  total_plays: number;
+  trend_days: number;
+  items: TournamentRankingItem[];
+}
+
+/** 대시보드 정렬 옵션. 백엔드 `sort` 파라미터와 1:1. */
+export type TournamentSort = 'recent' | 'popular_all' | 'popular_year' | 'popular_month';

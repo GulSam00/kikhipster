@@ -1,266 +1,129 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import Image from 'next/image';
-import { Music2, Trophy, X } from 'lucide-react';
+import Link from 'next/link';
+import { Plus, Search, Trophy } from 'lucide-react';
 import { toast } from 'sonner';
 import { apiFetch } from '@/lib/api';
-import TrackRow from '@/components/music/TrackRow';
-import { Badge } from '@/components/ui/badge';
+import TournamentCard from '@/components/music/TournamentCard';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
+import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import { Skeleton } from '@/components/ui/skeleton';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
-import { cn } from '@/lib/utils';
-import type { TrackSearchItem } from '@/types/music';
-import type { Tournament, TournamentRound } from '@/types/tournament';
+import type { TournamentSort, TournamentSummary } from '@/types/tournament';
 
-type Phase = 'setup' | 'playing' | 'done';
-type Size = 8 | 16 | 32;
+const SORTS: { value: TournamentSort; label: string }[] = [
+  { value: 'recent', label: '최신순' },
+  { value: 'popular_all', label: '인기 전체' },
+  { value: 'popular_year', label: '인기 올해' },
+  { value: 'popular_month', label: '인기 이번 달' },
+];
 
-const SIZES: Size[] = [8, 16, 32];
-
-export default function TournamentPage() {
-  const router = useRouter();
-  const [phase, setPhase] = useState<Phase>('setup');
-  const [size, setSize] = useState<Size>(8);
-  const [searchQ, setSearchQ] = useState('');
-  const [searchResults, setSearchResults] = useState<TrackSearchItem[]>([]);
-  const [selected, setSelected] = useState<TrackSearchItem[]>([]);
-  const [tournament, setTournament] = useState<Tournament | null>(null);
-  const [currentRound, setCurrentRound] = useState<TournamentRound | null>(null);
-  const [loading, setLoading] = useState(false);
+export default function TournamentDashboardPage() {
+  const [items, setItems] = useState<TournamentSummary[]>([]);
+  const [q, setQ] = useState('');
+  const [debouncedQ, setDebouncedQ] = useState('');
+  const [sort, setSort] = useState<TournamentSort>('recent');
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!localStorage.getItem('access_token')) router.push('/login');
-  }, [router]);
-
-  useEffect(() => {
-    if (!searchQ.trim()) { setSearchResults([]); return; }
-    const t = setTimeout(async () => {
-      try {
-        const res = await apiFetch<{ items: TrackSearchItem[] }>(`/api/music/search/tracks?q=${encodeURIComponent(searchQ)}&limit=20`);
-        setSearchResults(res.items);
-      } catch {
-        toast.error('곡 검색에 실패했습니다');
-      }
-    }, 300);
+    const t = setTimeout(() => setDebouncedQ(q.trim()), 300);
     return () => clearTimeout(t);
-  }, [searchQ]);
+  }, [q]);
 
-  function toggleTrack(track: TrackSearchItem) {
-    setSelected((prev) =>
-      prev.find((t) => t.id === track.id)
-        ? prev.filter((t) => t.id !== track.id)
-        : prev.length < size ? [...prev, track] : prev
-    );
-  }
+  useEffect(() => {
+    let alive = true;
+    const params = new URLSearchParams({ sort, limit: '30', offset: '0' });
+    if (debouncedQ) params.set('q', debouncedQ);
 
-  async function startTournament() {
-    if (selected.length !== size) return;
-    setLoading(true);
-    try {
-      const t = await apiFetch<Tournament>('/api/tournaments/', {
-        method: 'POST',
-        body: JSON.stringify({ track_ids: selected.map((t) => t.id) }),
-      });
-      setTournament(t);
-      const maxRound = Math.max(...t.rounds.map((r) => r.round_num));
-      const firstMatch = t.rounds.find((r) => r.round_num === maxRound && r.match_num === 0) ?? null;
-      setCurrentRound(firstMatch);
-      setPhase('playing');
-    } catch {
-      toast.error('토너먼트 생성에 실패했습니다');
-    } finally {
-      setLoading(false);
-    }
-  }
+    // setState는 전부 await 뒤에서만 일어난다 — effect 본문에서 동기로 부르면 연쇄 렌더가 생긴다.
+    (async () => {
+      try {
+        const data = await apiFetch<TournamentSummary[]>(`/api/tournaments/?${params}`);
+        if (alive) setItems(data);
+      } catch {
+        if (alive) toast.error('월드컵 목록을 불러오지 못했습니다');
+      } finally {
+        if (alive) setLoading(false);
+      }
+    })();
 
-  async function vote(winnerId: string) {
-    if (!tournament || !currentRound) return;
-    try {
-      const updated = await apiFetch<Tournament>(
-        `/api/tournaments/${tournament.id}/rounds/${currentRound.id}/vote`,
-        { method: 'POST', body: JSON.stringify({ winner_id: winnerId }) }
-      );
-      setTournament(updated);
-      if (updated.status === 'completed') { setPhase('done'); return; }
-      const nextMatch = updated.rounds.find((r) => !r.winner_id) ?? null;
-      setCurrentRound(nextMatch);
-    } catch {
-      toast.error('투표 처리에 실패했습니다');
-    }
-  }
+    return () => {
+      alive = false;
+    };
+  }, [debouncedQ, sort]);
 
-  const trackMap = Object.fromEntries(selected.map((t) => [t.id, t]));
+  return (
+    <div className="mx-auto w-full max-w-6xl px-4 py-8">
+      <div className="mb-6 flex items-center justify-between gap-3">
+        <h1 className="font-heading text-2xl font-bold">음악 월드컵</h1>
+        <Button asChild size="lg">
+          <Link href="/tournament/new">
+            <Plus />
+            만들기
+          </Link>
+        </Button>
+      </div>
 
-  if (phase === 'setup') {
-    return (
-      <div className="mx-auto w-full max-w-4xl px-4 py-8">
-        <h1 className="mb-6 font-heading text-2xl font-bold">노래 토너먼트</h1>
-
-        <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
-          <div className="grid gap-2">
-            <Label>규모</Label>
-            <ToggleGroup
-              type="single"
-              variant="outline"
-              value={String(size)}
-              onValueChange={(v) => {
-                if (!v) return;
-                setSize(Number(v) as Size);
-                setSelected([]);
-              }}
-            >
-              {SIZES.map((s) => (
-                <ToggleGroupItem key={s} value={String(s)}>
-                  {s}강
-                </ToggleGroupItem>
-              ))}
-            </ToggleGroup>
-          </div>
-          <p className="text-sm text-muted-foreground tabular-nums">
-            {selected.length}/{size} 선택
-          </p>
-        </div>
-
+      <div className="mb-3 relative">
+        <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
         <Input
-          value={searchQ}
-          onChange={(e) => setSearchQ(e.target.value)}
-          placeholder="곡 검색..."
-          className="mb-3 h-10"
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+          placeholder="월드컵 제목·설명 검색..."
+          className="h-10 pl-9"
         />
-
-        {searchResults.length > 0 && (
-          <ScrollArea className="mb-4 h-64 rounded-lg border">
-            <div className="flex flex-col gap-1 p-1">
-              {searchResults.map((t) => {
-                const picked = !!selected.find((s) => s.id === t.id);
-                return (
-                  <button
-                    key={t.id}
-                    type="button"
-                    onClick={() => toggleTrack(t)}
-                    aria-pressed={picked}
-                    className={cn(
-                      'flex items-center gap-2 rounded-md px-3 py-2 text-left transition-colors',
-                      picked ? 'bg-primary/15 ring-1 ring-primary ring-inset' : 'hover:bg-accent',
-                    )}
-                  >
-                    <span className="flex-1 truncate text-sm">{t.name}</span>
-                    <span className="shrink-0 text-xs text-muted-foreground">{t.artists[0]}</span>
-                  </button>
-                );
-              })}
-            </div>
-          </ScrollArea>
-        )}
-
-        {selected.length > 0 && (
-          <div className="mb-4 flex flex-wrap gap-1.5">
-            {selected.map((t) => (
-              <Badge
-                key={t.id}
-                variant="secondary"
-                asChild
-                className="cursor-pointer transition-colors hover:bg-destructive/20 hover:text-destructive"
-              >
-                <button type="button" onClick={() => toggleTrack(t)}>
-                  {t.name}
-                  <X className="size-3" />
-                </button>
-              </Badge>
-            ))}
-          </div>
-        )}
-
-        <Button
-          onClick={startTournament}
-          disabled={selected.length !== size || loading}
-          size="lg"
-          className="h-11 w-full"
-        >
-          {loading ? '생성 중...' : `${size}강 토너먼트 시작`}
-        </Button>
       </div>
-    );
-  }
 
-  if (phase === 'playing' && currentRound) {
-    const trackA = trackMap[currentRound.track_a_id];
-    const trackB = trackMap[currentRound.track_b_id];
-    const remaining = tournament!.rounds.filter((r) => !r.winner_id).length;
+      <ToggleGroup
+        type="single"
+        variant="outline"
+        value={sort}
+        onValueChange={(v) => v && setSort(v as TournamentSort)}
+        className="mb-6"
+      >
+        {SORTS.map((s) => (
+          <ToggleGroupItem key={s.value} value={s.value}>
+            {s.label}
+          </ToggleGroupItem>
+        ))}
+      </ToggleGroup>
 
-    return (
-      <div className="mx-auto w-full max-w-2xl px-4 py-8">
-        <p className="mb-2 text-center text-sm text-muted-foreground">남은 경기 {remaining}개</p>
-        <h2 className="mb-8 text-center font-heading text-xl font-bold">어느 곡이 더 좋으신가요?</h2>
-
-        <div className="grid grid-cols-2 gap-4">
-          {[trackA, trackB].map((t) => t ? (
-            <Card
-              key={t.id}
-              className="transition-colors hover:bg-accent has-focus-visible:ring-2 has-focus-visible:ring-ring"
-            >
-              <CardContent className="flex flex-col items-center gap-3">
-                <button
-                  type="button"
-                  onClick={() => vote(t.id)}
-                  className="flex flex-col items-center gap-3 rounded-lg outline-none"
-                >
-                  <div className="relative size-24 overflow-hidden rounded-lg bg-muted">
-                    {t.album.cover_url ? (
-                      <Image src={t.album.cover_url} alt={t.name} fill className="object-cover" />
-                    ) : (
-                      <div className="flex size-full items-center justify-center text-muted-foreground">
-                        <Music2 className="size-6" />
-                      </div>
-                    )}
-                  </div>
-                  <div className="text-center">
-                    <p className="text-sm font-medium">{t.name}</p>
-                    <p className="text-xs text-muted-foreground">{t.artists[0]}</p>
-                  </div>
-                </button>
-
-                {t.preview_url && (
-                  <div className="w-full">
-                    <TrackRow
-                      track={{ id: t.id, name: t.name, duration_ms: t.duration_ms, explicit: t.explicit, preview_url: t.preview_url }}
-                      artist={t.artists[0]}
-                      albumCover={t.album.cover_url}
-                    />
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          ) : null)}
+      {loading ? (
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <Skeleton key={i} className="h-36" />
+          ))}
         </div>
-      </div>
-    );
-  }
-
-  if (phase === 'done' && tournament) {
-    const winner = trackMap[tournament.winner_track_id ?? ''];
-    return (
-      <div className="mx-auto w-full max-w-md px-4 py-16 text-center">
-        <Trophy className="mx-auto mb-3 size-10 text-primary" />
-        <p className="mb-2 text-sm text-primary">최종 우승</p>
-        <h2 className="mb-1 font-heading text-2xl font-bold">{winner?.name ?? '알 수 없음'}</h2>
-        <p className="mb-8 text-muted-foreground">{winner?.artists[0]}</p>
-        <Button
-          size="lg"
-          className="h-11 rounded-full"
-          onClick={() => { setPhase('setup'); setTournament(null); setSelected([]); }}
-        >
-          다시 하기
-        </Button>
-      </div>
-    );
-  }
-
-  return null;
+      ) : items.length === 0 ? (
+        <Empty className="border">
+          <EmptyHeader>
+            <EmptyMedia variant="icon">
+              <Trophy />
+            </EmptyMedia>
+            <EmptyTitle>{debouncedQ ? '검색 결과가 없습니다' : '아직 월드컵이 없습니다'}</EmptyTitle>
+            <EmptyDescription>
+              {debouncedQ
+                ? '다른 검색어로 찾아보세요.'
+                : '좋아하는 곡이나 앨범을 모아 첫 월드컵을 만들어보세요.'}
+            </EmptyDescription>
+          </EmptyHeader>
+          {!debouncedQ && (
+            <EmptyContent>
+              <Button asChild>
+                <Link href="/tournament/new">첫 월드컵 만들기</Link>
+              </Button>
+            </EmptyContent>
+          )}
+        </Empty>
+      ) : (
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {items.map((t) => (
+            <TournamentCard key={t.id} tournament={t} />
+          ))}
+        </div>
+      )}
+    </div>
+  );
 }
