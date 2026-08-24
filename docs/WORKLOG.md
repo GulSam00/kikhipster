@@ -621,3 +621,4 @@ Spotify 연동 백엔드, 프론트 기획(`_workspace/planning.md`), QA 리뷰(
 | 2026-08-25 | feat(topster): 만들기·상세 화면을 topsters.org 구조로 개편 | frontend | 커밋 `eb34fac` |
 | 2026-08-25 | feat(music): 앨범 검색에서 싱글·EP 제외 (기본값) | backend | 커밋 `0809b53` |
 | 2026-08-25 | feat(frontend): 홈에서 둘러보기 카드를 빼고 최근 월드컵 목록으로 교체 | frontend | 커밋 `a0c463c` |
+| 2026-08-25 | docs: 8/22~8/23 세션 기록과 과제 보드 갱신 | docs | 커밋 `9b10424` |
