@@ -10,6 +10,7 @@ from config import settings
 from routers.auth import router as auth_router
 from routers.comment import router as comment_router
 from routers.comment import topster_router as topster_comment_router
+from routers.play import router as play_router
 from routers.like import router as like_router
 from routers.music import router as music_router
 from routers.topster import router as topster_router
@@ -48,6 +49,7 @@ app.include_router(comment_router)
 app.include_router(topster_comment_router)
 app.include_router(like_router)
 app.include_router(tournament_router)
+app.include_router(play_router)
 
 
 @app.get("/")

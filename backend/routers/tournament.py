@@ -1,117 +1,450 @@
 from __future__ import annotations
 
 import math
+import random
+from datetime import datetime, timedelta
 
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
+from fastapi import APIRouter, Depends, HTTPException, Query
+from sqlalchemy import func, or_
+from sqlalchemy.orm import Session, joinedload
 
 from database import get_db
-from models.tournament import Tournament, TournamentRound
+from models.tournament import (
+    Tournament,
+    TournamentItem,
+    TournamentPlay,
+    TournamentRound,
+)
 from models.user import User
-from routers.deps import get_current_user
-from schemas.tournament import TournamentCreate, TournamentResponse, TournamentVote
+from routers.comment import purge_comments
+from routers.deps import get_current_user, get_optional_user
+from schemas.tournament import (
+    MAX_POOL,
+    MIN_POOL,
+    VALID_PLAY_SIZES,
+    PlayCreate,
+    PlayResponse,
+    PlayRoundResponse,
+    TournamentCreate,
+    TournamentDetailResponse,
+    TournamentRankingItem,
+    TournamentRankingResponse,
+    TournamentSummaryResponse,
+    TournamentUpdate,
+)
 
 router = APIRouter(prefix="/api/tournaments", tags=["tournaments"])
 
-VALID_SIZES = {8, 16, 32}
+# 순위 추이를 비교할 기준 시점(며칠 전).
+TREND_DAYS = 7
+
+# 대시보드 카드 썸네일에 쓸 미리보기 개수.
+PREVIEW_COUNT = 4
 
 
-def _build_rounds(tournament_id, track_ids: list[str]) -> list[TournamentRound]:
-    size = len(track_ids)
-    total_rounds = int(math.log2(size))
-    rounds = []
-    for i in range(0, size, 2):
-        rounds.append(TournamentRound(
-            tournament_id=tournament_id,
-            round_num=total_rounds,
-            match_num=i // 2,
-            track_a_id=track_ids[i],
-            track_b_id=track_ids[i + 1],
-        ))
-    return rounds
+# --------------------------------------------------------------------------
+# 공통 헬퍼
+# --------------------------------------------------------------------------
 
 
-@router.post("/", response_model=TournamentResponse, status_code=201)
+def _available_sizes(pool_size: int) -> list[int]:
+    """풀 크기 이하인 강수만 고를 수 있다. 풀이 5개면 4강만 가능."""
+    return [s for s in VALID_PLAY_SIZES if s <= pool_size]
+
+
+def _get_tournament_or_404(tournament_id: str, db: Session) -> Tournament:
+    tournament = db.query(Tournament).filter_by(id=tournament_id).first()
+    if not tournament:
+        raise HTTPException(status_code=404, detail="월드컵을 찾을 수 없습니다")
+    return tournament
+
+
+def _replace_items(tournament: Tournament, item_ids: list[str], db: Session) -> None:
+    """풀을 통째로 교체한다. 순서를 지키며 중복만 제거한다."""
+    unique = list(dict.fromkeys(item_ids))
+    if len(unique) < MIN_POOL:
+        raise HTTPException(
+            status_code=400,
+            detail=f"중복을 제외하면 {len(unique)}개입니다. 최소 {MIN_POOL}개가 필요합니다",
+        )
+    if len(unique) > MAX_POOL:
+        raise HTTPException(status_code=400, detail=f"최대 {MAX_POOL}개까지 담을 수 있습니다")
+
+    db.query(TournamentItem).filter_by(tournament_id=tournament.id).delete()
+    for position, item_id in enumerate(unique):
+        db.add(TournamentItem(tournament_id=tournament.id, item_id=item_id, position=position))
+
+
+# --------------------------------------------------------------------------
+# 월드컵 정의
+# --------------------------------------------------------------------------
+
+
+@router.get("/", response_model=list[TournamentSummaryResponse])
+def list_tournaments(
+    q: str | None = Query(None, description="제목·설명 부분 일치 검색"),
+    sort: str = Query("recent", pattern="^(recent|popular_all|popular_year|popular_month)$"),
+    limit: int = Query(20, ge=1, le=100),
+    offset: int = Query(0, ge=0),
+    db: Session = Depends(get_db),
+):
+    """대시보드 목록. 검색 + 최신순/인기순(전체·년·월) 정렬. 비로그인도 조회 가능.
+
+    인기순은 '플레이 횟수'다. 기간 필터는 플레이가 만들어진 시각(TournamentPlay.created_at)을
+    자르는 것이지 월드컵 생성 시각이 아니다 — 오래전에 만든 월드컵도 이번 달에 많이 플레이됐으면
+    월간 인기순 상위에 올라온다.
+    """
+    since = None
+    if sort == "popular_year":
+        since = datetime.utcnow() - timedelta(days=365)
+    elif sort == "popular_month":
+        since = datetime.utcnow() - timedelta(days=30)
+
+    # 정렬 기준이 되는 플레이 수. 기간 필터가 있으면 그 기간 안의 플레이만 센다.
+    ranked = db.query(
+        TournamentPlay.tournament_id.label("tid"),
+        func.count(TournamentPlay.id).label("cnt"),
+    )
+    if since is not None:
+        ranked = ranked.filter(TournamentPlay.created_at >= since)
+    ranked = ranked.group_by(TournamentPlay.tournament_id).subquery()
+
+    # 카드에 늘 보여주는 '전체' 플레이 수는 기간과 무관하게 따로 센다.
+    totals = (
+        db.query(
+            TournamentPlay.tournament_id.label("tid"),
+            func.count(TournamentPlay.id).label("cnt"),
+        )
+        .group_by(TournamentPlay.tournament_id)
+        .subquery()
+    )
+
+    query = (
+        db.query(
+            Tournament,
+            func.coalesce(totals.c.cnt, 0).label("total_plays"),
+        )
+        .outerjoin(ranked, ranked.c.tid == Tournament.id)
+        .outerjoin(totals, totals.c.tid == Tournament.id)
+        .options(joinedload(Tournament.user))
+    )
+
+    if q:
+        pattern = f"%{q}%"
+        query = query.filter(
+            or_(Tournament.title.ilike(pattern), Tournament.description.ilike(pattern))
+        )
+
+    if sort == "recent":
+        query = query.order_by(Tournament.created_at.desc())
+    else:
+        # 플레이 수가 같으면 최신순으로 갈라 순서가 요청마다 흔들리지 않게 한다.
+        query = query.order_by(
+            func.coalesce(ranked.c.cnt, 0).desc(), Tournament.created_at.desc()
+        )
+
+    rows = query.offset(offset).limit(limit).all()
+    if not rows:
+        return []
+
+    tournament_ids = [t.id for t, _ in rows]
+
+    # 카드 썸네일용 미리보기 id — 월드컵 하나당 앞에서 PREVIEW_COUNT개만.
+    previews: dict = {}
+    for row in (
+        db.query(TournamentItem)
+        .filter(TournamentItem.tournament_id.in_(tournament_ids))
+        .filter(TournamentItem.position < PREVIEW_COUNT)
+        .order_by(TournamentItem.tournament_id, TournamentItem.position)
+        .all()
+    ):
+        previews.setdefault(row.tournament_id, []).append(row.item_id)
+
+    counts = dict(
+        db.query(TournamentItem.tournament_id, func.count(TournamentItem.id))
+        .filter(TournamentItem.tournament_id.in_(tournament_ids))
+        .group_by(TournamentItem.tournament_id)
+        .all()
+    )
+
+    return [
+        TournamentSummaryResponse(
+            id=str(t.id),
+            title=t.title,
+            description=t.description,
+            item_type=t.item_type,
+            item_count=counts.get(t.id, 0),
+            play_count=total,
+            created_at=t.created_at,
+            user=t.user,
+            preview_item_ids=previews.get(t.id, []),
+        )
+        for t, total in rows
+    ]
+
+
+def _detail_response(tournament: Tournament, db: Session) -> TournamentDetailResponse:
+    item_ids = [i.item_id for i in tournament.items]
+    play_count = (
+        db.query(func.count(TournamentPlay.id)).filter_by(tournament_id=tournament.id).scalar() or 0
+    )
+    return TournamentDetailResponse(
+        id=str(tournament.id),
+        title=tournament.title,
+        description=tournament.description,
+        item_type=tournament.item_type,
+        item_ids=item_ids,
+        item_count=len(item_ids),
+        play_count=play_count,
+        created_at=tournament.created_at,
+        user=tournament.user,
+        available_sizes=_available_sizes(len(item_ids)),
+    )
+
+
+@router.post("/", response_model=TournamentDetailResponse, status_code=201)
 def create_tournament(
     body: TournamentCreate,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    if len(body.track_ids) not in VALID_SIZES:
-        raise HTTPException(status_code=400, detail="track_ids는 8, 16, 32개여야 합니다")
-    if len(body.track_ids) != len(set(body.track_ids)):
-        raise HTTPException(status_code=400, detail="중복된 트랙이 있습니다")
-
-    tournament = Tournament(user_id=current_user.id, size=len(body.track_ids))
+    tournament = Tournament(
+        user_id=current_user.id,
+        title=body.title.strip(),
+        description=body.description.strip(),
+        item_type=body.item_type,
+    )
     db.add(tournament)
     db.flush()
 
-    for r in _build_rounds(tournament.id, body.track_ids):
+    _replace_items(tournament, body.item_ids, db)
+
+    db.commit()
+    db.refresh(tournament)
+    return _detail_response(tournament, db)
+
+
+@router.get("/{tournament_id}", response_model=TournamentDetailResponse)
+def get_tournament(tournament_id: str, db: Session = Depends(get_db)):
+    return _detail_response(_get_tournament_or_404(tournament_id, db), db)
+
+
+@router.put("/{tournament_id}", response_model=TournamentDetailResponse)
+def update_tournament(
+    tournament_id: str,
+    body: TournamentUpdate,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    tournament = _get_tournament_or_404(tournament_id, db)
+    if tournament.user_id != current_user.id:
+        raise HTTPException(status_code=403, detail="권한이 없습니다")
+
+    if body.title is not None:
+        tournament.title = body.title.strip()
+    if body.description is not None:
+        tournament.description = body.description.strip()
+    if body.item_ids is not None:
+        # item_type은 바꾸지 않는다 — 이미 치러진 플레이의 대진과 종류가 어긋나기 때문.
+        _replace_items(tournament, body.item_ids, db)
+
+    db.commit()
+    db.refresh(tournament)
+    return _detail_response(tournament, db)
+
+
+@router.delete("/{tournament_id}", status_code=204)
+def delete_tournament(
+    tournament_id: str,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    tournament = _get_tournament_or_404(tournament_id, db)
+    if tournament.user_id != current_user.id:
+        raise HTTPException(status_code=403, detail="권한이 없습니다")
+
+    # 댓글은 FK가 아니라 (target_type, target_id)로 붙어 있어 DB가 대신 지워주지 않는다.
+    purge_comments("tournament", tournament.id, db)
+    db.delete(tournament)
+    db.commit()
+
+
+# --------------------------------------------------------------------------
+# 플레이 생성
+# --------------------------------------------------------------------------
+
+
+def _build_first_round(play_id, item_ids: list[str]) -> list[TournamentRound]:
+    """1라운드만 만든다. 이후 라운드는 투표가 다 찼을 때 vote에서 생성한다."""
+    total_rounds = int(math.log2(len(item_ids)))
+    return [
+        TournamentRound(
+            play_id=play_id,
+            round_num=total_rounds,
+            match_num=i // 2,
+            item_a_id=item_ids[i],
+            item_b_id=item_ids[i + 1],
+        )
+        for i in range(0, len(item_ids), 2)
+    ]
+
+
+def play_response(play: TournamentPlay) -> PlayResponse:
+    return PlayResponse(
+        id=str(play.id),
+        tournament_id=str(play.tournament_id),
+        tournament_title=play.tournament.title,
+        item_type=play.tournament.item_type,
+        size=play.size,
+        status=play.status,
+        winner_item_id=play.winner_item_id,
+        created_at=play.created_at,
+        rounds=[PlayRoundResponse.model_validate(r) for r in play.rounds],
+    )
+
+
+@router.post("/{tournament_id}/plays", response_model=PlayResponse, status_code=201)
+def create_play(
+    tournament_id: str,
+    body: PlayCreate,
+    current_user: User | None = Depends(get_optional_user),
+    db: Session = Depends(get_db),
+):
+    """풀에서 size개를 무작위로 뽑아 새 판을 만든다. 비로그인도 가능하다."""
+    tournament = _get_tournament_or_404(tournament_id, db)
+    pool = [i.item_id for i in tournament.items]
+
+    if body.size not in VALID_PLAY_SIZES:
+        allowed = ", ".join(str(s) for s in VALID_PLAY_SIZES)
+        raise HTTPException(status_code=400, detail=f"강수는 {allowed} 중 하나여야 합니다")
+    if body.size > len(pool):
+        raise HTTPException(
+            status_code=400,
+            detail=f"풀에 {len(pool)}개뿐이라 {body.size}강을 만들 수 없습니다",
+        )
+
+    # 매 플레이마다 다르게 뽑는다 — 같은 월드컵을 여러 번 돌리는 게 이 설계의 전제다.
+    picked = random.sample(pool, body.size)
+
+    play = TournamentPlay(
+        tournament_id=tournament.id,
+        user_id=current_user.id if current_user else None,
+        size=body.size,
+    )
+    db.add(play)
+    db.flush()
+
+    for r in _build_first_round(play.id, picked):
         db.add(r)
 
     db.commit()
-    db.refresh(tournament)
-    return tournament
+    db.refresh(play)
+    return play_response(play)
 
 
-@router.get("/{tournament_id}", response_model=TournamentResponse)
-def get_tournament(
-    tournament_id: str,
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db),
-):
-    tournament = db.query(Tournament).filter_by(id=tournament_id, user_id=current_user.id).first()
-    if not tournament:
-        raise HTTPException(status_code=404, detail="토너먼트를 찾을 수 없습니다")
-    return tournament
+# --------------------------------------------------------------------------
+# 랭킹
+# --------------------------------------------------------------------------
 
 
-@router.post("/{tournament_id}/rounds/{round_id}/vote", response_model=TournamentResponse)
-def vote_round(
-    tournament_id: str,
-    round_id: str,
-    body: TournamentVote,
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db),
-):
-    tournament = db.query(Tournament).filter_by(id=tournament_id, user_id=current_user.id).first()
-    if not tournament:
-        raise HTTPException(status_code=404, detail="토너먼트를 찾을 수 없습니다")
-    if tournament.status == "completed":
-        raise HTTPException(status_code=400, detail="이미 완료된 토너먼트입니다")
+def _aggregate(rounds, plays_by_id, item_ids, cutoff=None):
+    stats = {
+        item_id: {"plays": set(), "championships": 0, "matches": 0, "match_wins": 0}
+        for item_id in item_ids
+    }
 
-    round_ = db.query(TournamentRound).filter_by(id=round_id, tournament_id=tournament_id).first()
-    if not round_:
-        raise HTTPException(status_code=404, detail="라운드를 찾을 수 없습니다")
-    if round_.winner_id:
-        raise HTTPException(status_code=400, detail="이미 투표된 경기입니다")
-    if body.winner_id not in (round_.track_a_id, round_.track_b_id):
-        raise HTTPException(status_code=400, detail="유효하지 않은 winner_id입니다")
+    for r in rounds:
+        play = plays_by_id.get(r.play_id)
+        if play is None:
+            continue
+        if cutoff is not None and play.created_at >= cutoff:
+            continue
 
-    round_.winner_id = body.winner_id
+        for item_id in (r.item_a_id, r.item_b_id):
+            if item_id in stats:
+                stats[item_id]["plays"].add(r.play_id)
+                # 아직 투표되지 않은 경기는 1:1 표본에 넣지 않는다.
+                if r.winner_id:
+                    stats[item_id]["matches"] += 1
+        if r.winner_id in stats:
+            stats[r.winner_id]["match_wins"] += 1
 
-    current_round_matches = (
-        db.query(TournamentRound)
-        .filter_by(tournament_id=tournament_id, round_num=round_.round_num)
-        .all()
+    for play in plays_by_id.values():
+        if cutoff is not None and play.created_at >= cutoff:
+            continue
+        if play.winner_item_id in stats:
+            stats[play.winner_item_id]["championships"] += 1
+
+    return stats
+
+
+def _rank(stats) -> dict[str, int]:
+    """우승 비율 → 승률 → 참가 횟수 순으로 정렬해 1부터 순위를 매긴다."""
+    rows = []
+    for item_id, s in stats.items():
+        plays = len(s["plays"])
+        rows.append((
+            item_id,
+            s["championships"] / plays if plays else 0.0,
+            s["match_wins"] / s["matches"] if s["matches"] else 0.0,
+            plays,
+        ))
+    # 마지막 item_id는 완전 동률일 때 순위가 매 요청마다 흔들리지 않게 하는 결정적 tie-breaker.
+    rows.sort(key=lambda r: (-r[1], -r[2], -r[3], r[0]))
+    return {row[0]: i + 1 for i, row in enumerate(rows)}
+
+
+@router.get("/{tournament_id}/ranking", response_model=TournamentRankingResponse)
+def get_tournament_ranking(tournament_id: str, db: Session = Depends(get_db)):
+    """이 월드컵의 풀 전체를 누적 플레이 성적으로 줄 세운다.
+
+    플레이마다 풀에서 무작위로 뽑히므로 항목별 참가 횟수가 달라진다 — 그래서
+    '우승 횟수'가 아니라 '우승 비율(우승/참가)'이 의미를 갖는다.
+    """
+    tournament = _get_tournament_or_404(tournament_id, db)
+    item_ids = [i.item_id for i in tournament.items]
+
+    plays_by_id = {
+        p.id: p for p in db.query(TournamentPlay).filter_by(tournament_id=tournament.id).all()
+    }
+    rounds = (
+        db.query(TournamentRound).filter(TournamentRound.play_id.in_(plays_by_id.keys())).all()
+        if plays_by_id
+        else []
     )
-    winners = [r.winner_id for r in current_round_matches if r.winner_id]
 
-    if len(winners) == len(current_round_matches):
-        if len(winners) == 1:
-            tournament.status = "completed"
-            tournament.winner_track_id = winners[0]
-        else:
-            next_round_num = round_.round_num - 1
-            for i in range(0, len(winners), 2):
-                db.add(TournamentRound(
-                    tournament_id=tournament_id,
-                    round_num=next_round_num,
-                    match_num=i // 2,
-                    track_a_id=winners[i],
-                    track_b_id=winners[i + 1],
-                ))
+    current_stats = _aggregate(rounds, plays_by_id, item_ids)
+    current_rank = _rank(current_stats)
 
-    db.commit()
-    db.refresh(tournament)
-    return tournament
+    cutoff = datetime.utcnow() - timedelta(days=TREND_DAYS)
+    past_stats = _aggregate(rounds, plays_by_id, item_ids, cutoff=cutoff)
+    # 기준 시점에 표본이 하나도 없던 항목은 "신규"로 두고 추이를 비운다.
+    had_history = {i for i, s in past_stats.items() if s["plays"]}
+    past_rank = _rank({i: s for i, s in past_stats.items() if i in had_history})
+
+    items = []
+    for item_id in sorted(item_ids, key=lambda i: current_rank[i]):
+        s = current_stats[item_id]
+        plays = len(s["plays"])
+        previous = past_rank.get(item_id)
+        items.append(TournamentRankingItem(
+            rank=current_rank[item_id],
+            item_id=item_id,
+            play_count=plays,
+            championship_count=s["championships"],
+            championship_rate=s["championships"] / plays if plays else 0.0,
+            match_count=s["matches"],
+            match_win_count=s["match_wins"],
+            match_win_rate=s["match_wins"] / s["matches"] if s["matches"] else 0.0,
+            previous_rank=previous,
+            rank_delta=(previous - current_rank[item_id]) if previous is not None else None,
+        ))
+
+    return TournamentRankingResponse(
+        tournament_id=str(tournament.id),
+        title=tournament.title,
+        item_type=tournament.item_type,
+        total_plays=len(plays_by_id),
+        trend_days=TREND_DAYS,
+        items=items,
+    )
