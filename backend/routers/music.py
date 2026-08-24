@@ -104,9 +104,19 @@ async def search_albums(
     q: str = Query(..., min_length=1, description="검색어"),
     market: str = Query("KR", description="마켓 코드 (예: KR, JP, US)"),
     limit: int = Query(20, ge=1, le=50, description="최대 결과 수"),
+    include_singles: bool = Query(
+        False, description='iTunes가 " - Single" / " - EP" 로 표기한 항목을 포함할지'
+    ),
 ):
+    """앨범 검색. 기본적으로 싱글·EP는 제외한다 — 탑스터·월드컵에 담을 '앨범'을 고르는 자리다.
+
+    ID 배치 조회(`/albums?ids=`)에는 이 필터를 걸지 않는다. 이미 저장된 탑스터가 싱글을
+    담고 있으면 그 커버가 안 나와 화면이 깨진다.
+    """
     service = request.app.state.music_service
-    return await service.search_albums(q, market=market, limit=limit)
+    return await service.search_albums(
+        q, market=market, limit=limit, include_singles=include_singles
+    )
 
 
 @router.get("/artists/{artist_id}", response_model=ArtistDetail)

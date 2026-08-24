@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+import re
 
 import httpx
 from fastapi import HTTPException
@@ -15,8 +16,31 @@ def _upscale_artwork(url: str | None, size: int = 600) -> str | None:
     return url.replace("100x100bb", f"{size}x{size}bb")
 
 
-def _album_type(track_count: int) -> str:
-    """iTunes엔 single/album 구분 필드가 없어 트랙 수로 추정."""
+# iTunes는 싱글·EP를 컬렉션 이름 끝에 " - Single" / " - EP" 로 붙여 표기한다.
+# 실측(앨범 검색 900건): " - Single" 469건(52%), " - EP" 79건(9%). 그 외 꼬리는 전부
+# 1~2건짜리 진짜 부제였다("The 2nd Album", "TOKYO DOME (Live)" 등).
+#
+# 구분자를 반드시 요구한다. 접미만 보면 "...lEP" 처럼 단어 끝이 EP인 제목이 걸리고
+# ("Single Version)" 같은 괄호 표기도 오탐이 된다 — 둘 다 실측에서 확인했다.
+# 실제 데이터에는 반각 하이픈만 나왔지만 en/em dash 와 대소문자 변형까지 받아둔다.
+_SINGLE_EP_SUFFIX = re.compile(r"\s[-–—]\s*(single|ep)\s*$", re.IGNORECASE)
+
+
+def is_single_or_ep(title: str) -> bool:
+    """컬렉션 이름이 iTunes의 싱글·EP 표기로 끝나는가."""
+    return bool(_SINGLE_EP_SUFFIX.search(title or ""))
+
+
+def _album_type(title: str, track_count: int) -> str:
+    """iTunes엔 single/album 구분 필드가 없다. 제목 표기를 먼저 믿고 없으면 트랙 수로 추정.
+
+    트랙 수만으로는 어긋난다 — 실측에서 " - Single" 표기인데 트랙이 2개 이상인 게 89건,
+    " - EP" 인데 10곡짜리도 있었다. 반대로 트랙이 1~2개인 진짜 앨범도 있다
+    ("In a Silent Way" 2곡 등).
+    """
+    m = _SINGLE_EP_SUFFIX.search(title or "")
+    if m:
+        return m.group(1).lower()
     return "single" if track_count <= 1 else "album"
 
 
@@ -65,7 +89,7 @@ class ITunesMusicService:
             "artist_name": artists,
             "release_date": a.get("releaseDate", ""),
             "total_tracks": track_count,
-            "album_type": _album_type(track_count),
+            "album_type": _album_type(a.get("collectionName", ""), track_count),
         }
 
     def _map_track(self, t: dict) -> dict:
@@ -101,10 +125,22 @@ class ITunesMusicService:
         items = [self._map_artist(a) for a in data.get("results", [])]
         return {"items": items, "total": data.get("resultCount", len(items))}
 
+    # 싱글·EP를 걸러내면 결과가 60% 넘게 사라진다(실측 61%). 요청한 개수를 채우려면
+    # iTunes에서 넉넉히 받아와야 한다. iTunes /search 의 limit 상한은 200이다.
+    SEARCH_OVERFETCH = 3
+    SEARCH_MAX_LIMIT = 200
+
     async def search_albums(
-        self, query: str, market: str = "KR", limit: int = 20
+        self, query: str, market: str = "KR", limit: int = 20, include_singles: bool = False
     ) -> dict:
-        """앨범명 또는 아티스트명으로 앨범 검색."""
+        """앨범명 또는 아티스트명으로 앨범 검색.
+
+        `include_singles=False` 면 iTunes가 " - Single" / " - EP" 로 표기한 항목을 뺀다.
+        탑스터·월드컵에 담을 '앨범'을 고르는 자리라 기본값을 제외로 뒀다.
+        """
+        want = min(limit, 50)
+        fetch = min(want * self.SEARCH_OVERFETCH, self.SEARCH_MAX_LIMIT) if not include_singles else want
+
         data = await self._request(
             "/search",
             params={
@@ -112,11 +148,18 @@ class ITunesMusicService:
                 "country": market,
                 "media": "music",
                 "entity": "album",
-                "limit": min(limit, 50),
+                "limit": fetch,
             },
         )
-        items = [self._map_album(a) for a in data.get("results", [])]
-        return {"items": items, "total": data.get("resultCount", len(items))}
+        results = data.get("results", [])
+        if not include_singles:
+            results = [a for a in results if not is_single_or_ep(a.get("collectionName", ""))]
+
+        items = [self._map_album(a) for a in results[:want]]
+        # total 은 iTunes가 준 전체 건수라 필터 이후 개수와 다르다. 필터를 켠 경우
+        # 화면에 쓸 수 있는 값은 실제 반환 개수뿐이라 그걸 준다.
+        total = data.get("resultCount", len(items)) if include_singles else len(items)
+        return {"items": items, "total": total}
 
     async def search_tracks(
         self, query: str, market: str = "KR", limit: int = 20
