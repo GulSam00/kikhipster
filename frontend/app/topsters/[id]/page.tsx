@@ -1,17 +1,19 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import { Heart, Link2, Music2, Send, Trash2 } from 'lucide-react';
+import { Heart, Link2, Send, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { apiFetch, ApiError } from '@/lib/api';
+import TopsterCanvas from '@/components/music/TopsterCanvas';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 import { Spinner } from '@/components/ui/spinner';
+import { useAlbumItems } from '@/lib/album-covers';
 import { cn } from '@/lib/utils';
 import type { Topster } from '@/types/topster';
 import type { Comment, LikeStatus } from '@/types/social';
@@ -23,6 +25,11 @@ export default function TopsterDetailPage() {
   const [like, setLike] = useState<LikeStatus>({ liked: false, like_count: 0 });
   const [commentText, setCommentText] = useState('');
   const [loading, setLoading] = useState(true);
+  const albumIds = useMemo(
+    () => topster?.items.map((it) => it.album_spotify_id) ?? [],
+    [topster],
+  );
+  const albums = useAlbumItems(albumIds);
   const [meId, setMeId] = useState<string | null>(null);
 
   const isLoggedIn = typeof window !== 'undefined' && !!localStorage.getItem('access_token');
@@ -117,7 +124,7 @@ export default function TopsterDetailPage() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-3xl px-4 py-8">
+    <div className="mx-auto w-full max-w-5xl px-4 py-8">
       <div className="mb-6">
         <h1 className="mb-1 font-heading text-2xl font-bold">{topster.title}</h1>
         {topster.description && (
@@ -131,30 +138,13 @@ export default function TopsterDetailPage() {
         </p>
       </div>
 
-      <div
-        className="mb-6 grid gap-1"
-        style={{ gridTemplateColumns: `repeat(${topster.grid_size}, minmax(0, 1fr))` }}
-      >
-        {Array.from({ length: topster.grid_size * topster.grid_size }).map((_, i) => {
-          const item = topster.items.find((it) => it.position === i);
-          return (
-            <div
-              key={i}
-              className="relative aspect-square overflow-hidden rounded-md bg-muted ring-1 ring-border ring-inset"
-            >
-              {item && (
-                <Link
-                  href={`/albums/${item.album_spotify_id}`}
-                  className="flex size-full items-center justify-center text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
-                  aria-label="앨범 상세 보기"
-                >
-                  <Music2 className="size-5" />
-                </Link>
-              )}
-            </div>
-          );
-        })}
-      </div>
+      <TopsterCanvas
+        options={topster}
+        title={topster.title}
+        items={topster.items}
+        albums={albums}
+        className="mb-6"
+      />
 
       <div className="mb-8 flex items-center gap-2">
         <Button
