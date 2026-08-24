@@ -1,7 +1,12 @@
+'use client';
+
+import { useMemo } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Heart } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
+import { useAlbumItems } from '@/lib/album-covers';
 import { cn } from '@/lib/utils';
 import type { Topster } from '@/types/topster';
 
@@ -15,11 +20,18 @@ interface Props {
 
 /**
  * 탑스터 목록용 미리보기 카드.
- * TopsterItem에는 cover_url이 없어 앨범이 채워진 칸만 색으로 구분한다.
- * TODO: [OpenAPI] 목록 응답에 커버 URL이 추가되면 실제 이미지로 교체
+ *
+ * 목록 응답에는 커버 URL이 없고 앨범 ID만 있다. 그래서 카드가 필요한 ID를
+ * `useAlbumCovers` 에 등록하면 같은 화면의 모든 카드 몫이 한 번의 요청으로 합쳐진다.
+ * 커버를 아직 못 받았거나 없는 칸은 예전처럼 색으로만 구분한다.
  */
 export default function TopsterCard({ topster, showAuthor = true, showVisibility = false }: Props) {
-  const cellCount = topster.grid_size * topster.grid_size;
+  const cellCount = topster.width * topster.height;
+  const albumIds = useMemo(
+    () => topster.items.map((it) => it.album_spotify_id),
+    [topster.items],
+  );
+  const albums = useAlbumItems(albumIds);
 
   return (
     <Link
@@ -28,20 +40,41 @@ export default function TopsterCard({ topster, showAuthor = true, showVisibility
     >
       <Card size="sm" className="h-full gap-2 transition-colors group-hover:bg-accent">
         <CardContent className="flex flex-col gap-2">
+          {/*
+            배경색은 탑스터마다 다르므로 카드 미리보기도 그 색을 쓴다 — 목록에서
+            상세로 들어갔을 때 다른 물건처럼 보이지 않게.
+            비정방형(1x5 등)이 가능해져 카드도 aspect-square 를 강제하지 않는다.
+          */}
           <div
-            className="grid aspect-square gap-0.5 overflow-hidden rounded-md bg-muted p-0.5"
-            style={{ gridTemplateColumns: `repeat(${topster.grid_size}, minmax(0, 1fr))` }}
+            className="grid gap-0.5 overflow-hidden rounded-md p-0.5"
+            style={{
+              backgroundColor: topster.background_color,
+              gridTemplateColumns: `repeat(${topster.width}, minmax(0, 1fr))`,
+            }}
           >
             {Array.from({ length: cellCount }).map((_, i) => {
-              const filled = topster.items.some((it) => it.position === i);
+              const item = topster.items.find((it) => it.position === i);
+              const cover = item ? albums.get(item.album_spotify_id)?.coverUrl : null;
               return (
                 <div
                   key={i}
                   className={cn(
-                    'aspect-square rounded-[2px]',
-                    filled ? 'bg-primary/40' : 'bg-foreground/5',
+                    'relative aspect-square overflow-hidden rounded-[2px]',
+                    item && !cover ? 'bg-white/25' : 'bg-white/5',
                   )}
-                />
+                >
+                  {cover && (
+                    <Image
+                      src={cover}
+                      alt=""
+                      fill
+                      // 카드 안 그리드 셀이라 실제 표시 크기는 수십 px다. 원본(600px)을
+                      // 그대로 받으면 한 화면에 수백 장이 뜨므로 힌트를 작게 준다.
+                      sizes="64px"
+                      className="object-cover"
+                    />
+                  )}
+                </div>
               );
             })}
           </div>
