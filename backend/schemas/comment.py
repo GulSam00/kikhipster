@@ -22,7 +22,8 @@ class CommentUserInfo(BaseModel):
 
 class CommentResponse(BaseModel):
     id: UUIDStr
-    topster_id: UUIDStr
+    target_type: str
+    target_id: str
     content: str
     created_at: datetime
     updated_at: datetime

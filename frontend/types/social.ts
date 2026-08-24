@@ -3,9 +3,12 @@ export interface CommentUser {
   nickname: string;
 }
 
+export type CommentTargetType = 'topster' | 'tournament';
+
 export interface Comment {
   id: string;
-  topster_id: string;
+  target_type: CommentTargetType;
+  target_id: string;
   content: string;
   created_at: string;
   updated_at: string;
