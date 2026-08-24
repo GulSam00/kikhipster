@@ -211,3 +211,42 @@ class ITunesMusicService:
         )
         tracks = [r for r in data.get("results", []) if r.get("wrapperType") == "track"]
         return [self._map_track(t) for t in tracks]
+
+    # iTunes lookup은 id를 많이 넘기면 **조용히 잘린다**. 실측: 200개 요청 → 200개 정상,
+    # 300개 요청 → 210개만 반환, 512개 → 응답 자체가 깨짐. 그래서 호출부가 몇 개를 넘기든
+    # 여기서 청크로 쪼개 부른다. 여유를 두고 150으로 잡았다.
+    LOOKUP_CHUNK = 150
+
+    async def _lookup_chunked(self, ids: list[str], wrapper_type: str) -> dict[str, dict]:
+        """id 목록을 청크로 나눠 lookup하고 {id: 매핑결과} 를 돌려준다.
+
+        `country`는 넘기지 않는다 — 앨범 lookup에서 트랙이 0개로 잘리는 것과 같은 계열의
+        문제를 피하기 위함이고, trackId/collectionId는 전역 고유값이라 필요도 없다.
+        """
+        mapper = self._map_track if wrapper_type == "track" else self._map_album
+        found: dict[str, dict] = {}
+
+        for start in range(0, len(ids), self.LOOKUP_CHUNK):
+            chunk = ids[start:start + self.LOOKUP_CHUNK]
+            data = await self._request("/lookup", params={"id": ",".join(chunk)})
+            for r in data.get("results", []):
+                if r.get("wrapperType") != wrapper_type:
+                    continue
+                key = "trackId" if wrapper_type == "track" else "collectionId"
+                found[str(r.get(key))] = mapper(r)
+
+        return found
+
+    async def get_tracks_by_ids(self, track_ids: list[str]) -> list[dict]:
+        """트랙 ID 여러 개를 조회한다. 요청 순서를 유지하고, 없는 ID는 결과에서 빠진다."""
+        if not track_ids:
+            return []
+        found = await self._lookup_chunked(track_ids, "track")
+        return [found[i] for i in track_ids if i in found]
+
+    async def get_albums_by_ids(self, album_ids: list[str]) -> list[dict]:
+        """앨범 ID 여러 개를 조회한다. 앨범 월드컵의 풀·대진 표시에 쓴다."""
+        if not album_ids:
+            return []
+        found = await self._lookup_chunked(album_ids, "collection")
+        return [found[i] for i in album_ids if i in found]

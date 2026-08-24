@@ -2,6 +2,7 @@ from models.user import User
 from models.topster import Topster, TopsterItem
 from models.comment import Comment
 from models.like import Like
+from models.music_cache import MusicCache
 from models.tournament import Tournament, TournamentItem, TournamentPlay, TournamentRound
 
 __all__ = [
@@ -10,6 +11,7 @@ __all__ = [
     "TopsterItem",
     "Comment",
     "Like",
+    "MusicCache",
     "Tournament",
     "TournamentItem",
     "TournamentPlay",
