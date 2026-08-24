@@ -15,7 +15,7 @@ kikhipster의 Python FastAPI 백엔드 구현 전담. architect의 스펙을 바
 3. 기능별로 라우터를 분리한다 (`routers/topster.py`, `routers/reviews.py` 등).
 4. 각 기능은 독립 DB 테이블로 관리한다.
 5. OpenAPI 연동 부분은 `services/music_api.py`에 플레이스홀더 함수로 정의하고 `# TODO: [OpenAPI]` 주석을 명시한다.
-6. CORS: `http://localhost:3000` 허용.
+6. CORS: `http://localhost:3300` 허용.
 7. 이전 구현 파일이 있으면 읽고 개선점을 반영한다.
 
 ## 에러 핸들링

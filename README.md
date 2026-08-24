@@ -51,7 +51,7 @@ uvicorn main:app --reload --port 8000
 ```bash
 cd frontend
 pnpm install
-pnpm dev                  # http://localhost:3000
+pnpm dev                  # http://localhost:3300
 ```
 
 `NEXT_PUBLIC_API_URL` 미설정 시 `http://localhost:8000` 을 기본값으로 씁니다.

@@ -17,10 +17,10 @@ class Settings(BaseSettings):
     kakao_client_id: str = ""
     kakao_client_secret: str = ""
     oauth_redirect_base_url: str = "http://localhost:8000"
-    frontend_url: str = "http://localhost:3000"
+    frontend_url: str = "http://localhost:3300"
 
     # CORS 허용 origin (콤마로 구분된 목록)
-    cors_origins: str = "http://localhost:3000"
+    cors_origins: str = "http://localhost:3300"
 
     model_config = {"env_file": ".env", "env_file_encoding": "utf-8"}
 

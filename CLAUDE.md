@@ -28,11 +28,11 @@
 docker compose up -d                                            # Postgres, healthy 확인
 cd backend  && ./venv/Scripts/python.exe -m alembic upgrade head
 cd backend  && ./venv/Scripts/python.exe -m uvicorn main:app --reload --port 8000
-cd frontend && npm run dev                                      # :3000
+cd frontend && npm run dev                                      # :3300
 ```
 
 - **`.env` 를 고치면 백엔드를 반드시 재기동한다.** uvicorn `--reload` 는 `.py` 만 감시해서 `.env` 변경은 반영되지 않는다.
-- OAuth Redirect URI는 **백엔드 8000** 이다 — 프론트 3000이 아니다. `http://localhost:8000/api/auth/callback/{google,kakao}`
+- OAuth Redirect URI는 **백엔드 8000** 이다 — 프론트 3300이 아니다. `http://localhost:8000/api/auth/callback/{google,kakao}`
 - Kakao는 `KAKAO_CLIENT_ID` 에 **REST API 키**를 넣고, 사이트 도메인(`http://localhost:8000`)을 먼저 등록해야 Redirect URI 등록이 된다.
 
 ---
