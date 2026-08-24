@@ -18,10 +18,13 @@ async function getAlbum(id: string): Promise<AlbumWithTracks | null> {
 
 export default async function AlbumPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const album = await getAlbum(id);
+  const data = await getAlbum(id);
 
-  if (!album) notFound();
+  if (!data) notFound();
 
+  // 응답은 { album, tracks } 로 중첩돼 있다. 예전엔 평평하다고 가정해
+  // 헤더의 제목·커버·아티스트가 전부 undefined 로 비어 있었다.
+  const { album, tracks } = data;
   const year = album.release_date?.slice(0, 4) ?? '';
 
   return (
@@ -29,7 +32,7 @@ export default async function AlbumPage({ params }: { params: Promise<{ id: stri
       <div className="mb-8 flex flex-col items-start gap-6 sm:flex-row sm:items-end">
         <div className="relative size-36 shrink-0 overflow-hidden rounded-lg bg-muted">
           {album.cover_url ? (
-            <Image src={album.cover_url} alt={album.name} fill className="object-cover" />
+            <Image src={album.cover_url} alt={album.title} fill className="object-cover" />
           ) : (
             <div className="flex size-full items-center justify-center text-muted-foreground">
               <Disc3 className="size-10" />
@@ -38,7 +41,7 @@ export default async function AlbumPage({ params }: { params: Promise<{ id: stri
         </div>
         <div className="min-w-0">
           <Badge variant="outline" className="mb-2 capitalize">{album.album_type}</Badge>
-          <h1 className="mb-1 font-heading text-3xl font-bold">{album.name}</h1>
+          <h1 className="mb-1 font-heading text-3xl font-bold">{album.title}</h1>
           <p className="mb-1 text-foreground/80">{album.artist_name}</p>
           <p className="text-sm text-muted-foreground">
             {year} · {album.total_tracks}곡
@@ -49,11 +52,11 @@ export default async function AlbumPage({ params }: { params: Promise<{ id: stri
       <Separator className="mb-4" />
 
       <div className="flex flex-col">
-        {album.tracks.map((t) => (
+        {tracks.map((t) => (
           <TrackRow
             key={t.id}
-            track={t}
-            artist={album.artist_name}
+            track={{ ...t, explicit: false }}
+            artist={t.artists[0] ?? album.artist_name}
             albumCover={album.cover_url}
           />
         ))}

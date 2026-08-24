@@ -12,8 +12,8 @@ export type ArtistDetail = ArtistSummary;
 
 export interface AlbumSummary {
   id: string;
-  name: string;
-  artist_id: string;
+  /** 백엔드는 `name`이 아니라 `title`로 준다. `artist_id`는 아예 오지 않는다. */
+  title: string;
   artist_name: string;
   cover_url: string | null;
   release_date: string;
@@ -27,10 +27,15 @@ export interface TrackItem {
   duration_ms: number;
   track_number: number;
   preview_url: string | null;
-  explicit: boolean;
+  artists: string[];
 }
 
-export interface AlbumWithTracks extends AlbumSummary {
+/**
+ * `GET /api/music/albums/{id}/tracks` 응답.
+ * 백엔드는 앨범을 `album` 키 아래에 중첩해 준다 — 평평한 모양이 아니다.
+ */
+export interface AlbumWithTracks {
+  album: AlbumSummary;
   tracks: TrackItem[];
 }
 

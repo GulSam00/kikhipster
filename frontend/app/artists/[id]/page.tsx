@@ -6,7 +6,7 @@ import AlbumCard from '@/components/music/AlbumCard';
 import TrackRow from '@/components/music/TrackRow';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import type { AlbumSummary, ArtistDetail, TrackItem } from '@/types/music';
+import type { AlbumSummary, ArtistDetail, TrackSearchItem } from '@/types/music';
 
 async function getArtist(id: string): Promise<ArtistDetail | null> {
   try {
@@ -17,9 +17,9 @@ async function getArtist(id: string): Promise<ArtistDetail | null> {
   }
 }
 
-async function getTopTracks(id: string): Promise<TrackItem[]> {
+async function getTopTracks(id: string): Promise<TrackSearchItem[]> {
   try {
-    return await apiFetch<TrackItem[]>(`/api/music/artists/${id}/top-tracks`);
+    return await apiFetch<TrackSearchItem[]>(`/api/music/artists/${id}/top-tracks`);
   } catch {
     return [];
   }

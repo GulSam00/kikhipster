@@ -17,7 +17,7 @@ export default function AlbumCard({ album }: Props) {
         <CardContent className="flex flex-col gap-2">
           <div className="relative aspect-square w-full overflow-hidden rounded-md bg-muted">
             {album.cover_url ? (
-              <Image src={album.cover_url} alt={album.name} fill className="object-cover" />
+              <Image src={album.cover_url} alt={album.title} fill className="object-cover" />
             ) : (
               <div className="flex size-full items-center justify-center text-muted-foreground">
                 <Disc3 className="size-8" />
@@ -25,7 +25,7 @@ export default function AlbumCard({ album }: Props) {
             )}
           </div>
           <div className="min-w-0">
-            <p className="truncate text-sm font-medium">{album.name}</p>
+            <p className="truncate text-sm font-medium">{album.title}</p>
             <p className="truncate text-xs text-muted-foreground">{album.artist_name}</p>
             <p className="text-xs text-muted-foreground">
               {year} · {album.total_tracks}곡
