@@ -27,10 +27,18 @@ export default function RootLayout({
       className={`dark ${geistSans.variable} h-full antialiased`}
       suppressHydrationWarning
     >
-      <body className="flex min-h-full flex-col">
+      {/*
+        문서 자체는 스크롤하지 않고 main 안에서만 스크롤한다. 이래야 페이지가
+        "헤더를 뺀 남은 높이"를 definite 한 값으로 받을 수 있다 — 만들기 화면처럼
+        화면을 꽉 채우고 내부만 스크롤해야 하는 페이지가 h-full 로 그 높이를 쓴다.
+        (기존 페이지들은 main 이 스크롤되므로 보이는 동작은 그대로다.)
+      */}
+      <body className="flex h-full flex-col overflow-hidden">
         <PlayerProvider>
           <Navbar />
-          <main className="flex flex-1 flex-col pb-16 sm:pb-0">{children}</main>
+          <main className="flex min-h-0 flex-1 flex-col overflow-y-auto pb-16 sm:pb-0">
+            {children}
+          </main>
           <MiniPlayer />
           <Toaster />
         </PlayerProvider>
