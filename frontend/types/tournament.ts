@@ -39,6 +39,13 @@ export interface TournamentCreateBody {
   item_ids: string[];
 }
 
+/** 수정. 백엔드는 `item_type` 을 바꾸지 않는다 — 이미 치러진 플레이와 종류가 어긋나기 때문. */
+export interface TournamentUpdateBody {
+  title?: string;
+  description?: string;
+  item_ids?: string[];
+}
+
 export interface PlayRound {
   id: string;
   round_num: number;

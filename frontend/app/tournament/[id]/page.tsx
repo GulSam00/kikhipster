@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { BarChart3 } from 'lucide-react';
 import { apiFetch } from '@/lib/api';
+import OwnerEditButton from '@/components/music/OwnerEditButton';
 import PlayStarter from '@/components/music/PlayStarter';
 import PoolItemTile from '@/components/music/PoolItemTile';
 import ShareButton from '@/components/music/ShareButton';
@@ -60,6 +61,11 @@ export default async function TournamentDetailPage({
           </Link>
         </Button>
         <ShareButton path={`/tournament/${tournament.id}`} />
+        {/* 이 페이지는 Server Component라 로그인 사용자를 모른다 — 버튼만 클라이언트로 뺐다. */}
+        <OwnerEditButton
+          ownerId={tournament.user.id}
+          href={`/tournament/${tournament.id}/edit`}
+        />
       </div>
 
       <Separator className="mb-6" />

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { BarChart3, Play } from 'lucide-react';
@@ -15,6 +15,8 @@ import type { TournamentSummary } from '@/types/tournament';
 
 interface Props {
   tournament: TournamentSummary;
+  /** 카드 아래에 붙일 동작 — 내 프로필의 수정·삭제 버튼. */
+  actions?: ReactNode;
 }
 
 /**
@@ -23,7 +25,7 @@ interface Props {
  * 세 버튼 모두 중립 variant다 — 카드가 여러 장 깔리는 화면이라 primary를 쓰면
  * DESIGN.md § Color budget의 강조 요소 상한을 그대로 넘긴다.
  */
-export default function TournamentCard({ tournament }: Props) {
+export default function TournamentCard({ tournament, actions }: Props) {
   const [previews, setPreviews] = useState<PoolItem[]>([]);
   const href = `/tournament/${tournament.id}`;
 
@@ -97,6 +99,8 @@ export default function TournamentCard({ tournament }: Props) {
           </Button>
           <ShareButton path={href} />
         </div>
+
+        {actions}
       </CardContent>
     </Card>
   );

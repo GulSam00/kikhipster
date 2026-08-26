@@ -75,6 +75,52 @@ def _replace_items(tournament: Tournament, item_ids: list[str], db: Session) -> 
         db.add(TournamentItem(tournament_id=tournament.id, item_id=item_id, position=position))
 
 
+def _summaries(rows, db: Session) -> list[TournamentSummaryResponse]:
+    """(Tournament, 플레이 수) 목록을 카드 응답으로 만든다.
+
+    대시보드·내 목록·유저 목록이 같은 카드를 쓰므로 조립을 한 군데로 모았다.
+    썸네일과 후보 수는 월드컵마다 묻지 않고 한 번에 모아 조회한다 — 목록이 30장이면
+    각자 묻는 순간 쿼리가 60번이 된다.
+    """
+    if not rows:
+        return []
+
+    tournament_ids = [t.id for t, _ in rows]
+
+    # 카드 썸네일용 미리보기 id — 월드컵 하나당 앞에서 PREVIEW_COUNT개만.
+    previews: dict = {}
+    for row in (
+        db.query(TournamentItem)
+        .filter(TournamentItem.tournament_id.in_(tournament_ids))
+        .filter(TournamentItem.position < PREVIEW_COUNT)
+        .order_by(TournamentItem.tournament_id, TournamentItem.position)
+        .all()
+    ):
+        previews.setdefault(row.tournament_id, []).append(row.item_id)
+
+    counts = dict(
+        db.query(TournamentItem.tournament_id, func.count(TournamentItem.id))
+        .filter(TournamentItem.tournament_id.in_(tournament_ids))
+        .group_by(TournamentItem.tournament_id)
+        .all()
+    )
+
+    return [
+        TournamentSummaryResponse(
+            id=str(t.id),
+            title=t.title,
+            description=t.description,
+            item_type=t.item_type,
+            item_count=counts.get(t.id, 0),
+            play_count=total,
+            created_at=t.created_at,
+            user=t.user,
+            preview_item_ids=previews.get(t.id, []),
+        )
+        for t, total in rows
+    ]
+
+
 # --------------------------------------------------------------------------
 # 월드컵 정의
 # --------------------------------------------------------------------------
@@ -144,43 +190,7 @@ def list_tournaments(
         )
 
     rows = query.offset(offset).limit(limit).all()
-    if not rows:
-        return []
-
-    tournament_ids = [t.id for t, _ in rows]
-
-    # 카드 썸네일용 미리보기 id — 월드컵 하나당 앞에서 PREVIEW_COUNT개만.
-    previews: dict = {}
-    for row in (
-        db.query(TournamentItem)
-        .filter(TournamentItem.tournament_id.in_(tournament_ids))
-        .filter(TournamentItem.position < PREVIEW_COUNT)
-        .order_by(TournamentItem.tournament_id, TournamentItem.position)
-        .all()
-    ):
-        previews.setdefault(row.tournament_id, []).append(row.item_id)
-
-    counts = dict(
-        db.query(TournamentItem.tournament_id, func.count(TournamentItem.id))
-        .filter(TournamentItem.tournament_id.in_(tournament_ids))
-        .group_by(TournamentItem.tournament_id)
-        .all()
-    )
-
-    return [
-        TournamentSummaryResponse(
-            id=str(t.id),
-            title=t.title,
-            description=t.description,
-            item_type=t.item_type,
-            item_count=counts.get(t.id, 0),
-            play_count=total,
-            created_at=t.created_at,
-            user=t.user,
-            preview_item_ids=previews.get(t.id, []),
-        )
-        for t, total in rows
-    ]
+    return _summaries(rows, db)
 
 
 def _detail_response(tournament: Tournament, db: Session) -> TournamentDetailResponse:
@@ -267,6 +277,55 @@ def delete_tournament(
     purge_comments("tournament", tournament.id, db)
     db.delete(tournament)
     db.commit()
+
+
+def _owned_list(user_id: str, limit: int, offset: int, db: Session):
+    """한 사용자의 월드컵을 최신순으로. 플레이 수는 전체 기간 기준이다.
+
+    월드컵에는 탑스터의 `is_public` 같은 공개 플래그가 없다 — 만들면 곧 공개다.
+    그래서 '내 목록'과 '남의 목록'이 같은 결과를 돌려준다(엔드포인트만 다르다).
+    """
+    totals = (
+        db.query(
+            TournamentPlay.tournament_id.label("tid"),
+            func.count(TournamentPlay.id).label("cnt"),
+        )
+        .group_by(TournamentPlay.tournament_id)
+        .subquery()
+    )
+
+    rows = (
+        db.query(Tournament, func.coalesce(totals.c.cnt, 0).label("total_plays"))
+        .filter(Tournament.user_id == user_id)
+        .outerjoin(totals, totals.c.tid == Tournament.id)
+        .options(joinedload(Tournament.user))
+        .order_by(Tournament.created_at.desc())
+        .offset(offset)
+        .limit(limit)
+        .all()
+    )
+    return _summaries(rows, db)
+
+
+# `/{tournament_id}` 와 겹치지 않는다 — 아래 둘은 세그먼트가 2개이고 첫 칸이 리터럴이다.
+@router.get("/user/{user_id}", response_model=list[TournamentSummaryResponse])
+def list_user_tournaments(
+    user_id: str,
+    limit: int = Query(20, ge=1, le=100),
+    offset: int = Query(0, ge=0),
+    db: Session = Depends(get_db),
+):
+    return _owned_list(user_id, limit, offset, db)
+
+
+@router.get("/me/list", response_model=list[TournamentSummaryResponse])
+def list_my_tournaments(
+    limit: int = Query(20, ge=1, le=100),
+    offset: int = Query(0, ge=0),
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    return _owned_list(str(current_user.id), limit, offset, db)
 
 
 # --------------------------------------------------------------------------
