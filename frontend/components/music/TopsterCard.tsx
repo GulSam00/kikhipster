@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, type ReactNode } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Heart } from 'lucide-react';
@@ -16,6 +16,12 @@ interface Props {
   showAuthor?: boolean;
   /** 공개/비공개 배지 노출 여부 (내 프로필에서만 의미 있음) */
   showVisibility?: boolean;
+  /**
+   * 카드 아래에 붙일 동작 — 내 프로필의 수정·삭제 버튼.
+   * 카드 전체를 `<Link>` 로 감싸지 않는 이유가 이것이다: 앵커 안에 버튼을 넣으면
+   * 마크업이 무효고 클릭도 링크에 먹힌다. 그래서 링크는 미리보기·제목까지만 감싼다.
+   */
+  actions?: ReactNode;
 }
 
 /**
@@ -25,7 +31,12 @@ interface Props {
  * `useAlbumCovers` 에 등록하면 같은 화면의 모든 카드 몫이 한 번의 요청으로 합쳐진다.
  * 커버를 아직 못 받았거나 없는 칸은 예전처럼 색으로만 구분한다.
  */
-export default function TopsterCard({ topster, showAuthor = true, showVisibility = false }: Props) {
+export default function TopsterCard({
+  topster,
+  showAuthor = true,
+  showVisibility = false,
+  actions,
+}: Props) {
   const cellCount = topster.width * topster.height;
   const albumIds = useMemo(
     () => topster.items.map((it) => it.album_spotify_id),
@@ -33,13 +44,15 @@ export default function TopsterCard({ topster, showAuthor = true, showVisibility
   );
   const albums = useAlbumItems(albumIds);
 
+  // 링크가 카드 전체가 아니게 되면서 group-hover 를 못 쓴다 — 안쪽 앵커에 hover 가
+  // 걸렸을 때 카드를 틴트하는 has-* 로 같은 피드백을 유지한다.
   return (
-    <Link
-      href={`/topsters/${topster.id}`}
-      className="group block rounded-xl outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
-    >
-      <Card size="sm" className="h-full gap-2 transition-colors group-hover:bg-accent">
-        <CardContent className="flex flex-col gap-2">
+    <Card size="sm" className="h-full gap-2 transition-colors has-[a:hover]:bg-accent">
+      <CardContent className="flex flex-col gap-2">
+        <Link
+          href={`/topsters/${topster.id}`}
+          className="group flex flex-col gap-2 rounded-lg outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+        >
           {/*
             배경색은 탑스터마다 다르므로 카드 미리보기도 그 색을 쓴다 — 목록에서
             상세로 들어갔을 때 다른 물건처럼 보이지 않게.
@@ -94,8 +107,10 @@ export default function TopsterCard({ topster, showAuthor = true, showVisibility
               </span>
             </div>
           </div>
-        </CardContent>
-      </Card>
-    </Link>
+        </Link>
+
+        {actions}
+      </CardContent>
+    </Card>
   );
 }
