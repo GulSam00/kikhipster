@@ -74,9 +74,19 @@ export default function TrackRow({ track, artist, albumCover }: Props) {
       <LikeButton targetType="track" targetId={track.id} name={track.name} tone="inline" />
 
       {track.preview_url ? (
+        /*
+          좋아요와 같은 이유로 ghost — 한 앨범에 트랙이 12행이면 primary 로 칠한 재생
+          버튼이 화면에 12개가 된다(DESIGN.md § Color budget 상 4개 초과는 BLOCK).
+          재생 중인 행은 배경 bg-accent 와 곡명 text-primary 로 이미 구분되므로
+          버튼은 색이 아니라 밝기 단계로만 상태를 보인다.
+        */
         <Button
           size="icon-xs"
-          className="shrink-0 rounded-full"
+          variant="ghost"
+          className={cn(
+            'shrink-0 rounded-full text-muted-foreground hover:text-foreground',
+            isActive && 'text-foreground',
+          )}
           onClick={handlePlay}
           aria-label={`${track.name} 미리듣기`}
         >

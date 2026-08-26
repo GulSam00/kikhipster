@@ -187,21 +187,33 @@ class ITunesMusicService:
         return self._map_artist(results[0])
 
     async def get_artist_albums(
-        self, artist_id: str, market: str = "KR", limit: int = 50
+        self, artist_id: str, market: str = "KR", limit: int = 50,
+        include_singles: bool = False,
     ) -> list[dict]:
-        """아티스트의 앨범/싱글 목록 조회."""
+        """아티스트의 앨범 목록 조회.
+
+        `search_albums` 와 같은 기준으로 싱글·EP를 기본 제외한다. 아티스트 상세의
+        디스코그래피도 '앨범을 고르는 자리'라 검색만 필터를 걸어두면 같은 아티스트가
+        화면마다 다른 목록을 보여준다(2026-08-27).
+        """
+        want = min(limit, 50)
+        # 필터를 켜면 결과의 절반 이상이 사라지므로 넉넉히 받아온다 — search_albums 와 같은 이유.
+        fetch = min(want * self.SEARCH_OVERFETCH, self.SEARCH_MAX_LIMIT) if not include_singles else want
+
         data = await self._request(
             "/lookup",
             params={
                 "id": artist_id,
                 "entity": "album",
                 "country": market,
-                "limit": min(limit, 50),
+                "limit": fetch,
             },
         )
         # results[0]은 아티스트 레코드 자신(wrapperType=artist) — 앨범 목록은 그 뒤부터.
         albums = [r for r in data.get("results", []) if r.get("wrapperType") == "collection"]
-        return [self._map_album(a) for a in albums]
+        if not include_singles:
+            albums = [a for a in albums if not is_single_or_ep(a.get("collectionName", ""))]
+        return [self._map_album(a) for a in albums[:want]]
 
     async def get_album_tracks(self, album_id: str, market: str = "KR") -> dict:
         """앨범 트랙 목록 조회 (preview_url 포함)."""

@@ -131,9 +131,15 @@ async def get_artist_albums(
     artist_id: str,
     market: str = Query("KR", description="마켓 코드"),
     limit: int = Query(50, ge=1, le=50, description="최대 결과 수"),
+    include_singles: bool = Query(
+        False, description='iTunes가 " - Single" / " - EP" 로 표기한 항목을 포함할지'
+    ),
 ):
+    """아티스트의 앨범 목록. 앨범 검색과 같은 기준으로 싱글·EP를 기본 제외한다."""
     service = request.app.state.music_service
-    return await service.get_artist_albums(artist_id, market=market, limit=limit)
+    return await service.get_artist_albums(
+        artist_id, market=market, limit=limit, include_singles=include_singles
+    )
 
 
 @router.get("/albums/{album_id}/tracks", response_model=AlbumWithTracks)
