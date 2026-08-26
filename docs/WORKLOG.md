@@ -769,3 +769,4 @@ Spotify 연동 백엔드, 프론트 기획(`_workspace/planning.md`), QA 리뷰(
 | 2026-08-26 | feat(tournament): 수정 화면, 유저별·내 목록, 프로필에 월드컵 나열 | backend, frontend | 커밋 `df4845f` |
 | 2026-08-26 | docs: 8/26 세션 기록과 과제 보드 갱신 | docs | 커밋 `696f382` |
 | 2026-08-26 | feat(tournament): 월드컵 상세에 댓글 영역 추가 | frontend | 커밋 `4442220` |
+| 2026-08-26 | docs: 월드컵 댓글 영역 반영과 세션 기록 | docs | 커밋 `433b81a` |
