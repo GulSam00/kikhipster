@@ -8,6 +8,39 @@
 
 ## 세션 기록
 
+### 2026-08-26 (계속) — 쌓인 변경 커밋 분할, 월드컵 상세에 댓글 영역
+
+**먼저 미커밋 상태였던 8/26 작업 전체를 6개 커밋으로 나눴다**
+23개 파일 수정 + 신규 9개가 한 덩어리로 남아 있었다. 나중에 이 중 하나만 되돌릴 수 있도록
+의존 순서대로 쪼갰다: `apiFetch` 204 + `use-me` → 댓글 `edited_at` → 좋아요 배치 → 탑스터 수정·삭제 →
+월드컵 수정·프로필 나열 → docs. 뒤 커밋이 앞 커밋의 모듈을 import 하므로 이 순서를 뒤집으면
+중간 커밋에서 빌드가 깨진다.
+
+**월드컵 댓글은 백엔드를 손댈 게 없었다**
+`/api/comments/tournament/{id}` 는 대상 존재 검증(`_assert_target_exists`)·수정·삭제·월드컵 삭제 시
+`purge_comments` 까지 이미 다 있었다. 화면만 없던 상태라 상세 페이지에 `Separator` +
+`CommentSection targetType="tournament"` 4줄을 붙인 게 전부다.
+
+**검증 (API 15항목, 전부 PASS)**
+빈 목록 → 작성 201(`target_type=tournament` 확인) → 갓 만든 댓글 `edited_at=None` → 같은 내용 PUT은
+`edited_at` 미기록 → 다른 내용 PUT은 기록 → 비로그인 작성/수정/삭제 401 → 없는 월드컵 404 →
+월드컵 삭제 204 → 댓글 목록 404 → `comments` 행 0건(동반 삭제).
+SSR HTML에서 `<h2>` 가 `후보 4` / `댓글 0` 두 개로 렌더되고 빈 상태 문구가 있으며 비로그인이라
+입력 폼은 없음을 확인했다. **SSR 단계의 "댓글 0"은 언제나 0이다** — `CommentSection` 이 클라이언트
+컴포넌트라 초기 `useState([])` 가 그대로 찍히고 실제 목록은 하이드레이션 뒤에 온다.
+
+**환경 함정 두 개 — 다음에 또 만난다**
+- **Docker Desktop이 뜨면 Windows가 TCP 3040~3539를 예약해 `npm run dev`(:3300)가 `EACCES` 로 죽는다.**
+  포트 점유가 아니라 `netsh interface ipv4 show excludedportrange protocol=tcp` 에 잡히는 예약 구간이라
+  `-H 127.0.0.1` 로 바꿔도 소용없다. 이번엔 검증용으로 3600을 썼다. 항구적으로 고치려면
+  `net stop winnat` → `net start winnat` 으로 예약을 풀거나 개발 포트를 구간 밖으로 옮겨야 한다
+- backend venv에는 `requests` 가 없다. 검증 스크립트는 `httpx`(FastAPI가 이미 의존)로 쓸 것
+
+**안 한 것**
+- 브라우저 클릭 흐름은 이번에도 못 돌렸다(playwright 부재). 로그인 상태에서만 보이는 입력 폼·수정 버튼은
+  API 레벨로만 확인했다
+- 월드컵 카드·대시보드에는 댓글 수가 안 나온다. 목록 응답에 개수가 없어 붙이려면 스키마부터 손대야 한다
+
 ### 2026-08-26 (계속) — 프로필에 월드컵 나열, 내 항목 수정·삭제
 
 **프로필용 월드컵 목록 엔드포인트가 아예 없었다**
@@ -734,3 +767,5 @@ Spotify 연동 백엔드, 프론트 기획(`_workspace/planning.md`), QA 리뷰(
 | 2026-08-26 | feat(like): 앨범·트랙·아티스트 좋아요 버튼과 배치 상태 조회 | backend, frontend | 커밋 `d806a6e` |
 | 2026-08-26 | feat(topster): 수정·삭제 화면과 TopsterEditor 추출 | frontend | 커밋 `65a3df0` |
 | 2026-08-26 | feat(tournament): 수정 화면, 유저별·내 목록, 프로필에 월드컵 나열 | backend, frontend | 커밋 `df4845f` |
+| 2026-08-26 | docs: 8/26 세션 기록과 과제 보드 갱신 | docs | 커밋 `696f382` |
+| 2026-08-26 | feat(tournament): 월드컵 상세에 댓글 영역 추가 | frontend | 커밋 `4442220` |
