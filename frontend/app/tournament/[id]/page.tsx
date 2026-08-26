@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { BarChart3 } from 'lucide-react';
 import { apiFetch } from '@/lib/api';
+import CommentSection from '@/components/music/CommentSection';
 import OwnerEditButton from '@/components/music/OwnerEditButton';
 import PlayStarter from '@/components/music/PlayStarter';
 import PoolItemTile from '@/components/music/PoolItemTile';
@@ -91,6 +92,10 @@ export default async function TournamentDetailPage({
           )}
         </>
       )}
+
+      <Separator className="my-6" />
+
+      <CommentSection targetType="tournament" targetId={tournament.id} />
     </div>
   );
 }
