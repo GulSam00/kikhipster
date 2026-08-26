@@ -8,6 +8,40 @@
 
 ## 세션 기록
 
+### 2026-08-27 — main 머지, 색 예산·프리플라이트·싱글 필터 3건
+
+**브랜치를 main 에 fast-forward 로 넣었다**
+`feat/topster-worldcup-rework` 24커밋. main 에 별도 커밋이 없어 merge commit 없이 들어갔다.
+아직 push 는 안 했다 — origin/main 대비 로컬이 24 앞서 있다.
+
+**`uvicorn --reload` 가 변경을 못 잡았다 — 이번 세션 최대 함정**
+싱글·EP 필터를 넣고 curl 로 확인했는데 필터 ON/OFF 가 똑같이 46개를 돌려줬다. 코드는 맞았다.
+백엔드 로그의 **실제 iTunes 요청 URL 이 `limit=50`** 인 걸 보고서야 옛 프로세스가 응답 중임을 알았다
+(내 코드는 overfetch 로 150이어야 한다). WatchFiles 가 파일 변경을 놓친 것이다.
+**게다가 새 uvicorn 을 8000에 띄웠더니 "Uvicorn running on 8000" 을 정상적으로 찍었는데도
+요청은 계속 옛 프로세스가 받았다** — Windows 라 바인딩이 조용히 겹쳤다. 옛 태스크를 명시적으로
+죽이고 나서야 반영됐다. **다음에 백엔드 수정이 안 먹는 것처럼 보이면 응답이 아니라
+로그의 실제 외부 요청 URL 을 먼저 볼 것.** 재기동은 옛 프로세스 종료가 선행돼야 한다.
+
+**`apiFetch` 에 헤더 덮어쓰기 버그가 하나 더 있었다**
+`headers` 를 먼저 두고 `...options` 를 뒤에 펼치고 있어서, 호출부가 `headers` 를 넘기는 순간
+`Authorization` 까지 통째로 덮인다. 지금은 headers 를 넘기는 호출부가 0곳이라 안 터졌을 뿐이다.
+Content-Type 을 손대는 김에 `...options` 를 먼저 펼치도록 순서를 뒤집었다.
+
+**검증**
+- `apiFetch` 는 브라우저가 없어 `npx tsx` 로 `fetch`·`localStorage` 를 모킹해 단위 확인했다:
+  GET → `Authorization` 만, POST+body → `Content-Type` 추가, GET+커스텀 헤더 → `Authorization` 유지
+- 아티스트 앨범 필터: 라디오헤드(657515) **46개 → 17개, 싱글·EP 0개**. 필터 OFF 는 46개/29개 그대로.
+  백엔드 로그에서 iTunes 요청이 `limit=150`(overfetch) 인 것까지 확인
+- `TrackRow`: 앨범 상세 SSR HTML 에서 **미리듣기 버튼 12개 전부 ghost**, `bg-primary` 는
+  Navbar 로그인 CTA 1개만 남음 (12 → 1)
+- `tsc --noEmit` 통과, eslint 신규 0건, 주요 페이지 8개 전부 200
+
+**안 한 것**
+- GET 프리플라이트가 실제로 줄었는지는 브라우저 네트워크 탭으로 못 봤다. 헤더 구성까지만 확인했다
+- push 안 함
+
+
 ### 2026-08-26 (계속) — 쌓인 변경 커밋 분할, 월드컵 상세에 댓글 영역
 
 **먼저 미커밋 상태였던 8/26 작업 전체를 6개 커밋으로 나눴다**
@@ -770,3 +804,4 @@ Spotify 연동 백엔드, 프론트 기획(`_workspace/planning.md`), QA 리뷰(
 | 2026-08-26 | docs: 8/26 세션 기록과 과제 보드 갱신 | docs | 커밋 `696f382` |
 | 2026-08-26 | feat(tournament): 월드컵 상세에 댓글 영역 추가 | frontend | 커밋 `4442220` |
 | 2026-08-26 | docs: 월드컵 댓글 영역 반영과 세션 기록 | docs | 커밋 `433b81a` |
+| 2026-08-27 | fix: 재생 버튼 색 예산 위반, GET 프리플라이트, 아티스트 앨범 싱글 노이즈 | backend, frontend | 커밋 `07383ba` |
