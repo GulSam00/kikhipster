@@ -2,24 +2,16 @@
 
 > 이 파일이 **할 일의 정본**이다. CLAUDE.md에는 과제를 적지 않는다.
 > 완료된 항목은 여기서 지우고 `docs/WORKLOG.md` 에 기록한다.
-> 최종 갱신: 2026-08-23
+> 최종 갱신: 2026-08-26
 
 ---
 
 ## 진행 예정
 
-### T2. 백엔드에 있는데 UI가 없는 기능 붙이기 — 가장 값싼 확장
-
-- [ ] 탑스터 **수정/삭제 UI** — `PUT`/`DELETE /api/topsters/{id}` 존재, 프론트 호출부 0. **표시 옵션 7개가 생기면서 무게가 늘었다** — 저장 후에는 격자·배경색·넘버링을 못 고친다 (2026-08-23)
-- [ ] 댓글 **수정 UI** — `PUT` 존재, 화면은 삭제만 지원
-- [ ] 앨범/트랙/아티스트 **좋아요** — 모델·API는 범용 `target_type` 지원, UI는 탑스터에만
-- [ ] **탑스터 상세의 댓글을 `CommentSection`으로 통일** — 지금은 `app/topsters/[id]/page.tsx`가 옛 전용 경로를 인라인으로 호출한다. 같은 테이블을 보므로 데이터 이관은 불필요, 컴포넌트 교체만 (2026-08-22)
-
 ### T3. 설계상 구멍
 
 - [ ] **토너먼트 T3 방침 폐기 (2026-08-23).** "진행 상태를 localStorage에만 두고 서버엔 최종 결과만" 방침은 월드컵 재설계로 무효가 됐다. 대진은 서버가 풀에서 무작위 추출해 만들고, 라운드별 승자도 서버에 기록한다. 그 대가로 새로고침에 견디고 랭킹 표본이 자동으로 쌓인다. 남은 항목:
   - [ ] **랭킹 집계가 매 요청 전수 계산이다.** `GET /{id}/ranking` 이 그 월드컵의 모든 플레이·라운드를 읽어 파이썬에서 두 번(현재/7일 전) 집계한다. 플레이가 수천 건 쌓이면 집계 테이블이나 캐시가 필요하다
-  - [ ] **월드컵 수정 UI 없음.** `PUT /api/tournaments/{id}`(제목·설명·풀 교체)와 `DELETE`는 있는데 화면이 없다
   - [ ] **풀 표시가 앞 24개로 잘린다.** 상세 페이지가 `POOL_PREVIEW_LIMIT`개만 보여준다(512개 전부 타일로 깔면 이미지 요청이 그만큼 나감). 전체 보기가 필요하면 페이지네이션을 붙일 것
   - [ ] **목록 페이지네이션 없음 — 월드컵 대시보드와 탑스터 목록 공통.** 둘 다 `limit=30` 고정이다. 같은 문제이므로 한 번에 푸는 게 맞다 (2026-08-23)
 - [ ] **리뷰 기능 — 구현 여부 결정 보류 (2026-08-20).** CLAUDE.md 목표에는 있으나 모델·라우터·페이지·기획(`_workspace/planning.md`) 전부 부재. `Comment`는 `topster_id`에 고정돼 있어 리뷰(앨범/아티스트/트랙 대상 별점+텍스트) 대체 불가 — 진짜 빈 기능임은 확인함. 구현 vs CLAUDE.md 목표에서 제외, 둘 중 하나를 나중에 결정. 그 사이 T3의 다른 항목(토너먼트 소실, 프론트 에러 처리)부터 진행
@@ -31,6 +23,7 @@
   - [ ] **§ Color budget 위반** — 만들기 화면 옵션 탭의 체크박스 4개가 체크 시 `bg-primary`(amber)라 저장 버튼까지 한 화면 primary 5개. 규칙상 4개 초과는 BLOCK. 폼 컨트롤을 예외로 적든지 체크박스를 중립으로 내리든지 결정 필요
   - [ ] **§ Visual reference 의 탑스터 행** — Netflix·Watcha만 근거로 두고 있으나 실제 구현은 topsters.org 구조를 따랐다(헤드리스 브라우저로 관측 완료)
   - [ ] **탑스터 배경색 임의 hex 허용** — 사용자 콘텐츠라 예외로 판단했으나 정본에 안 적혀 있다
+  - [ ] **`TrackRow` 의 미리듣기 버튼이 행마다 `bg-primary` 다** — 앨범 상세에 트랙이 12행이면 한 화면에 primary 강조가 12개다(규칙상 4개 초과 BLOCK). T2에서 좋아요 버튼을 붙이며 관측했다 — 좋아요 쪽은 `tone="inline"`(ghost + 채움)으로 피해 갔으니 재생 버튼만 남았다 (2026-08-26)
 - [ ] **아티스트 상세의 앨범 목록에도 싱글·EP 노이즈가 있다** — 검색에만 필터를 걸었다 (2026-08-23)
 - [ ] **테스트·CI 전무** — `.github/workflows` 없음, 테스트 파일 0개. AWS 실습 4단계에서 어차피 필요해진다
 
@@ -46,7 +39,7 @@
 
 ---
 
-## 현재 구현 범위 (2026-08-21 기준)
+## 현재 구현 범위 (2026-08-26 기준)
 
 무엇이 이미 있는지 모르면 중복 구현하게 되므로 여기 둔다.
 
@@ -55,7 +48,7 @@
 | **인증** | Google·Kakao OAuth, JWT 발급/갱신, `/api/auth/me`, 공개 프로필 조회. 토큰은 프론트 `localStorage` |
 | **음악** | **ID 배치 조회**(`GET /api/music/tracks?ids=`, `GET /api/music/albums?ids=` — 최대 512개, 내부에서 150개씩 청크, **`music_cache` DB 캐시 경유** — 데이터 30일 / '없음' tombstone 1일 TTL). 아티스트/앨범/곡 검색(**앨범 검색은 싱글·EP 제외가 기본**, `include_singles=true` 로 해제), 아티스트 상세, 아티스트 앨범 목록, 아티스트 트랙 목록, 앨범 트랙 목록 — **iTunes Search API 기반, 인증 키 불필요**. 팔로워 수·인물 사진 없음(마이크 아이콘 폴백), "인기 트랙"은 진짜 인기순 아님(iTunes에 popularity 개념 자체가 없음) |
 | **탑스터** | 생성(**비정방형 격자 width×height, 최대 5×5 — 칸이 늘어도 전체 크기 고정**, 공개·비공개), **목록(검색 + 최신순·인기순 — 인기는 좋아요 수 기준)**, 상세, 수정, 삭제, 유저별 목록, 내 목록. **실제 앨범 커버 렌더**(목록·홈·프로필·상세), **격자 옆 `아티스트 – 앨범` 목록**, **표시 옵션 8종**(제목/제목표시/앨범정보표시/넘버링/배경색/**글자색**/간격/공개), **앨범 정보가 격자 행에 세로 정렬**, **저장 전 PNG 다운로드**(캔버스 직접 렌더) |
-| **댓글** | 목록/작성/수정/삭제. **`(target_type, target_id)` 범용 구조**(topster·tournament) — `/api/comments/{type}/{id}`. 기존 `/api/topsters/{id}/comments` 경로도 그대로 유지 |
-| **좋아요** | `target_type`(topster·album·track·artist·comment) + `target_id` 범용 토글·상태 조회 |
-| **월드컵** | **정의와 플레이가 분리된 구조.** 월드컵 = 이름·설명·타입(곡\|앨범)·풀(4~512). 생성/조회/수정/삭제, 대시보드 목록(검색 + 최신순·인기순 전체/년/월 — 인기는 플레이 횟수 기준). 플레이 = `POST /{id}/plays`로 풀에서 강수(4~128)만큼 무작위 추출 → `/api/plays/{id}` 조회·투표. **비로그인 플레이 허용**(`plays.user_id` nullable). 랭킹 `GET /{id}/ranking` — 우승 비율·승률 + 7일 전 대비 추이 |
-| **프론트** | 페이지 15개 — `/`, `/search`, `/artists/[id]`, `/albums/[id]`, `/topsters`, `/topsters/new`, `/topsters/[id]`, `/tournament`, **`/tournament`(대시보드)**, **`/tournament/new`(3단계 위저드)**, **`/tournament/[id]`**, **`/tournament/[id]/ranking`**, **`/play/[playId]`**, `/profile`, `/profile/[userId]`, `/login`, `/auth/callback`. `PlayerContext` + `MiniPlayer` 로 30초 미리듣기 |
+| **댓글** | 목록/작성/**수정**/삭제 — 화면까지 전부 있다. **`(target_type, target_id)` 범용 구조**(topster·tournament) — `/api/comments/{type}/{id}`. 기존 `/api/topsters/{id}/comments` 경로도 그대로 유지. **본문이 실제로 바뀔 때만 `edited_at` 을 찍고 화면에 `(수정됨)`** 을 붙인다 |
+| **좋아요** | `target_type`(topster·album·track·artist·comment) + `target_id` 범용 토글·상태 조회 + **배치 조회 `GET /api/likes/batch/{type}?ids=`**. UI는 **탑스터·앨범·아티스트·트랙**에 붙어 있다(댓글 좋아요는 아직 화면 없음) |
+| **월드컵** | **정의와 플레이가 분리된 구조.** 월드컵 = 이름·설명·타입(곡\|앨범)·풀(4~512). 생성/조회/**수정**/**삭제** — 화면까지 전부 있다(`/tournament/[id]/edit`, 종류는 못 바꾼다). 대시보드 목록(검색 + 최신순·인기순 전체/년/월 — 인기는 플레이 횟수 기준), **유저별 목록 `GET /user/{id}`·내 목록 `GET /me/list`**. 플레이 = `POST /{id}/plays`로 풀에서 강수(4~128)만큼 무작위 추출 → `/api/plays/{id}` 조회·투표. **비로그인 플레이 허용**(`plays.user_id` nullable). 랭킹 `GET /{id}/ranking` — 우승 비율·승률 + 7일 전 대비 추이 |
+| **프론트** | 페이지 17개 — `/`, `/search`, `/artists/[id]`, `/albums/[id]`, `/topsters`, `/topsters/new`, `/topsters/[id]`, **`/topsters/[id]/edit`**, `/tournament`, **`/tournament`(대시보드)**, **`/tournament/new`(3단계 위저드)**, **`/tournament/[id]`**, **`/tournament/[id]/edit`**, **`/tournament/[id]/ranking`**, **`/play/[playId]`**, `/profile`, `/profile/[userId]`, `/login`, `/auth/callback`. `PlayerContext` + `MiniPlayer` 로 30초 미리듣기. **탑스터는 `TopsterEditor`, 월드컵은 `TournamentEditor` 를 만들기·수정이 공유한다.** **프로필에는 내 탑스터와 내 월드컵이 함께 나열되고 카드마다 수정·삭제가 붙는다** |
