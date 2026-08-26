@@ -25,5 +25,8 @@ export async function apiFetch<T>(path: string, options?: RequestInit): Promise<
     ...options,
   });
   if (!res.ok) throw new ApiError(res.status);
+  // DELETE 계열은 204라 본문이 비어 있다. 그대로 res.json() 을 부르면 SyntaxError 가 나서
+  // 삭제가 성공했는데도 호출부의 catch 로 떨어진다 — 댓글 삭제가 실제로 그랬다(2026-08-26).
+  if (res.status === 204) return undefined as T;
   return res.json() as Promise<T>;
 }

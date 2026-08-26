@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react';
 import { Home, Search, LayoutGrid, Trophy, User, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { clearMeCache } from '@/lib/use-me';
 
 const navLinks = [
   { href: '/search', label: '검색', icon: Search },
@@ -26,6 +27,8 @@ export default function Navbar() {
     localStorage.removeItem('access_token');
     localStorage.removeItem('refresh_token');
     localStorage.removeItem('user_id');
+    // 모듈 캐시에 남은 이전 사용자를 지운다. 안 지우면 로그아웃 직후에도 '내 댓글'로 보인다.
+    clearMeCache();
     setIsLoggedIn(false);
     router.push('/');
   }
