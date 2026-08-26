@@ -2,6 +2,7 @@ import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import { Disc3 } from 'lucide-react';
 import { apiFetch, ApiError } from '@/lib/api';
+import LikeButton from '@/components/music/LikeButton';
 import TrackRow from '@/components/music/TrackRow';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
@@ -43,9 +44,10 @@ export default async function AlbumPage({ params }: { params: Promise<{ id: stri
           <Badge variant="outline" className="mb-2 capitalize">{album.album_type}</Badge>
           <h1 className="mb-1 font-heading text-3xl font-bold">{album.title}</h1>
           <p className="mb-1 text-foreground/80">{album.artist_name}</p>
-          <p className="text-sm text-muted-foreground">
+          <p className="mb-3 text-sm text-muted-foreground">
             {year} · {album.total_tracks}곡
           </p>
+          <LikeButton targetType="album" targetId={album.id} name={album.title} />
         </div>
       </div>
 

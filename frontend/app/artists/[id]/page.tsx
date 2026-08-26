@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import { Mic2 } from 'lucide-react';
 import { apiFetch, ApiError } from '@/lib/api';
 import AlbumCard from '@/components/music/AlbumCard';
+import LikeButton from '@/components/music/LikeButton';
 import TrackRow from '@/components/music/TrackRow';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
@@ -58,11 +59,12 @@ export default async function ArtistPage({ params }: { params: Promise<{ id: str
         <div className="min-w-0">
           <p className="mb-1 text-xs text-muted-foreground">아티스트</p>
           <h1 className="mb-2 font-heading text-3xl font-bold">{artist.name}</h1>
-          <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+          <div className="mb-3 flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
             {artist.genres.slice(0, 3).map((g) => (
               <Badge key={g} variant="secondary">{g}</Badge>
             ))}
           </div>
+          <LikeButton targetType="artist" targetId={artist.id} name={artist.name} />
         </div>
       </div>
 

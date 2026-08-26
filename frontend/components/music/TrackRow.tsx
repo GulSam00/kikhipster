@@ -2,6 +2,7 @@
 
 import { Pause, Play } from 'lucide-react';
 import { usePlayer } from '@/contexts/PlayerContext';
+import LikeButton from '@/components/music/LikeButton';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -65,6 +66,12 @@ export default function TrackRow({ track, artist, albumCover }: Props) {
       <span className="shrink-0 text-xs text-muted-foreground tabular-nums">
         {formatMs(track.duration_ms)}
       </span>
+
+      {/*
+        여러 행에 나란히 놓이므로 tone="inline" — DESIGN.md § Color budget 상 primary
+        강조가 한 화면에 4개를 넘으면 BLOCK 이라 여기서는 색 대신 채움으로 상태를 보인다.
+      */}
+      <LikeButton targetType="track" targetId={track.id} name={track.name} tone="inline" />
 
       {track.preview_url ? (
         <Button
