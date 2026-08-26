@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from datetime import datetime
+
 from fastapi import APIRouter, Depends, HTTPException, Path, Query
 from sqlalchemy.orm import Session
 
@@ -88,7 +90,10 @@ def _owned_comment_or_error(
 
 def _update(target_type, target_id, comment_id, content, current_user, db):
     comment = _owned_comment_or_error(target_type, target_id, comment_id, current_user, db)
-    comment.content = content
+    # 같은 내용을 다시 저장한 건 수정이 아니다 — 그때까지 "(수정됨)"을 붙이면 거짓말이 된다.
+    if comment.content != content:
+        comment.content = content
+        comment.edited_at = datetime.utcnow()
     db.commit()
     db.refresh(comment)
     return comment

@@ -1,13 +1,14 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Send, Trash2 } from 'lucide-react';
+import { Check, Pencil, Send, Trash2, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { apiFetch } from '@/lib/api';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import { useMe } from '@/lib/use-me';
 import type { Comment, CommentTargetType } from '@/types/social';
 
 interface Props {
@@ -17,15 +18,16 @@ interface Props {
 
 /**
  * 범용 댓글 영역. `/api/comments/{target_type}/{target_id}` 를 쓴다.
- * 탑스터 상세는 아직 `/api/topsters/{id}/comments` 전용 경로를 그대로 쓰고 있다 —
- * 두 경로 모두 같은 테이블을 보므로 나중에 이 컴포넌트로 합쳐도 데이터는 그대로다.
+ * 탑스터 상세도 이 컴포넌트를 쓴다 — 예전엔 `/api/topsters/{id}/comments` 전용 경로를
+ * 인라인으로 부르는 사본이 따로 있었으나 같은 테이블이라 그대로 합쳤다(2026-08-26).
  */
 export default function CommentSection({ targetType, targetId }: Props) {
   const [comments, setComments] = useState<Comment[]>([]);
   const [text, setText] = useState('');
-  // 로그인 여부를 별도 state로 두지 않고 meId로 갈음한다. /api/auth/me 가 성공했다는 건
-  // 토큰이 실제로 유효하다는 뜻이라, localStorage에 죽은 토큰이 남아 있는 경우도 걸러진다.
-  const [meId, setMeId] = useState<string | null>(null);
+  /** 수정 중인 댓글 id. null 이면 아무것도 수정 중이 아니다. */
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editText, setEditText] = useState('');
+  const me = useMe();
 
   const base = `/api/comments/${targetType}/${targetId}`;
 
@@ -33,12 +35,6 @@ export default function CommentSection({ targetType, targetId }: Props) {
     apiFetch<Comment[]>(`${base}/`)
       .then(setComments)
       .catch(() => toast.error('댓글을 불러오지 못했습니다'));
-
-    if (localStorage.getItem('access_token')) {
-      apiFetch<{ id: string }>('/api/auth/me')
-        .then((u) => setMeId(u.id))
-        .catch(() => setMeId(null));
-    }
   }, [base]);
 
   async function submit(e: React.FormEvent) {
@@ -56,10 +52,38 @@ export default function CommentSection({ targetType, targetId }: Props) {
     }
   }
 
+  function startEdit(c: Comment) {
+    setEditingId(c.id);
+    setEditText(c.content);
+  }
+
+  function cancelEdit() {
+    setEditingId(null);
+    setEditText('');
+  }
+
+  async function saveEdit(e: React.FormEvent) {
+    e.preventDefault();
+    const content = editText.trim();
+    if (!editingId || !content) return;
+    try {
+      // 응답의 edited_at 을 그대로 받아 쓴다 — "(수정됨)" 판정을 프론트에서 흉내내지 않는다.
+      const updated = await apiFetch<Comment>(`${base}/${editingId}`, {
+        method: 'PUT',
+        body: JSON.stringify({ content }),
+      });
+      setComments((prev) => prev.map((c) => (c.id === updated.id ? updated : c)));
+      cancelEdit();
+    } catch {
+      toast.error('댓글을 수정하지 못했습니다');
+    }
+  }
+
   async function remove(commentId: string) {
     try {
       await apiFetch(`${base}/${commentId}`, { method: 'DELETE' });
       setComments((prev) => prev.filter((c) => c.id !== commentId));
+      if (editingId === commentId) cancelEdit();
     } catch {
       toast.error('댓글을 삭제하지 못했습니다');
     }
@@ -69,7 +93,7 @@ export default function CommentSection({ targetType, targetId }: Props) {
     <section>
       <h2 className="mb-4 font-heading text-lg font-bold">댓글 {comments.length}</h2>
 
-      {meId && (
+      {me && (
         <form onSubmit={submit} className="mb-4 flex gap-2">
           <Input
             value={text}
@@ -95,21 +119,62 @@ export default function CommentSection({ targetType, targetId }: Props) {
                   <AvatarFallback>{c.user.nickname[0]?.toUpperCase()}</AvatarFallback>
                 </Avatar>
                 <div className="min-w-0 flex-1">
-                  <p className="mb-0.5 text-xs font-medium text-muted-foreground">
+                  <p className="mb-0.5 flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
                     {c.user.nickname}
+                    {c.edited_at && <span>(수정됨)</span>}
                   </p>
-                  <p className="text-sm break-words">{c.content}</p>
+
+                  {editingId === c.id ? (
+                    <form onSubmit={saveEdit} className="flex gap-2">
+                      <Input
+                        value={editText}
+                        onChange={(e) => setEditText(e.target.value)}
+                        className="h-8"
+                        aria-label="댓글 수정"
+                        autoFocus
+                        onKeyDown={(e) => {
+                          if (e.key === 'Escape') cancelEdit();
+                        }}
+                      />
+                      <Button type="submit" size="icon-sm" disabled={!editText.trim()} aria-label="수정 저장">
+                        <Check />
+                      </Button>
+                      <Button
+                        type="button"
+                        size="icon-sm"
+                        variant="ghost"
+                        onClick={cancelEdit}
+                        aria-label="수정 취소"
+                      >
+                        <X />
+                      </Button>
+                    </form>
+                  ) : (
+                    <p className="text-sm break-words">{c.content}</p>
+                  )}
                 </div>
-                {c.user.id === meId && (
-                  <Button
-                    size="icon-xs"
-                    variant="ghost"
-                    className="shrink-0 text-muted-foreground hover:text-destructive"
-                    onClick={() => remove(c.id)}
-                    aria-label="댓글 삭제"
-                  >
-                    <Trash2 />
-                  </Button>
+
+                {c.user.id === me?.id && editingId !== c.id && (
+                  <div className="flex shrink-0 gap-0.5">
+                    <Button
+                      size="icon-xs"
+                      variant="ghost"
+                      className="text-muted-foreground hover:text-foreground"
+                      onClick={() => startEdit(c)}
+                      aria-label="댓글 수정"
+                    >
+                      <Pencil />
+                    </Button>
+                    <Button
+                      size="icon-xs"
+                      variant="ghost"
+                      className="text-muted-foreground hover:text-destructive"
+                      onClick={() => remove(c.id)}
+                      aria-label="댓글 삭제"
+                    >
+                      <Trash2 />
+                    </Button>
+                  </div>
                 )}
               </CardContent>
             </Card>

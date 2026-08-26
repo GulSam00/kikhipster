@@ -28,6 +28,10 @@ class Comment(Base):
     content = Column(Text, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+    # 화면의 "(수정됨)" 표시용. updated_at 으로는 판정할 수 없다 — created_at/updated_at 의
+    # default 가 각각 utcnow() 를 따로 호출해 insert 직후에도 마이크로초가 어긋나고,
+    # onupdate 는 content 와 무관한 UPDATE 에도 걸린다. 본문이 실제로 바뀔 때만 찍는다.
+    edited_at = Column(DateTime, nullable=True)
 
     # backref 쪽에도 cascade를 걸어야 한다. 빠뜨리면 부모 삭제 시 SQLAlchemy가 자식의 FK를
     # NULL로 UPDATE하려 들고, 컬럼이 nullable=False라 IntegrityError로 500이 난다.
