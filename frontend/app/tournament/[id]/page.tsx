@@ -4,7 +4,7 @@ import { apiFetch } from '@/lib/api';
 import CommentSection from '@/components/music/CommentSection';
 import OwnerEditButton from '@/components/music/OwnerEditButton';
 import PlayStarter from '@/components/music/PlayStarter';
-import PoolItemTile from '@/components/music/PoolItemTile';
+import PoolGrid from '@/components/music/PoolGrid';
 import ShareButton from '@/components/music/ShareButton';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -14,8 +14,9 @@ import { formatDate } from '@/lib/utils';
 import type { TournamentDetail } from '@/types/tournament';
 
 /**
- * 풀이 최대 512개라 전부 타일로 깔면 이미지 요청이 그만큼 나간다.
- * 앞의 일부만 보여주고 나머지는 개수로 안내한다.
+ * 첫 화면에서 서버가 미리 받아 두는 개수. 풀이 최대 512개라 전부 그리면
+ * 메타데이터 배치 조회가 그만큼 나가므로 앞부분만 SSR로 내려보내고,
+ * 나머지는 `PoolGrid` 의 "더 보기"로 사용자가 원할 때 이어 받는다.
  */
 const POOL_PREVIEW_LIMIT = 24;
 
@@ -29,7 +30,6 @@ export default async function TournamentDetailPage({
 
   const shownIds = tournament.item_ids.slice(0, POOL_PREVIEW_LIMIT);
   const items = await fetchPoolItems(tournament.item_type, shownIds);
-  const hidden = tournament.item_count - shownIds.length;
 
   return (
     <div className="mx-auto w-full max-w-4xl px-4 py-8">
@@ -79,18 +79,12 @@ export default async function TournamentDetailPage({
           후보 정보를 불러오지 못했습니다.
         </p>
       ) : (
-        <>
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
-            {items.map((item) => (
-              <PoolItemTile key={item.id} item={item} itemType={tournament.item_type} />
-            ))}
-          </div>
-          {hidden > 0 && (
-            <p className="mt-3 text-center text-sm text-muted-foreground tabular-nums">
-              외 {hidden}개
-            </p>
-          )}
-        </>
+        <PoolGrid
+          itemType={tournament.item_type}
+          allIds={tournament.item_ids}
+          initialItems={items}
+          initialRequested={shownIds.length}
+        />
       )}
 
       <Separator className="my-6" />
