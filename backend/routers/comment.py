@@ -40,11 +40,6 @@ def _assert_target_exists(target_type: str, target_id: str, db: Session) -> obje
     raise HTTPException(status_code=400, detail="지원하지 않는 댓글 대상입니다")
 
 
-def _assert_writable(target_type: str, target, current_user: User) -> None:
-    if target_type == "topster" and not target.is_public and target.user_id != current_user.id:
-        raise HTTPException(status_code=403, detail="비공개 탑스터입니다")
-
-
 def _list(target_type: str, target_id: str, limit: int, offset: int, db: Session):
     _assert_target_exists(target_type, target_id, db)
     return (
@@ -59,7 +54,6 @@ def _list(target_type: str, target_id: str, limit: int, offset: int, db: Session
 
 def _create(target_type: str, target_id: str, content: str, current_user: User, db: Session):
     target = _assert_target_exists(target_type, target_id, db)
-    _assert_writable(target_type, target, current_user)
 
     comment = Comment(
         user_id=current_user.id,

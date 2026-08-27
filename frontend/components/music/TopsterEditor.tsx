@@ -35,7 +35,6 @@ interface GridItem {
 export interface TopsterEditorInitial {
   title: string;
   description: string;
-  isPublic: boolean;
   options: TopsterOptions;
   /** 인덱스가 곧 격자 position 이다. 빈 칸은 null. */
   placements: (PoolItem | null)[];
@@ -77,7 +76,6 @@ export default function TopsterEditor({
   const router = useRouter();
   const [title, setTitle] = useState(initial?.title ?? '');
   const [description, setDescription] = useState(initial?.description ?? '');
-  const [isPublic, setIsPublic] = useState(initial?.isPublic ?? true);
   const [options, setOptions] = useState<TopsterOptions>(initial?.options ?? NEW_DEFAULTS);
   // 배치는 '칸 수'와 독립적으로 들고 있는다. 격자를 줄였다 늘려도 원래 앨범이 살아난다.
   const [placements, setPlacements] = useState<(PoolItem | null)[]>(initial?.placements ?? []);
@@ -201,7 +199,7 @@ export default function TopsterEditor({
     setSaving(true);
     setError('');
     try {
-      await onSubmit({ title, description, is_public: isPublic, ...options, items: placed });
+      await onSubmit({ title, description, ...options, items: placed });
     } catch {
       setError('저장에 실패했습니다. 다시 시도해주세요.');
     } finally {
@@ -381,12 +379,6 @@ export default function TopsterEditor({
                   label="넘버링 표시"
                   checked={options.show_numbering}
                   onChange={(v) => setOption('show_numbering', v)}
-                />
-                <OptionToggle
-                  id="topster-public"
-                  label="공개"
-                  checked={isPublic}
-                  onChange={setIsPublic}
                 />
               </div>
             </TabsContent>

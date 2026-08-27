@@ -4,7 +4,6 @@ import { useMemo, type ReactNode } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Heart } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { useAlbumItems } from '@/lib/album-covers';
 import { cn } from '@/lib/utils';
@@ -14,8 +13,6 @@ interface Props {
   topster: Topster;
   /** 작성자 닉네임 노출 여부 (내 프로필에서는 불필요) */
   showAuthor?: boolean;
-  /** 공개/비공개 배지 노출 여부 (내 프로필에서만 의미 있음) */
-  showVisibility?: boolean;
   /**
    * 카드 아래에 붙일 동작 — 내 프로필의 수정·삭제 버튼.
    * 카드 전체를 `<Link>` 로 감싸지 않는 이유가 이것이다: 앵커 안에 버튼을 넣으면
@@ -34,7 +31,6 @@ interface Props {
 export default function TopsterCard({
   topster,
   showAuthor = true,
-  showVisibility = false,
   actions,
 }: Props) {
   const cellCount = topster.width * topster.height;
@@ -95,11 +91,6 @@ export default function TopsterCard({
           <div className="min-w-0">
             <p className="truncate text-sm font-medium">{topster.title}</p>
             <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-              {showVisibility && (
-                <Badge variant="outline" className="px-1.5 text-[10px]">
-                  {topster.is_public ? '공개' : '비공개'}
-                </Badge>
-              )}
               {showAuthor && <span className="truncate">{topster.user.nickname}</span>}
               <span className="flex shrink-0 items-center gap-0.5">
                 <Heart className="size-3" />

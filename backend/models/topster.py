@@ -19,7 +19,6 @@ class Topster(Base):
     # position 은 row * width + col 로 평탄화한 인덱스라 width 가 바뀌면 배치가 재해석된다.
     width = Column(Integer, nullable=False, default=5)
     height = Column(Integer, nullable=False, default=5)
-    is_public = Column(Boolean, nullable=False, default=True)
 
     # --- 표시 옵션 (topsters.org의 Options 탭에 대응) ---
     # 배경색은 사용자 콘텐츠라 임의 지정을 허용한다. DESIGN.md의 "임의 색상값 금지"는

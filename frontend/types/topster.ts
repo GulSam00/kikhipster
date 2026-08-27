@@ -43,7 +43,6 @@ export interface Topster extends TopsterOptions {
   id: string;
   title: string;
   description: string;
-  is_public: boolean;
   created_at: string;
   user: TopsterUser;
   items: TopsterItem[];
@@ -53,14 +52,12 @@ export interface Topster extends TopsterOptions {
 export interface TopsterCreateBody extends TopsterOptions {
   title: string;
   description?: string;
-  is_public: boolean;
   items: { album_spotify_id: string; position: number }[];
 }
 
 export interface TopsterUpdateBody extends Partial<TopsterOptions> {
   title?: string;
   description?: string;
-  is_public?: boolean;
   items?: { album_spotify_id: string; position: number }[];
 }
 

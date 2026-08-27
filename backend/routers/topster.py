@@ -9,7 +9,7 @@ from models.like import Like
 from models.topster import Topster, TopsterItem
 from models.user import User
 from routers.comment import purge_comments
-from routers.deps import get_current_user, get_optional_user
+from routers.deps import get_current_user
 from schemas.topster import TopsterCreate, TopsterResponse, TopsterUpdate
 
 router = APIRouter(prefix="/api/topsters", tags=["topsters"])
@@ -39,7 +39,6 @@ def _build_response(
         id=str(topster.id),
         title=topster.title,
         description=topster.description,
-        is_public=topster.is_public,
         created_at=topster.created_at,
         user=topster.user,
         items=topster.items,
@@ -80,7 +79,6 @@ def list_topsters(
             Topster,
             func.coalesce(totals.c.cnt, 0).label("like_count"),
         )
-        .filter(Topster.is_public.is_(True))
         .outerjoin(totals, totals.c.tid == cast(Topster.id, String))
         # 카드가 그리드 미리보기를 그리므로 items까지 미리 당겨온다. 컬렉션이라
         # joinedload를 쓰면 limit/offset과 얽히므로 selectinload를 쓴다.
@@ -115,7 +113,6 @@ def create_topster(
         user_id=current_user.id,
         title=body.title,
         description=body.description,
-        is_public=body.is_public,
         **{f: getattr(body, f) for f in OPTION_FIELDS},
     )
     db.add(topster)
@@ -136,14 +133,12 @@ def create_topster(
 @router.get("/{topster_id}", response_model=TopsterResponse)
 def get_topster(
     topster_id: str,
-    current_user: User | None = Depends(get_optional_user),
     db: Session = Depends(get_db),
 ):
+    """탑스터 상세. **모든 탑스터가 공개다** — 2026-08-27에 비공개 개념을 없앨다."""
     topster = db.query(Topster).filter_by(id=topster_id).first()
     if not topster:
         raise HTTPException(status_code=404, detail="탑스터를 찾을 수 없습니다")
-    if not topster.is_public and (not current_user or current_user.id != topster.user_id):
-        raise HTTPException(status_code=403, detail="비공개 탑스터입니다")
     return _build_response(topster, db)
 
 
@@ -168,9 +163,6 @@ def update_topster(
         value = getattr(body, f)
         if value is not None:
             setattr(topster, f, value)
-    if body.is_public is not None:
-        topster.is_public = body.is_public
-
     if body.items is not None:
         db.query(TopsterItem).filter_by(topster_id=topster.id).delete()
         for item in body.items:
@@ -212,7 +204,7 @@ def list_user_topsters(
 ):
     topsters = (
         db.query(Topster)
-        .filter_by(user_id=user_id, is_public=True)
+        .filter_by(user_id=user_id)
         .order_by(Topster.created_at.desc())
         .offset(offset)
         .limit(limit)

@@ -61,7 +61,6 @@ export default function EditTopsterPage() {
     return {
       title: topster.title,
       description: topster.description,
-      isPublic: topster.is_public,
       options: {
         width: topster.width,
         height: topster.height,

@@ -172,7 +172,6 @@ export default function ProfilePage() {
                 key={t.id}
                 topster={t}
                 showAuthor={false}
-                showVisibility
                 actions={
                   <OwnerItemActions
                     editHref={`/topsters/${t.id}/edit`}

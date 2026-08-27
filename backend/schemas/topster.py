@@ -47,7 +47,6 @@ class TopsterOptions(BaseModel):
 class TopsterCreate(TopsterOptions):
     title: str
     description: str = ""
-    is_public: bool = True
     items: list[TopsterItemCreate] = []
 
     @field_validator("items")
@@ -69,7 +68,6 @@ class TopsterCreate(TopsterOptions):
 class TopsterUpdate(BaseModel):
     title: str | None = None
     description: str | None = None
-    is_public: bool | None = None
     width: int | None = Field(None, ge=MIN_SIDE, le=MAX_SIDE)
     height: int | None = Field(None, ge=MIN_SIDE, le=MAX_SIDE)
     background_color: str | None = Field(None, pattern=HEX_COLOR)
@@ -92,7 +90,6 @@ class TopsterResponse(BaseModel):
     id: UUIDStr
     title: str
     description: str
-    is_public: bool
     width: int
     height: int
     background_color: str
