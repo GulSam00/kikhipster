@@ -15,8 +15,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { apiFetch } from '@/lib/api';
-import { ItemFallbackIcon } from '@/components/music/PoolItemTile';
-import { Badge } from '@/components/ui/badge';
+import PoolItemTile, { ItemFallbackIcon } from '@/components/music/PoolItemTile';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -424,20 +423,12 @@ export default function TournamentEditor({ initial, onSubmit, backHref, extraAct
       {pool.length > 0 && (
         <>
           <Separator className="mb-3" />
-          <p className="mb-2 text-sm font-medium">담긴 목록</p>
-          <div className="mb-4 flex flex-wrap gap-1.5">
+          <p className="mb-2 text-sm font-medium tabular-nums">담긴 목록 {pool.length}</p>
+          {/* 상세 페이지의 후보 그리드(PoolItemTile)와 같은 모양으로 맞춘다 — 담기 전과 후가
+              같아 보여야 무엇이 담겼는지 알아보기 쉽다. 커버는 이미 메모리에 있어 추가 요청이 없다. */}
+          <div className="mb-4 grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-6">
             {pool.map((p) => (
-              <Badge
-                key={p.id}
-                variant="secondary"
-                asChild
-                className="max-w-52 cursor-pointer transition-colors hover:bg-destructive/20 hover:text-destructive"
-              >
-                <button type="button" onClick={() => toggleItem(p)}>
-                  <span className="truncate">{p.title}</span>
-                  <X className="size-3 shrink-0" />
-                </button>
-              </Badge>
+              <PickedTile key={p.id} item={p} itemType={itemType} onRemove={() => toggleItem(p)} />
             ))}
           </div>
         </>
@@ -486,6 +477,41 @@ function StepHeader({
       <p className="mb-1 text-xs text-muted-foreground tabular-nums">{step} / {total}</p>
       <h1 className="mb-6 font-heading text-2xl font-bold">{title}</h1>
     </>
+  );
+}
+
+/**
+ * 담긴 목록의 타일. 상세 페이지와 같은 `PoolItemTile` 위에 '빼기' 버튼만 얹는다.
+ *
+ * 버튼을 중립(secondary)으로 두고 hover에서만 destructive로 가는 건 예전 Badge 목록의
+ * 동작을 그대로 이은 것이다. 타일마다 붉은 버튼을 상시 노출하면 풀이 커질수록
+ * 화면이 경고문처럼 보인다 — DESIGN.md § Color budget 상 destructive는 삭제 맥락에만 쓴다.
+ */
+function PickedTile({
+  item,
+  itemType,
+  onRemove,
+}: {
+  item: PoolItem;
+  itemType: TournamentItemType;
+  onRemove: () => void;
+}) {
+  return (
+    <div className="relative">
+      <PoolItemTile item={item} itemType={itemType} />
+      <Button
+        type="button"
+        variant="secondary"
+        size="icon"
+        onClick={onRemove}
+        aria-label={`${item.title} 빼기`}
+        // size-8(32px)에 after로 히트 영역을 사방 6px 넓혀 44px를 채운다
+        // (components/ui/checkbox.tsx가 쓰는 것과 같은 기법).
+        className="absolute top-1 right-1 size-8 rounded-full after:absolute after:-inset-1.5 hover:bg-destructive hover:text-destructive-foreground"
+      >
+        <X className="size-3.5" />
+      </Button>
+    </div>
   );
 }
 
