@@ -8,7 +8,14 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from database import get_db
-from services.music_cache import get_cached, put_cached
+from services.music_cache import (
+    DETAIL_TTL_DAYS,
+    LISTING_TTL_DAYS,
+    get_cached,
+    get_cached_one,
+    put_cached,
+    put_cached_one,
+)
 from schemas.music import (
     AlbumSummary,
     AlbumWithTracks,
@@ -24,6 +31,16 @@ router = APIRouter(prefix="/api/music", tags=["music"])
 # 월드컵 풀이 최대 512개라 그만큼은 한 번에 받을 수 있어야 한다.
 # 실제 iTunes 호출은 services/music_api.py 가 150개씩 청크로 쪼개 처리한다.
 MAX_LOOKUP_IDS = 512
+
+
+class _AlbumListPayload(BaseModel):
+    """목록 응답을 캐시에 넣기 위한 래퍼. JSONB 컬럼이라 최상위가 dict여야 한다."""
+
+    items: list[AlbumSummary]
+
+
+class _TrackListPayload(BaseModel):
+    items: list[TrackSearchItem]
 
 
 def _parse_ids(raw: str) -> list[str]:
@@ -86,6 +103,48 @@ async def _lookup_with_cache(
     return [merged[i] for i in ids if i in merged]
 
 
+async def _detail_with_cache(
+    db: Session,
+    item_type: str,
+    key: str,
+    fetch: Callable[[], Awaitable[dict]],
+    model: type[BaseModel],
+    ttl_days: int,
+) -> dict:
+    """단건 조회 경로의 캐시 래퍼. 배치 경로와 같은 테이블을 쓰되 item_type 으로 갈린다.
+
+    캐시를 스키마로 한 번 검증하는 이유는 배치 경로와 같다 — 매핑이나 스키마가 바뀌면
+    예전 payload가 더는 안 맞고, 그대로 돌려주면 직렬화에서 500이 난다. 검증에 실패하면
+    미스로 취급해 다시 받아오고 덮어쓴다.
+    """
+    cached = await run_in_threadpool(get_cached_one, db, item_type, key, ttl_days)
+    if cached is not None:
+        try:
+            model.model_validate(cached)
+            return cached
+        except Exception:
+            pass
+
+    data = await fetch()
+    await run_in_threadpool(put_cached_one, db, item_type, key, data)
+    return data
+
+
+async def _warm_item_cache(db: Session, item_type: str, items: list[dict]) -> None:
+    """검색 결과를 배치 캐시에 미리 적어 둔다.
+
+    검색 응답의 항목은 배치 조회 응답과 **같은 스키마**(AlbumSummary / TrackSearchItem)라
+    그대로 재사용할 수 있다. 탑스터·월드컵을 만드는 흐름이 늘 "검색 → 고르기 → 저장 →
+    목록에서 커버 배치 조회"라서, 여기서 적어 두면 저장 직후의 배치 조회가 캐시에 맞는다.
+
+    `requested` 를 비워 넘기는 게 중요하다 — 넘기면 검색에 안 걸린 ID를 tombstone 으로
+    남기는데, 여기서는 "요청한 ID" 자체가 없다.
+    """
+    if not items:
+        return
+    await run_in_threadpool(put_cached, db, item_type, items, [])
+
+
 
 @router.get("/search/artists", response_model=SearchArtistsResponse)
 async def search_artists(
@@ -107,22 +166,36 @@ async def search_albums(
     include_singles: bool = Query(
         False, description='iTunes가 " - Single" / " - EP" 로 표기한 항목을 포함할지'
     ),
+    db: Session = Depends(get_db),
 ):
     """앨범 검색. 기본적으로 싱글·EP는 제외한다 — 탑스터·월드컵에 담을 '앨범'을 고르는 자리다.
 
     ID 배치 조회(`/albums?ids=`)에는 이 필터를 걸지 않는다. 이미 저장된 탑스터가 싱글을
     담고 있으면 그 커버가 안 나와 화면이 깨진다.
+
+    검색 자체는 캐시하지 않는다(질의어마다 키가 갈려 적중률이 낮다). 대신 결과로 받은
+    개별 앨범을 배치 캐시에 적어 둔다 — 사용자가 곧 그중 몇 개를 골라 저장하기 때문이다.
     """
     service = request.app.state.music_service
-    return await service.search_albums(
+    result = await service.search_albums(
         q, market=market, limit=limit, include_singles=include_singles
     )
+    await _warm_item_cache(db, "album", result.get("items", []))
+    return result
 
 
 @router.get("/artists/{artist_id}", response_model=ArtistDetail)
-async def get_artist_detail(request: Request, artist_id: str):
+async def get_artist_detail(request: Request, artist_id: str, db: Session = Depends(get_db)):
+    """아티스트 상세. 이름·장르는 사실상 불변이라 길게 캐시한다."""
     service = request.app.state.music_service
-    return await service.get_artist_detail(artist_id)
+    return await _detail_with_cache(
+        db,
+        "artist_detail",
+        artist_id,
+        lambda: service.get_artist_detail(artist_id),
+        ArtistDetail,
+        DETAIL_TTL_DAYS,
+    )
 
 
 @router.get("/artists/{artist_id}/albums", response_model=list[AlbumSummary])
@@ -134,12 +207,31 @@ async def get_artist_albums(
     include_singles: bool = Query(
         False, description='iTunes가 " - Single" / " - EP" 로 표기한 항목을 포함할지'
     ),
+    db: Session = Depends(get_db),
 ):
-    """아티스트의 앨범 목록. 앨범 검색과 같은 기준으로 싱글·EP를 기본 제외한다."""
+    """아티스트의 앨범 목록. 앨범 검색과 같은 기준으로 싱글·EP를 기본 제외한다.
+
+    **응답을 가르는 파라미터를 전부 캐시 키에 넣는다.** market·limit·include_singles 중
+    하나라도 빠지면 필터를 끈 요청이 켠 결과를 받는 식으로 섞인다.
+    TTL이 짧은 쪽(LISTING)인 이유는 신보가 나오면 목록이 실제로 바뀌기 때문이다.
+    """
     service = request.app.state.music_service
-    return await service.get_artist_albums(
-        artist_id, market=market, limit=limit, include_singles=include_singles
+    key = f"{artist_id}:{market}:{limit}:{int(include_singles)}"
+
+    async def fetch() -> dict:
+        albums = await service.get_artist_albums(
+            artist_id, market=market, limit=limit, include_singles=include_singles
+        )
+        # 캐시 payload는 dict여야 한다(JSONB 컬럼) — 목록은 한 겹 감싼다.
+        return {"items": albums}
+
+    cached = await _detail_with_cache(
+        db, "artist_albums", key, fetch, _AlbumListPayload, LISTING_TTL_DAYS
     )
+    items = cached["items"]
+    # 목록 항목도 배치 캐시에 적어 둔다 — 아티스트 페이지에서 고른 앨범이 곧 탑스터로 간다.
+    await _warm_item_cache(db, "album", items)
+    return items
 
 
 @router.get("/albums/{album_id}/tracks", response_model=AlbumWithTracks)
@@ -147,9 +239,20 @@ async def get_album_tracks(
     request: Request,
     album_id: str,
     market: str = Query("KR", description="마켓 코드"),
+    db: Session = Depends(get_db),
 ):
+    """앨범 상세 + 트랙 목록. 발매된 앨범의 트랙 구성은 바뀌지 않아 길게 캐시한다."""
     service = request.app.state.music_service
-    return await service.get_album_tracks(album_id, market=market)
+    result = await _detail_with_cache(
+        db,
+        "album_tracks",
+        f"{album_id}:{market}",
+        lambda: service.get_album_tracks(album_id, market=market),
+        AlbumWithTracks,
+        DETAIL_TTL_DAYS,
+    )
+    await _warm_item_cache(db, "track", result.get("tracks", []))
+    return result
 
 
 @router.get("/artists/{artist_id}/top-tracks", response_model=list[TrackSearchItem])
@@ -157,9 +260,20 @@ async def get_artist_top_tracks(
     request: Request,
     artist_id: str,
     market: str = Query("KR", description="마켓 코드"),
+    db: Session = Depends(get_db),
 ):
+    """아티스트의 트랙 목록. 앨범 목록과 같은 이유로 TTL이 짧다."""
     service = request.app.state.music_service
-    return await service.get_artist_top_tracks(artist_id, market=market)
+
+    async def fetch() -> dict:
+        return {"items": await service.get_artist_top_tracks(artist_id, market=market)}
+
+    cached = await _detail_with_cache(
+        db, "artist_top_tracks", f"{artist_id}:{market}", fetch, _TrackListPayload, LISTING_TTL_DAYS
+    )
+    items = cached["items"]
+    await _warm_item_cache(db, "track", items)
+    return items
 
 
 @router.get("/search/tracks", response_model=SearchTracksResponse)
@@ -168,9 +282,13 @@ async def search_tracks(
     q: str = Query(..., min_length=1, description="검색어"),
     market: str = Query("KR", description="마켓 코드 (예: KR, JP, US)"),
     limit: int = Query(20, ge=1, le=50, description="최대 결과 수"),
+    db: Session = Depends(get_db),
 ):
+    """곡 검색. 앨범 검색과 같은 이유로 결과 항목만 배치 캐시에 적어 둔다."""
     service = request.app.state.music_service
-    return await service.search_tracks(q, market=market, limit=limit)
+    result = await service.search_tracks(q, market=market, limit=limit)
+    await _warm_item_cache(db, "track", result.get("items", []))
+    return result
 
 
 @router.get("/tracks", response_model=list[TrackSearchItem])

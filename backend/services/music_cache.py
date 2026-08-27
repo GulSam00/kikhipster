@@ -10,12 +10,16 @@ iTunes를 수백 개 ID만큼 두드리게 된다. 그런데 "앨범 1097861387�
 """
 from __future__ import annotations
 
+import logging
 from datetime import datetime, timedelta
 
+from sqlalchemy import or_
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.orm import Session
 
 from models.music_cache import MusicCache
+
+logger = logging.getLogger(__name__)
 
 # 릴리스된 앨범/트랙의 메타데이터는 사실상 불변이라 길게 잡아도 된다.
 # 그래도 무한은 아니다 — 아트워크 경로가 갈리거나 우리 매핑 로직이 바뀔 수 있다.
@@ -26,6 +30,14 @@ CACHE_TTL_DAYS = 30
 # 앨범 ID가 실제로 존재한다(1508421225, 754383858 등에서 확인).
 # 다만 '없음'은 '있음'보다 뒤집힐 여지가 크므로(재등록 등) TTL을 짧게 둔다.
 MISSING_TTL_DAYS = 1
+
+# 단건 조회 경로(아티스트 상세, 앨범 트랙 등)의 TTL.
+#
+# 두 종류로 나눈 이유: "이 앨범의 트랙 목록"이나 "이 아티스트가 누구냐"는 배치 조회와
+# 마찬가지로 사실상 불변이지만, **"이 아티스트의 앨범 목록"은 신보가 나오면 바뀐다.**
+# 목록류에 30일을 걸면 새 앨범이 한 달 동안 안 보인다.
+DETAIL_TTL_DAYS = 30
+LISTING_TTL_DAYS = 1
 
 
 def get_cached(db: Session, item_type: str, ids: list[str]) -> tuple[dict[str, dict], set[str]]:
@@ -86,3 +98,65 @@ def put_cached(db: Session, item_type: str, items: list[dict], requested: list[s
     )
     db.execute(stmt)
     db.commit()
+
+
+def get_cached_one(db: Session, item_type: str, key: str, ttl_days: int) -> dict | None:
+    """단건 조회 경로용. 만료되지 않은 payload를 돌려주고, 없거나 만료면 None.
+
+    배치 경로(get_cached)와 달리 tombstone을 쓰지 않는다 — 단건 조회는 "없음"이 곧 404라
+    응답 자체가 다르고, 그 404를 캐싱해 봐야 아낄 왕복이 거의 없다.
+    """
+    row = (
+        db.query(MusicCache)
+        .filter(MusicCache.item_type == item_type, MusicCache.item_id == key)
+        .first()
+    )
+    if row is None or row.payload is None:
+        return None
+    if row.fetched_at < datetime.utcnow() - timedelta(days=ttl_days):
+        return None
+    return row.payload
+
+
+def put_cached_one(db: Session, item_type: str, key: str, payload: dict) -> None:
+    """단건 조회 결과를 upsert한다."""
+    stmt = insert(MusicCache).values(
+        item_type=item_type, item_id=key, payload=payload, fetched_at=datetime.utcnow()
+    )
+    stmt = stmt.on_conflict_do_update(
+        index_elements=["item_type", "item_id"],
+        set_={"payload": stmt.excluded.payload, "fetched_at": stmt.excluded.fetched_at},
+    )
+    db.execute(stmt)
+    db.commit()
+
+
+def purge_expired(db: Session) -> int:
+    """TTL이 지난 행을 지우고 지운 개수를 돌려준다.
+
+    만료된 행은 다시 조회되면 덮어써지지만, **다시 조회되지 않는 행은 영원히 남는다** —
+    한 번 보고 만 앨범, 지워진 탑스터가 참조하던 커버 따위가 그렇다. 그래서 주기적으로 턴다.
+
+    TTL이 종류마다 다르므로(tombstone 1일 / 목록 1일 / 그 외 30일) 가장 긴 TTL을 넘긴 것과
+    tombstone 중 만료된 것을 함께 지운다. 단건 목록 캐시(LISTING_TTL_DAYS)는 30일까지
+    남아 있어도 조회 시점에 만료로 걸러지므로 정확성 문제는 없다 — 여기서는 공간만 회수한다.
+    """
+    now = datetime.utcnow()
+    deleted = (
+        db.query(MusicCache)
+        .filter(
+            or_(
+                # tombstone: 짧은 TTL
+                (MusicCache.payload.is_(None))
+                & (MusicCache.fetched_at < now - timedelta(days=MISSING_TTL_DAYS)),
+                # 실제 데이터: 가장 긴 TTL 기준
+                (MusicCache.payload.isnot(None))
+                & (MusicCache.fetched_at < now - timedelta(days=CACHE_TTL_DAYS)),
+            )
+        )
+        .delete(synchronize_session=False)
+    )
+    db.commit()
+    if deleted:
+        logger.info("music_cache: 만료 행 %d개 정리", deleted)
+    return deleted
