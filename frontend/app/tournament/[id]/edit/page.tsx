@@ -2,13 +2,11 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { apiFetch, ApiError } from '@/lib/api';
 import TournamentEditor, {
   type TournamentEditorInitial,
 } from '@/components/music/TournamentEditor';
-import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
 import { fetchPoolItems } from '@/lib/pool-item';
 import { useMe } from '@/lib/use-me';
@@ -21,7 +19,6 @@ export default function EditTournamentPage() {
   const [tournament, setTournament] = useState<TournamentDetail | null>(null);
   const [initial, setInitial] = useState<TournamentEditorInitial | null>(null);
   const [loading, setLoading] = useState(true);
-  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     let alive = true;
@@ -77,27 +74,6 @@ export default function EditTournamentPage() {
     router.push(`/tournament/${id}`);
   }
 
-  async function doDelete() {
-    setDeleting(true);
-    try {
-      await apiFetch(`/api/tournaments/${id}`, { method: 'DELETE' });
-      toast.success('월드컵을 삭제했습니다');
-      router.push('/tournament');
-    } catch {
-      toast.error('삭제에 실패했습니다');
-      setDeleting(false);
-    }
-  }
-
-  function confirmDelete() {
-    toast.warning('이 월드컵을 삭제할까요?', {
-      id: 'tournament-delete-confirm',
-      description: '플레이 기록·랭킹·댓글이 함께 지워지고 되돌릴 수 없습니다.',
-      duration: 10000,
-      action: { label: '삭제', onClick: () => void doDelete() },
-      cancel: { label: '취소', onClick: () => toast.dismiss('tournament-delete-confirm') },
-    });
-  }
 
   if (loading) {
     return (
@@ -132,12 +108,6 @@ export default function EditTournamentPage() {
       initial={initial}
       onSubmit={save}
       backHref={`/tournament/${id}`}
-      extraActions={
-        <Button onClick={confirmDelete} disabled={deleting} variant="destructive" size="lg" className="h-11">
-          <Trash2 />
-          {deleting ? '삭제 중...' : '삭제'}
-        </Button>
-      }
     />
   );
 }

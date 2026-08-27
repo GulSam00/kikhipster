@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { BarChart3 } from 'lucide-react';
 import { apiFetch } from '@/lib/api';
 import CommentSection from '@/components/music/CommentSection';
-import OwnerEditButton from '@/components/music/OwnerEditButton';
+import OwnerActions from '@/components/music/OwnerActions';
 import PlayStarter from '@/components/music/PlayStarter';
 import PoolGrid from '@/components/music/PoolGrid';
 import ShareButton from '@/components/music/ShareButton';
@@ -63,9 +63,13 @@ export default async function TournamentDetailPage({
         </Button>
         <ShareButton path={`/tournament/${tournament.id}`} />
         {/* 이 페이지는 Server Component라 로그인 사용자를 모른다 — 버튼만 클라이언트로 뺐다. */}
-        <OwnerEditButton
+        <OwnerActions
           ownerId={tournament.user.id}
-          href={`/tournament/${tournament.id}/edit`}
+          editHref={`/tournament/${tournament.id}/edit`}
+          deletePath={`/api/tournaments/${tournament.id}`}
+          name={tournament.title}
+          losesOnDelete="플레이 기록·랭킹·댓글이 함께 지워집니다."
+          redirectTo="/tournament"
         />
       </div>
 

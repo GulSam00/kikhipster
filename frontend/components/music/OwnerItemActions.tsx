@@ -1,11 +1,9 @@
 'use client';
 
-import { useState } from 'react';
 import Link from 'next/link';
 import { Pencil, Trash2 } from 'lucide-react';
-import { toast } from 'sonner';
-import { apiFetch } from '@/lib/api';
 import { Button } from '@/components/ui/button';
+import { useDeleteItem } from '@/lib/use-delete-item';
 
 interface Props {
   /** 수정 화면 경로. */
@@ -33,30 +31,13 @@ export default function OwnerItemActions({
   losesOnDelete,
   onDeleted,
 }: Props) {
-  const [deleting, setDeleting] = useState(false);
-
-  async function doDelete() {
-    setDeleting(true);
-    try {
-      await apiFetch(deletePath, { method: 'DELETE' });
-      toast.success(`'${name}' 을(를) 삭제했습니다`);
-      onDeleted();
-    } catch {
-      toast.error('삭제에 실패했습니다');
-      setDeleting(false);
-    }
-  }
-
-  function confirmDelete() {
-    // 토스트는 저절로 사라지므로 방치하면 '취소'와 같은 결과가 된다 — 안전한 쪽이 기본값이다.
-    toast.warning(`'${name}' 을(를) 삭제할까요?`, {
-      id: deletePath,
-      description: `${losesOnDelete} 되돌릴 수 없습니다.`,
-      duration: 10000,
-      action: { label: '삭제', onClick: () => void doDelete() },
-      cancel: { label: '취소', onClick: () => toast.dismiss(deletePath) },
-    });
-  }
+  // 확인 문구와 동작은 상세 페이지의 삭제(`OwnerActions`)와 공유한다.
+  const { confirmDelete, deleting } = useDeleteItem({
+    deletePath,
+    name,
+    losesOnDelete,
+    onDeleted,
+  });
 
   return (
     <div className="flex gap-1">

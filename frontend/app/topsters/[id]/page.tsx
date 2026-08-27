@@ -3,25 +3,22 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import { Pencil } from 'lucide-react';
 import { toast } from 'sonner';
 import { apiFetch, ApiError } from '@/lib/api';
 import CommentSection from '@/components/music/CommentSection';
 import LikeButton from '@/components/music/LikeButton';
+import OwnerActions from '@/components/music/OwnerActions';
 import ShareButton from '@/components/music/ShareButton';
 import TopsterCanvas from '@/components/music/TopsterCanvas';
-import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Spinner } from '@/components/ui/spinner';
 import { useAlbumItems } from '@/lib/album-covers';
-import { useMe } from '@/lib/use-me';
 import type { Topster } from '@/types/topster';
 
 export default function TopsterDetailPage() {
   const { id } = useParams<{ id: string }>();
   const [topster, setTopster] = useState<Topster | null>(null);
   const [loading, setLoading] = useState(true);
-  const me = useMe();
   const albumIds = useMemo(
     () => topster?.items.map((it) => it.album_spotify_id) ?? [],
     [topster],
@@ -56,8 +53,6 @@ export default function TopsterDetailPage() {
     );
   }
 
-  const isOwner = me?.id === topster.user.id;
-
   return (
     <div className="mx-auto w-full max-w-5xl px-4 py-8">
       <div className="mb-6">
@@ -84,15 +79,16 @@ export default function TopsterDetailPage() {
       <div className="mb-8 flex items-center gap-2">
         <LikeButton targetType="topster" targetId={topster.id} name={topster.title} />
         <ShareButton path={`/topsters/${topster.id}`} label="링크 복사" className="rounded-full" />
-        {/* 격자·배경색·넘버링까지 전부 수정 화면에서 고친다 — 삭제도 거기 있다. */}
-        {isOwner && (
-          <Button asChild size="lg" variant="secondary" className="rounded-full">
-            <Link href={`/topsters/${topster.id}/edit`}>
-              <Pencil />
-              수정
-            </Link>
-          </Button>
-        )}
+        {/* 격자·배경색·넘버링은 수정 화면에서 고친다. 삭제는 2026-08-27부터 여기에 있다. */}
+        <OwnerActions
+          ownerId={topster.user.id}
+          editHref={`/topsters/${topster.id}/edit`}
+          deletePath={`/api/topsters/${topster.id}`}
+          name={topster.title}
+          losesOnDelete="댓글도 함께 지워집니다."
+          redirectTo="/topsters"
+          buttonClassName="rounded-full"
+        />
       </div>
 
       <Separator className="mb-6" />

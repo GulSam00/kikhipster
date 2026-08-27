@@ -2,11 +2,9 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { apiFetch, ApiError } from '@/lib/api';
 import TopsterEditor, { type TopsterEditorInitial } from '@/components/music/TopsterEditor';
-import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
 import { useAlbumItems } from '@/lib/album-covers';
 import type { PoolItem } from '@/lib/pool-item';
@@ -19,7 +17,6 @@ export default function EditTopsterPage() {
   const me = useMe();
   const [topster, setTopster] = useState<Topster | null>(null);
   const [loading, setLoading] = useState(true);
-  const [deleting, setDeleting] = useState(false);
 
   const albumIds = useMemo(
     () => topster?.items.map((it) => it.album_spotify_id) ?? [],
@@ -85,32 +82,6 @@ export default function EditTopsterPage() {
     router.push(`/topsters/${id}`);
   }
 
-  async function doRemove() {
-    setDeleting(true);
-    try {
-      await apiFetch(`/api/topsters/${id}`, { method: 'DELETE' });
-      toast.success('탑스터를 삭제했습니다');
-      router.push('/topsters');
-    } catch {
-      toast.error('삭제에 실패했습니다');
-      setDeleting(false);
-    }
-  }
-
-  /**
-   * 삭제 확인. 되돌릴 수 없는 동작이라 한 번 묻는다.
-   * 토스트는 저절로 사라지므로 그냥 두면 '취소'와 같은 결과가 된다 — 안전한 쪽이 기본값이다.
-   * 놓치지 않게 기본(4초)보다 길게 두고, 연타해도 쌓이지 않도록 id를 고정한다.
-   */
-  function confirmRemove() {
-    toast.warning('이 탑스터를 삭제할까요?', {
-      id: 'topster-delete-confirm',
-      description: '댓글도 함께 지워지고 되돌릴 수 없습니다.',
-      duration: 10000,
-      action: { label: '삭제', onClick: () => void doRemove() },
-      cancel: { label: '취소', onClick: () => toast.dismiss('topster-delete-confirm') },
-    });
-  }
 
   if (loading || (topster && !ready)) {
     return (
@@ -147,18 +118,6 @@ export default function EditTopsterPage() {
       savingLabel="저장 중..."
       initial={initial}
       onSubmit={save}
-      extraActions={
-        <Button
-          onClick={confirmRemove}
-          disabled={deleting}
-          variant="destructive"
-          size="lg"
-          className="h-11"
-        >
-          <Trash2 />
-          {deleting ? '삭제 중...' : '삭제'}
-        </Button>
-      }
     />
   );
 }
