@@ -5,7 +5,7 @@ import random
 from datetime import datetime, timedelta
 
 from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy import func, or_
+from sqlalchemy import distinct, func, or_, select
 from sqlalchemy.orm import Session, joinedload
 
 from database import get_db
@@ -406,33 +406,65 @@ def create_play(
 # --------------------------------------------------------------------------
 
 
-def _aggregate(rounds, plays_by_id, item_ids, cutoff=None):
+def _aggregate(db: Session, tournament_id, item_ids, cutoff=None):
+    """항목별 누적 성적을 **DB에서** 집계한다.
+
+    예전에는 이 월드컵의 플레이·라운드를 전부 파이썬으로 끌어와 두 번(현재/과거) 돌았다.
+    플레이가 쌓일수록 전송량과 루프가 같이 늘어서 SQL 쪽으로 내렸다 — 돌려주는 값은 같다.
+
+    `cutoff` 를 주면 그 시각 **이전에 시작된** 플레이만 센다(과거 스냅샷).
+    """
     stats = {
-        item_id: {"plays": set(), "championships": 0, "matches": 0, "match_wins": 0}
+        item_id: {"plays": 0, "championships": 0, "matches": 0, "match_wins": 0}
         for item_id in item_ids
     }
 
-    for r in rounds:
-        play = plays_by_id.get(r.play_id)
-        if play is None:
-            continue
-        if cutoff is not None and play.created_at >= cutoff:
-            continue
+    play_where = [TournamentPlay.tournament_id == tournament_id]
+    if cutoff is not None:
+        play_where.append(TournamentPlay.created_at < cutoff)
 
-        for item_id in (r.item_a_id, r.item_b_id):
-            if item_id in stats:
-                stats[item_id]["plays"].add(r.play_id)
-                # 아직 투표되지 않은 경기는 1:1 표본에 넣지 않는다.
-                if r.winner_id:
-                    stats[item_id]["matches"] += 1
-        if r.winner_id in stats:
-            stats[r.winner_id]["match_wins"] += 1
+    # 한 라운드는 item_a/item_b 두 칸을 쓴다. 항목 기준으로 group by 하려면
+    # 두 칸을 한 열로 펼쳐야 한다.
+    def _side(column):
+        return (
+            select(
+                TournamentRound.play_id.label("play_id"),
+                column.label("item_id"),
+                TournamentRound.winner_id.label("winner_id"),
+            )
+            .join(TournamentPlay, TournamentPlay.id == TournamentRound.play_id)
+            .where(*play_where)
+        )
 
-    for play in plays_by_id.values():
-        if cutoff is not None and play.created_at >= cutoff:
-            continue
-        if play.winner_item_id in stats:
-            stats[play.winner_item_id]["championships"] += 1
+    sides = _side(TournamentRound.item_a_id).union_all(_side(TournamentRound.item_b_id)).subquery()
+
+    round_rows = db.execute(
+        select(
+            sides.c.item_id,
+            func.count(distinct(sides.c.play_id)),
+            # 아직 투표되지 않은 경기는 1:1 표본에 넣지 않는다.
+            func.count().filter(sides.c.winner_id.isnot(None)),
+            func.count().filter(sides.c.winner_id == sides.c.item_id),
+        ).group_by(sides.c.item_id)
+    ).all()
+
+    for item_id, plays, matches, match_wins in round_rows:
+        s = stats.get(item_id)
+        if s is None:
+            continue  # 풀에서 빠진 항목의 과거 기록 — 랭킹에 넣지 않는다
+        s["plays"] = plays
+        s["matches"] = matches
+        s["match_wins"] = match_wins
+
+    champ_rows = db.execute(
+        select(TournamentPlay.winner_item_id, func.count())
+        .where(*play_where, TournamentPlay.winner_item_id.isnot(None))
+        .group_by(TournamentPlay.winner_item_id)
+    ).all()
+
+    for item_id, count in champ_rows:
+        if item_id in stats:
+            stats[item_id]["championships"] = count
 
     return stats
 
@@ -441,7 +473,7 @@ def _rank(stats) -> dict[str, int]:
     """우승 비율 → 승률 → 참가 횟수 순으로 정렬해 1부터 순위를 매긴다."""
     rows = []
     for item_id, s in stats.items():
-        plays = len(s["plays"])
+        plays = s["plays"]
         rows.append((
             item_id,
             s["championships"] / plays if plays else 0.0,
@@ -463,20 +495,17 @@ def get_tournament_ranking(tournament_id: str, db: Session = Depends(get_db)):
     tournament = _get_tournament_or_404(tournament_id, db)
     item_ids = [i.item_id for i in tournament.items]
 
-    plays_by_id = {
-        p.id: p for p in db.query(TournamentPlay).filter_by(tournament_id=tournament.id).all()
-    }
-    rounds = (
-        db.query(TournamentRound).filter(TournamentRound.play_id.in_(plays_by_id.keys())).all()
-        if plays_by_id
-        else []
+    total_plays = db.scalar(
+        select(func.count())
+        .select_from(TournamentPlay)
+        .where(TournamentPlay.tournament_id == tournament.id)
     )
 
-    current_stats = _aggregate(rounds, plays_by_id, item_ids)
+    current_stats = _aggregate(db, tournament.id, item_ids)
     current_rank = _rank(current_stats)
 
     cutoff = datetime.utcnow() - timedelta(days=TREND_DAYS)
-    past_stats = _aggregate(rounds, plays_by_id, item_ids, cutoff=cutoff)
+    past_stats = _aggregate(db, tournament.id, item_ids, cutoff=cutoff)
     # 기준 시점에 표본이 하나도 없던 항목은 "신규"로 두고 추이를 비운다.
     had_history = {i for i, s in past_stats.items() if s["plays"]}
     past_rank = _rank({i: s for i, s in past_stats.items() if i in had_history})
@@ -484,7 +513,7 @@ def get_tournament_ranking(tournament_id: str, db: Session = Depends(get_db)):
     items = []
     for item_id in sorted(item_ids, key=lambda i: current_rank[i]):
         s = current_stats[item_id]
-        plays = len(s["plays"])
+        plays = s["plays"]
         previous = past_rank.get(item_id)
         items.append(TournamentRankingItem(
             rank=current_rank[item_id],
@@ -503,7 +532,7 @@ def get_tournament_ranking(tournament_id: str, db: Session = Depends(get_db)):
         tournament_id=str(tournament.id),
         title=tournament.title,
         item_type=tournament.item_type,
-        total_plays=len(plays_by_id),
+        total_plays=total_plays,
         trend_days=TREND_DAYS,
         items=items,
     )
