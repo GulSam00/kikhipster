@@ -4,6 +4,7 @@ import Navbar from "@/components/layout/Navbar";
 import MiniPlayer from "@/components/layout/MiniPlayer";
 import { PlayerProvider } from "@/contexts/PlayerContext";
 import { Toaster } from "@/components/ui/sonner";
+import { SITE_NAME, siteUrl } from "@/lib/site";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -12,8 +13,20 @@ const geistSans = Geist({
 });
 
 export const metadata: Metadata = {
-  title: "kikhipster",
+  // 페이지별 OG 태그가 상대 경로를 절대 URL로 풀 기준. 없으면 Next가 빌드에서 경고하고
+  // 크롤러는 이미지 경로를 해석하지 못한다.
+  metadataBase: new URL(siteUrl()),
+  title: {
+    default: SITE_NAME,
+    // 상세 페이지들이 제목만 주면 여기 붙는다.
+    template: `%s · ${SITE_NAME}`,
+  },
   description: "음악 탑스터, 토너먼트, 아티스트 탐색 서비스",
+  openGraph: {
+    siteName: SITE_NAME,
+    type: "website",
+    locale: "ko_KR",
+  },
 };
 
 export default function RootLayout({

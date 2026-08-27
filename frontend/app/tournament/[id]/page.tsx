@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { BarChart3 } from 'lucide-react';
 import { apiFetch } from '@/lib/api';
@@ -19,6 +20,32 @@ import type { TournamentDetail } from '@/types/tournament';
  * 나머지는 `PoolGrid` 의 "더 보기"로 사용자가 원할 때 이어 받는다.
  */
 const POOL_PREVIEW_LIMIT = 24;
+
+/**
+ * 공유했을 때 보이는 제목·설명. 썸네일은 같은 폴더의 `opengraph-image.tsx` 가 그린다
+ * (Next가 파일 이름만으로 `og:image` 를 붙여준다 — 여기서 images를 지정할 필요가 없다).
+ */
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  const { id } = await params;
+  try {
+    const t = await apiFetch<TournamentDetail>(`/api/tournaments/${id}`);
+    const summary =
+      t.description ||
+      `${ITEM_TYPE_LABEL[t.item_type]} ${t.item_count}개로 겨루는 월드컵 · 플레이 ${t.play_count}회`;
+    return {
+      title: t.title,
+      description: summary,
+      openGraph: { title: t.title, description: summary, type: 'article' },
+    };
+  } catch {
+    // 없는 월드컵이면 페이지 렌더에서 어차피 에러 경계로 간다 — 메타에서 터뜨리지 않는다.
+    return { title: '월드컵' };
+  }
+}
 
 export default async function TournamentDetailPage({
   params,
