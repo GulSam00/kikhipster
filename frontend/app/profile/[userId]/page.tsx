@@ -1,11 +1,14 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { LayoutGrid, TriangleAlert, Trophy, UserX } from 'lucide-react';
 import { toast } from 'sonner';
 import { apiFetch, ApiError } from '@/lib/api';
+import { useInfiniteList } from '@/lib/use-infinite-list';
+import InfiniteListFooter from '@/components/music/InfiniteListFooter';
+import { Skeleton } from '@/components/ui/skeleton';
 import TopsterCard from '@/components/music/TopsterCard';
 import TournamentCard from '@/components/music/TournamentCard';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
@@ -26,8 +29,6 @@ interface PublicUser {
 export default function UserProfilePage() {
   const { userId } = useParams<{ userId: string }>();
   const [user, setUser] = useState<PublicUser | null>(null);
-  const [topsters, setTopsters] = useState<Topster[]>([]);
-  const [tournaments, setTournaments] = useState<TournamentSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
   const [loadError, setLoadError] = useState(false);
@@ -36,14 +37,7 @@ export default function UserProfilePage() {
     if (!userId) return;
     async function load() {
       try {
-        const [u, ts, ws] = await Promise.all([
-          apiFetch<PublicUser>(`/api/auth/users/${userId}`),
-          apiFetch<Topster[]>(`/api/topsters/user/${userId}`),
-          apiFetch<TournamentSummary[]>(`/api/tournaments/user/${userId}`),
-        ]);
-        setUser(u);
-        setTopsters(ts);
-        setTournaments(ws);
+        setUser(await apiFetch<PublicUser>(`/api/auth/users/${userId}`));
       } catch (err) {
         if (err instanceof ApiError && err.status === 404) {
           setNotFound(true);
@@ -57,6 +51,34 @@ export default function UserProfilePage() {
     }
     load();
   }, [userId]);
+
+  // 없는 사용자면 목록을 부를 이유가 없다 — user 가 확인된 뒤에만 요청한다.
+  const buildTopsters = useCallback(
+    ({ limit, offset }: { limit: number; offset: number }) =>
+      `/api/topsters/user/${userId}?limit=${limit}&offset=${offset}`,
+    [userId],
+  );
+  const buildTournaments = useCallback(
+    ({ limit, offset }: { limit: number; offset: number }) =>
+      `/api/tournaments/user/${userId}?limit=${limit}&offset=${offset}`,
+    [userId],
+  );
+
+  const topsterList = useInfiniteList<Topster>({
+    key: userId ?? '',
+    buildUrl: buildTopsters,
+    errorMessage: '탑스터 목록을 불러오지 못했습니다',
+    enabled: !!user,
+  });
+  const tournamentList = useInfiniteList<TournamentSummary>({
+    key: userId ?? '',
+    buildUrl: buildTournaments,
+    errorMessage: '월드컵 목록을 불러오지 못했습니다',
+    enabled: !!user,
+  });
+
+  const topsters = topsterList.items;
+  const tournaments = tournamentList.items;
 
   if (loading) {
     return (
@@ -122,9 +144,18 @@ export default function UserProfilePage() {
       </Card>
 
       <section>
-        <h2 className="mb-4 font-heading text-lg font-bold">탑스터 {topsters.length}</h2>
+        {/* 총 개수는 서버가 안 주므로, 끝까지 받았을 때만 숫자를 보인다. */}
+        <h2 className="mb-4 font-heading text-lg font-bold">
+          탑스터{topsterList.reachedEnd ? ` ${topsters.length}` : ''}
+        </h2>
 
-        {topsters.length === 0 ? (
+        {topsterList.loading ? (
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <Skeleton key={i} className="aspect-square" />
+            ))}
+          </div>
+        ) : topsters.length === 0 ? (
           <Empty className="border">
             <EmptyHeader>
               <EmptyMedia variant="icon">
@@ -140,12 +171,30 @@ export default function UserProfilePage() {
             ))}
           </div>
         )}
+
+        <InfiniteListFooter
+          sentinelRef={topsterList.sentinelRef}
+          loadingMore={topsterList.loadingMore}
+          failed={topsterList.failed}
+          retry={topsterList.retry}
+          reachedEnd={topsterList.reachedEnd}
+          loadedCount={topsters.length}
+          limit={topsterList.limit}
+        />
       </section>
 
       <section className="mt-10">
-        <h2 className="mb-4 font-heading text-lg font-bold">월드컵 {tournaments.length}</h2>
+        <h2 className="mb-4 font-heading text-lg font-bold">
+          월드컵{tournamentList.reachedEnd ? ` ${tournaments.length}` : ''}
+        </h2>
 
-        {tournaments.length === 0 ? (
+        {tournamentList.loading ? (
+          <div className="grid gap-3 sm:grid-cols-2">
+            {Array.from({ length: 2 }).map((_, i) => (
+              <Skeleton key={i} className="h-36" />
+            ))}
+          </div>
+        ) : tournaments.length === 0 ? (
           <Empty className="border">
             <EmptyHeader>
               <EmptyMedia variant="icon">
@@ -161,6 +210,16 @@ export default function UserProfilePage() {
             ))}
           </div>
         )}
+
+        <InfiniteListFooter
+          sentinelRef={tournamentList.sentinelRef}
+          loadingMore={tournamentList.loadingMore}
+          failed={tournamentList.failed}
+          retry={tournamentList.retry}
+          reachedEnd={tournamentList.reachedEnd}
+          loadedCount={tournaments.length}
+          limit={tournamentList.limit}
+        />
       </section>
     </div>
   );

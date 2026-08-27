@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Plus, Search, Trophy } from 'lucide-react';
 import { useInfiniteList } from '@/lib/use-infinite-list';
+import InfiniteListFooter from '@/components/music/InfiniteListFooter';
 import TournamentCard from '@/components/music/TournamentCard';
 import { Button } from '@/components/ui/button';
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty';
@@ -116,32 +117,26 @@ export default function TournamentDashboardPage() {
         </div>
       )}
 
-      {/* 화면에 들어오면 다음 페이지를 부른다. 첫 로딩 중에도 DOM 에 있어야 관찰이 시작된다. */}
-      <div ref={sentinelRef} aria-hidden className="h-px" />
-
-      {loadingMore && (
-        <div
-          role="status"
-          aria-label="더 불러오는 중"
-          className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3"
-        >
-          {Array.from({ length: 3 }).map((_, i) => (
-            <Skeleton key={i} className="h-36" />
-          ))}
-        </div>
-      )}
-
-      {failed && (
-        <div className="mt-6 flex justify-center">
-          <Button variant="outline" onClick={retry}>
-            다시 불러오기
-          </Button>
-        </div>
-      )}
-
-      {reachedEnd && items.length >= limit && (
-        <p className="mt-6 text-center text-sm text-muted-foreground">모두 불러왔습니다</p>
-      )}
+      <InfiniteListFooter
+        sentinelRef={sentinelRef}
+        loadingMore={loadingMore}
+        failed={failed}
+        retry={retry}
+        reachedEnd={reachedEnd}
+        loadedCount={items.length}
+        limit={limit}
+        skeleton={
+          <div
+            role="status"
+            aria-label="더 불러오는 중"
+            className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3"
+          >
+            {Array.from({ length: 3 }).map((_, i) => (
+              <Skeleton key={i} className="h-36" />
+            ))}
+          </div>
+        }
+      />
     </div>
   );
 }

@@ -12,6 +12,12 @@ interface Options {
   buildUrl: (params: { limit: number; offset: number }) => string;
   errorMessage: string;
   limit?: number;
+  /**
+   * false 면 아무 요청도 보내지 않고 로딩 상태로 남는다(기본 true).
+   * 프로필처럼 **사용자 정보를 먼저 확인해야 목록을 부를 수 있는** 화면에서 쓴다 —
+   * 비로그인 상태로 목록을 먼저 때리면 401 토스트가 뜬 뒤에야 로그인으로 넘어간다.
+   */
+  enabled?: boolean;
 }
 
 interface Result<T> {
@@ -28,6 +34,8 @@ interface Result<T> {
   /** 목록 끝에 두는 빈 div 에 붙인다. 화면에 들어오면 다음 페이지를 부른다. */
   sentinelRef: React.RefObject<HTMLDivElement | null>;
   limit: number;
+  /** 서버에서 이미 지운 항목을 목록에서 뺀다. 다시 불러오지 않는다. */
+  removeItem: (id: string) => void;
 }
 
 /**
@@ -42,6 +50,7 @@ export function useInfiniteList<T extends { id: string }>({
   buildUrl,
   errorMessage,
   limit = DEFAULT_LIMIT,
+  enabled = true,
 }: Options): Result<T> {
   const [items, setItems] = useState<T[]>([]);
   const [loading, setLoading] = useState(true);
@@ -128,11 +137,12 @@ export function useInfiniteList<T extends { id: string }>({
   );
 
   useEffect(() => {
+    if (!enabled) return;
     // 코드베이스의 다른 목록 화면과 같은 형태 — setState 가 전부 await 뒤에서만 일어나게 감싼다.
     (async () => {
       await load(true);
     })();
-  }, [key, load]);
+  }, [key, enabled, load]);
 
   /** 다음 페이지. 진행 중이거나 멈춘 상태를 여기서 걸러 내고, 로딩 표시도 여기서 켠다. */
   const loadMore = useCallback(() => {
@@ -166,5 +176,11 @@ export function useInfiniteList<T extends { id: string }>({
     loadMore();
   }, [failed, loadMore]);
 
-  return { items, loading, loadingMore, reachedEnd, failed, retry, sentinelRef, limit };
+  const removeItem = useCallback((id: string) => {
+    setItems((prev) => prev.filter((i) => i.id !== id));
+    // 서버 목록도 한 건 줄었다. offset 을 같이 당기지 않으면 다음 페이지에서 한 건을 건너뛴다.
+    offsetRef.current = Math.max(0, offsetRef.current - 1);
+  }, []);
+
+  return { items, loading, loadingMore, reachedEnd, failed, retry, sentinelRef, limit, removeItem };
 }

@@ -1,11 +1,14 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { LayoutGrid, Plus, TriangleAlert, Trophy } from 'lucide-react';
 import { toast } from 'sonner';
 import { apiFetch, ApiError } from '@/lib/api';
+import { useInfiniteList } from '@/lib/use-infinite-list';
+import InfiniteListFooter from '@/components/music/InfiniteListFooter';
+import { Skeleton } from '@/components/ui/skeleton';
 import OwnerItemActions from '@/components/music/OwnerItemActions';
 import TopsterCard from '@/components/music/TopsterCard';
 import TournamentCard from '@/components/music/TournamentCard';
@@ -28,8 +31,6 @@ interface Me {
 export default function ProfilePage() {
   const router = useRouter();
   const [me, setMe] = useState<Me | null>(null);
-  const [topsters, setTopsters] = useState<Topster[]>([]);
-  const [tournaments, setTournaments] = useState<TournamentSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(false);
 
@@ -37,15 +38,9 @@ export default function ProfilePage() {
     if (!localStorage.getItem('access_token')) { router.push('/login'); return; }
     async function load() {
       try {
-        const [user, ts, ws] = await Promise.all([
-          apiFetch<Me>('/api/auth/me'),
-          apiFetch<Topster[]>('/api/topsters/me/list'),
-          apiFetch<TournamentSummary[]>('/api/tournaments/me/list'),
-        ]);
+        const user = await apiFetch<Me>('/api/auth/me');
         setMe(user);
         localStorage.setItem('user_id', user.id);
-        setTopsters(ts);
-        setTournaments(ws);
       } catch (err) {
         if (err instanceof ApiError && err.status === 401) {
           router.push('/login');
@@ -59,6 +54,35 @@ export default function ProfilePage() {
     }
     load();
   }, [router]);
+
+  // 목록은 사용자 확인이 끝난 뒤에 부른다 — 비로그인 상태로 먼저 때리면
+  // 로그인 화면으로 넘어가기 전에 401 토스트가 뜬다.
+  const buildTopsters = useCallback(
+    ({ limit, offset }: { limit: number; offset: number }) =>
+      `/api/topsters/me/list?limit=${limit}&offset=${offset}`,
+    [],
+  );
+  const buildTournaments = useCallback(
+    ({ limit, offset }: { limit: number; offset: number }) =>
+      `/api/tournaments/me/list?limit=${limit}&offset=${offset}`,
+    [],
+  );
+
+  const topsterList = useInfiniteList<Topster>({
+    key: 'me',
+    buildUrl: buildTopsters,
+    errorMessage: '탑스터 목록을 불러오지 못했습니다',
+    enabled: !!me,
+  });
+  const tournamentList = useInfiniteList<TournamentSummary>({
+    key: 'me',
+    buildUrl: buildTournaments,
+    errorMessage: '월드컵 목록을 불러오지 못했습니다',
+    enabled: !!me,
+  });
+
+  const topsters = topsterList.items;
+  const tournaments = tournamentList.items;
 
   if (loading) {
     return (
@@ -109,7 +133,10 @@ export default function ProfilePage() {
 
       <section>
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="font-heading text-lg font-bold">내 탑스터 {topsters.length}</h2>
+          {/* 총 개수는 서버가 안 주므로, 끝까지 받았을 때만 숫자를 보인다. */}
+          <h2 className="font-heading text-lg font-bold">
+            내 탑스터{topsterList.reachedEnd ? ` ${topsters.length}` : ''}
+          </h2>
           <Button asChild variant="link" size="sm">
             <Link href="/topsters/new">
               <Plus />
@@ -118,7 +145,13 @@ export default function ProfilePage() {
           </Button>
         </div>
 
-        {topsters.length === 0 ? (
+        {topsterList.loading ? (
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <Skeleton key={i} className="aspect-square" />
+            ))}
+          </div>
+        ) : topsters.length === 0 ? (
           <Empty className="border">
             <EmptyHeader>
               <EmptyMedia variant="icon">
@@ -147,18 +180,30 @@ export default function ProfilePage() {
                     name={t.title}
                     losesOnDelete="댓글도 함께 지워집니다."
                     // 서버가 이미 지웠으므로 목록만 맞춰준다 — 다시 불러오면 왕복이 한 번 더 는다.
-                    onDeleted={() => setTopsters((prev) => prev.filter((x) => x.id !== t.id))}
+                    onDeleted={() => topsterList.removeItem(t.id)}
                   />
                 }
               />
             ))}
           </div>
         )}
+
+        <InfiniteListFooter
+          sentinelRef={topsterList.sentinelRef}
+          loadingMore={topsterList.loadingMore}
+          failed={topsterList.failed}
+          retry={topsterList.retry}
+          reachedEnd={topsterList.reachedEnd}
+          loadedCount={topsters.length}
+          limit={topsterList.limit}
+        />
       </section>
 
       <section className="mt-10">
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="font-heading text-lg font-bold">내 월드컵 {tournaments.length}</h2>
+          <h2 className="font-heading text-lg font-bold">
+            내 월드컵{tournamentList.reachedEnd ? ` ${tournaments.length}` : ''}
+          </h2>
           <Button asChild variant="link" size="sm">
             <Link href="/tournament/new">
               <Plus />
@@ -167,7 +212,13 @@ export default function ProfilePage() {
           </Button>
         </div>
 
-        {tournaments.length === 0 ? (
+        {tournamentList.loading ? (
+          <div className="grid gap-3 sm:grid-cols-2">
+            {Array.from({ length: 2 }).map((_, i) => (
+              <Skeleton key={i} className="h-36" />
+            ))}
+          </div>
+        ) : tournaments.length === 0 ? (
           <Empty className="border">
             <EmptyHeader>
               <EmptyMedia variant="icon">
@@ -194,13 +245,23 @@ export default function ProfilePage() {
                     deletePath={`/api/tournaments/${t.id}`}
                     name={t.title}
                     losesOnDelete="플레이 기록·랭킹·댓글이 함께 지워집니다."
-                    onDeleted={() => setTournaments((prev) => prev.filter((x) => x.id !== t.id))}
+                    onDeleted={() => tournamentList.removeItem(t.id)}
                   />
                 }
               />
             ))}
           </div>
         )}
+
+        <InfiniteListFooter
+          sentinelRef={tournamentList.sentinelRef}
+          loadingMore={tournamentList.loadingMore}
+          failed={tournamentList.failed}
+          retry={tournamentList.retry}
+          reachedEnd={tournamentList.reachedEnd}
+          loadedCount={tournaments.length}
+          limit={tournamentList.limit}
+        />
       </section>
     </div>
   );
