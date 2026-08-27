@@ -1,10 +1,9 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { BarChart3 } from 'lucide-react';
+import { BarChart3, Play } from 'lucide-react';
 import { apiFetch } from '@/lib/api';
 import CommentSection from '@/components/music/CommentSection';
 import OwnerActions from '@/components/music/OwnerActions';
-import PlayStarter from '@/components/music/PlayStarter';
 import PoolGrid from '@/components/music/PoolGrid';
 import ShareButton from '@/components/music/ShareButton';
 import { Badge } from '@/components/ui/badge';
@@ -77,8 +76,18 @@ export default async function TournamentDetailPage({
         <p className="mb-6 text-sm whitespace-pre-wrap">{tournament.description}</p>
       )}
 
+      {/* 강수는 다음 화면에서 고른다 — playId 는 강수를 정해야 생기므로 여기서는 이동만 한다. */}
       <div className="mb-4">
-        <PlayStarter tournamentId={tournament.id} availableSizes={tournament.available_sizes} />
+        {tournament.available_sizes.length === 0 ? (
+          <p className="text-sm text-muted-foreground">풀이 4개 미만이라 플레이할 수 없습니다.</p>
+        ) : (
+          <Button asChild size="lg" className="h-11">
+            <Link href={`/tournament/${tournament.id}/play`}>
+              <Play />
+              시작하기
+            </Link>
+          </Button>
+        )}
       </div>
 
       <div className="mb-8 flex flex-wrap gap-2">
