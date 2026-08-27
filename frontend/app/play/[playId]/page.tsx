@@ -4,32 +4,19 @@ import { useCallback, useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import { BarChart3, Trophy } from 'lucide-react';
+import { BarChart3, GitBranch, Swords, Trophy } from 'lucide-react';
 import { toast } from 'sonner';
 import { apiFetch } from '@/lib/api';
+import BracketBackground from '@/components/music/BracketBackground';
+import FullBracket from '@/components/music/FullBracket';
 import TrackRow from '@/components/music/TrackRow';
 import { ItemFallbackIcon } from '@/components/music/PoolItemTile';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
+import { nextMatch, roundLabel } from '@/lib/bracket';
 import { fetchPoolItems, type PoolItem } from '@/lib/pool-item';
 import type { Play, PlayRound } from '@/types/tournament';
-
-/** 아직 승자가 없는 경기 중 가장 앞 라운드(=먼저 치러야 할 경기)를 고른다. */
-function nextMatch(play: Play): PlayRound | null {
-  const pending = play.rounds.filter((r) => !r.winner_id);
-  if (pending.length === 0) return null;
-  const maxRound = Math.max(...pending.map((r) => r.round_num));
-  return (
-    pending.filter((r) => r.round_num === maxRound).sort((a, b) => a.match_num - b.match_num)[0] ??
-    null
-  );
-}
-
-/** 남은 경기 수로 현재 라운드 이름을 만든다. 2강이 아니라 '결승'으로 보이게. */
-function roundLabel(roundNum: number) {
-  return roundNum === 1 ? '결승' : roundNum === 2 ? '준결승' : `${2 ** roundNum}강`;
-}
 
 export default function PlayPage() {
   const router = useRouter();
@@ -39,6 +26,9 @@ export default function PlayPage() {
   const [items, setItems] = useState<Record<string, PoolItem>>({});
   const [loading, setLoading] = useState(true);
   const [voting, setVoting] = useState(false);
+  const [showBracket, setShowBracket] = useState(false);
+  // 방금 고른 항목. 배경 대진표에서 '다음 자리로 올라가는' 표시를 잠긐 보여주기 위해 둔다.
+  const [justPicked, setJustPicked] = useState<string | null>(null);
 
   const loadItems = useCallback(async (p: Play) => {
     const ids = Array.from(new Set(p.rounds.flatMap((r) => [r.item_a_id, r.item_b_id])));
@@ -70,15 +60,26 @@ export default function PlayPage() {
   async function vote(winnerId: string, roundId: string) {
     if (voting) return;
     setVoting(true);
+    // 서버 응답을 기다리기 전에 표시를 먼저 바꿄다 — 누른 직후가 이 피드백이 의미 있는 순간이다.
+    setJustPicked(winnerId);
     try {
       const updated = await apiFetch<Play>(`/api/plays/${playId}/rounds/${roundId}/vote`, {
         method: 'POST',
         body: JSON.stringify({ winner_id: winnerId }),
       });
+      // 올라가는 표시를 한 박자 보여준 뒤 다음 경기로 넘긴다.
+      // prefers-reduced-motion 이면 전환을 기다리게 할 이유가 없어 곱바로 넘긴다.
+      const reduced =
+        typeof window !== 'undefined' &&
+        window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (!reduced) await new Promise((r) => setTimeout(r, 450));
+
       setPlay(updated);
+      setJustPicked(null);
       // 다음 라운드가 새로 만들어졌을 수 있다 — 아직 못 받은 후보만 채운다.
       await loadItems(updated);
     } catch {
+      setJustPicked(null);
       toast.error('투표를 반영하지 못했습니다');
     } finally {
       setVoting(false);
@@ -130,42 +131,112 @@ export default function PlayPage() {
   const pair = [match.item_a_id, match.item_b_id];
 
   return (
-    <div className="mx-auto w-full max-w-2xl px-4 py-8">
-      <p className="mb-1 text-center text-xs text-muted-foreground">{play.tournament_title}</p>
-      <p className="mb-2 text-center text-sm text-muted-foreground tabular-nums">
-        {roundLabel(match.round_num)} · 남은 경기 {remaining}개
-      </p>
-      <h2 className="mb-8 text-center font-heading text-xl font-bold">
-        어느 쪽이 더 좋으신가요?
-      </h2>
+    <div className="relative mx-auto flex w-full max-w-4xl flex-1 flex-col px-4 py-6">
+      {/* 우측 상단 전환 — 대결 화면 ↔ 전체 대진표 */}
+      <div className="mb-2 flex items-start justify-between gap-2">
+        <div className="min-w-0">
+          <p className="truncate text-xs text-muted-foreground">{play.tournament_title}</p>
+          <p className="text-sm text-muted-foreground tabular-nums">
+            {roundLabel(match.round_num)} · 남은 경기 {remaining}개
+          </p>
+        </div>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setShowBracket((v) => !v)}
+          aria-pressed={showBracket}
+          className="shrink-0"
+        >
+          {showBracket ? <Swords /> : <GitBranch />}
+          {showBracket ? '대결로' : '대진표'}
+        </Button>
+      </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      {showBracket ? (
+        <FullBracket play={play} items={items} currentMatchId={match.id} />
+      ) : (
+        <PlayMatch
+          play={play}
+          match={match}
+          pair={pair}
+          items={items}
+          voting={voting}
+          justPicked={justPicked}
+          onVote={vote}
+        />
+      )}
+    </div>
+  );
+}
+
+/** 대결 화면. 배경에 대진표 조각을 깔고 그 위에 카드 두 장을 크게 놓는다. */
+function PlayMatch({
+  play,
+  match,
+  pair,
+  items,
+  voting,
+  justPicked,
+  onVote,
+}: {
+  play: Play;
+  match: PlayRound;
+  pair: string[];
+  items: Record<string, PoolItem>;
+  voting: boolean;
+  justPicked: string | null;
+  onVote: (winnerId: string, roundId: string) => void;
+}) {
+  return (
+    <div className="relative flex flex-1 flex-col justify-center">
+      <BracketBackground play={play} match={match} items={items} justPicked={justPicked} />
+
+      <div className="relative">
+        <h2 className="mb-6 text-center font-heading text-xl font-bold">
+          어느 쪽이 더 좋으신가요?
+        </h2>
+
+        <div className="grid grid-cols-2 gap-3 sm:gap-6">
         {pair.map((itemId) => {
           const item = items[itemId];
           return (
             <Card
               key={itemId}
-              className="transition-colors hover:bg-accent has-focus-visible:ring-2 has-focus-visible:ring-ring"
+              className={[
+                'transition-all duration-300 hover:bg-accent has-focus-visible:ring-2 has-focus-visible:ring-ring',
+                // 고른 쪽은 남고 진 쪽은 물러난다. 배경 대진표에서 승자가 올라가는 것과 같은 박자다.
+                justPicked === itemId ? 'border-primary' : '',
+                justPicked && justPicked !== itemId ? 'scale-95 opacity-40' : '',
+              ].join(' ')}
             >
               <CardContent className="flex flex-col items-center gap-3">
                 <button
                   type="button"
-                  onClick={() => vote(itemId, match.id)}
+                  onClick={() => onVote(itemId, match.id)}
                   disabled={voting}
-                  className="flex flex-col items-center gap-3 rounded-lg outline-none disabled:opacity-50"
+                  className="flex w-full flex-col items-center gap-3 rounded-lg outline-none disabled:opacity-50"
                 >
-                  <div className="relative size-28 overflow-hidden rounded-lg bg-muted">
+                  {/* 카드가 화면을 크게 쓰도록 커버를 정사각으로 꽉 채운다(예전엔 112px 고정). */}
+                  <div className="relative aspect-square w-full overflow-hidden rounded-lg bg-muted">
                     {item?.coverUrl ? (
-                      <Image src={item.coverUrl} alt={item.title} fill className="object-cover" />
+                      <Image
+                        src={item.coverUrl}
+                        alt={item.title}
+                        fill
+                        sizes="(max-width: 640px) 45vw, 380px"
+                        className="object-cover"
+                      />
                     ) : (
                       <div className="flex size-full items-center justify-center text-muted-foreground">
-                        <ItemFallbackIcon itemType={play.item_type} className="size-7" />
+                        <ItemFallbackIcon itemType={play.item_type} className="size-10" />
                       </div>
                     )}
                   </div>
-                  <div className="text-center">
-                    <p className="text-sm font-medium">{item?.title ?? '알 수 없음'}</p>
-                    <p className="text-xs text-muted-foreground">{item?.subtitle}</p>
+                  <div className="w-full text-center">
+                    <p className="truncate text-sm font-medium sm:text-base">
+                      {item?.title ?? '알 수 없음'}
+                    </p>
+                    <p className="truncate text-xs text-muted-foreground">{item?.subtitle}</p>
                   </div>
                 </button>
 
@@ -188,6 +259,7 @@ export default function PlayPage() {
             </Card>
           );
         })}
+        </div>
       </div>
     </div>
   );
