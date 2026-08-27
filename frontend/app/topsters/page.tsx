@@ -1,10 +1,9 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { LayoutGrid, Plus, Search } from 'lucide-react';
-import { toast } from 'sonner';
-import { apiFetch } from '@/lib/api';
+import { useInfiniteList } from '@/lib/use-infinite-list';
 import TopsterCard from '@/components/music/TopsterCard';
 import { Button } from '@/components/ui/button';
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty';
@@ -21,38 +20,30 @@ const SORTS: { value: TopsterSort; label: string }[] = [
 ];
 
 export default function TopstersPage() {
-  const [items, setItems] = useState<Topster[]>([]);
   const [q, setQ] = useState('');
   const [debouncedQ, setDebouncedQ] = useState('');
   const [sort, setSort] = useState<TopsterSort>('recent');
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const t = setTimeout(() => setDebouncedQ(q.trim()), 300);
     return () => clearTimeout(t);
   }, [q]);
 
-  useEffect(() => {
-    let alive = true;
-    const params = new URLSearchParams({ sort, limit: '30', offset: '0' });
-    if (debouncedQ) params.set('q', debouncedQ);
+  const buildUrl = useCallback(
+    ({ limit, offset }: { limit: number; offset: number }) => {
+      const params = new URLSearchParams({ sort, limit: String(limit), offset: String(offset) });
+      if (debouncedQ) params.set('q', debouncedQ);
+      return `/api/topsters/?${params}`;
+    },
+    [sort, debouncedQ],
+  );
 
-    // setState는 전부 await 뒤에서만 일어난다 — effect 본문에서 동기로 부르면 연쇄 렌더가 생긴다.
-    (async () => {
-      try {
-        const data = await apiFetch<Topster[]>(`/api/topsters/?${params}`);
-        if (alive) setItems(data);
-      } catch {
-        if (alive) toast.error('탑스터 목록을 불러오지 못했습니다');
-      } finally {
-        if (alive) setLoading(false);
-      }
-    })();
-
-    return () => {
-      alive = false;
-    };
-  }, [debouncedQ, sort]);
+  const { items, loading, loadingMore, reachedEnd, failed, retry, sentinelRef, limit } =
+    useInfiniteList<Topster>({
+      key: `${sort}|${debouncedQ}`,
+      buildUrl,
+      errorMessage: '탑스터 목록을 불러오지 못했습니다',
+    });
 
   return (
     <div className="mx-auto w-full max-w-6xl px-4 py-8">
@@ -123,6 +114,33 @@ export default function TopstersPage() {
             <TopsterCard key={t.id} topster={t} />
           ))}
         </div>
+      )}
+
+      {/* 화면에 들어오면 다음 페이지를 부른다. 첫 로딩 중에도 DOM 에 있어야 관찰이 시작된다. */}
+      <div ref={sentinelRef} aria-hidden className="h-px" />
+
+      {loadingMore && (
+        <div
+          role="status"
+          aria-label="더 불러오는 중"
+          className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5"
+        >
+          {Array.from({ length: 5 }).map((_, i) => (
+            <Skeleton key={i} className="aspect-square" />
+          ))}
+        </div>
+      )}
+
+      {failed && (
+        <div className="mt-6 flex justify-center">
+          <Button variant="outline" onClick={retry}>
+            다시 불러오기
+          </Button>
+        </div>
+      )}
+
+      {reachedEnd && items.length >= limit && (
+        <p className="mt-6 text-center text-sm text-muted-foreground">모두 불러왔습니다</p>
       )}
     </div>
   );

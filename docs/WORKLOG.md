@@ -8,6 +8,71 @@
 
 ## 세션 기록
 
+### 2026-08-27 (계속) — main push, 색 예산 예외 명문화, 목록 무한 스크롤
+
+**main 을 origin 에 올렸다 (24 → 27커밋)**
+`fix/design-budget-and-api-nits` 를 fast-forward 로 넣고 `6bbc96d..8bb3945` push.
+로컬에만 있던 월드컵 개편 전체가 이제 원격에 있다. 로컬 브랜치 3개는 전부 main 에 병합된 상태로 남겨 뒀다.
+
+**색 예산(T3) — 코드가 아니라 규칙을 고쳤다**
+문제의 `bg-primary` 는 화면이 칠한 게 아니라 **`components/ui/checkbox.tsx` 의 shadcn 기본값**
+(`data-checked:bg-primary`)이었다. 프리미티브를 중립으로 내리면 앞으로 생길 모든 체크박스에 영향이 가고
+CLAUDE.md 의 "shadcn/ui 위에서 조립한다" 와도 부딪힌다. 그래서 DESIGN.md § Color budget 에
+**"선택 상태 폼 컨트롤" 예외**를 명문화했다 — 이미 있던 "반복 콘텐츠 타일" 예외와 같은 논리
+("주의를 끄는 강조" vs "상태를 색으로 인코딩")에 같은 형태의 조건(size-4~5, shadcn 기본 스타일)을 달았다.
+**코드 변경 0.**
+
+**페이지네이션(T3) — 보드에 적힌 문제가 실제와 달랐다**
+"둘 다 `limit=30` 고정" 이라고만 적혀 있었는데, **백엔드는 이미 `limit`/`offset` 을 전부 받고 있었다**
+(topster·tournament 의 목록·유저별·내 목록 전부 `Query(20, ge=1, le=100)`). 진짜 막힌 건
+(1) 프론트의 `limit:'30', offset:'0'` 하드코딩과 (2) 응답이 `list[...]` 라 **총 개수가 없다**는 것이었다.
+그래서 무한 스크롤을 고르면 **백엔드 변경이 0**이 된다 — 총 개수 없이 "응답이 limit 미만이면 마지막 페이지"로 판정하면 되기 때문.
+
+**`lib/use-infinite-list.ts` 로 뽑았다**
+두 목록 페이지의 로직이 사실상 같아서(에디터 추출과 같은 이유) 훅으로 공유한다. 설계에서 걸린 것들:
+- **스크롤 컨테이너가 `body` 가 아니라 `main` 이다**(`app/layout.tsx` 가 `body overflow-hidden` + `main overflow-y-auto`).
+  IntersectionObserver 의 `root` 를 안 주면 `rootMargin` 이 뷰포트 기준이 돼 미리 불러오기가 안 걸린다.
+  `el.closest('main')` 을 root 로 준다
+- **sentinel 은 첫 로딩 중에도 DOM 에 있어야 한다.** 목록이 그려진 뒤에 붙이면 관찰 시작이 한 박자 늦는다
+- **실패 시 자동 로딩을 멈춘다.** 안 멈추면 sentinel 이 계속 보이는 동안 실패 요청이 쏟아진다.
+  `reachedEnd`(진짜 끝)와 `failed`(실패로 멈춤)를 따로 두고 후자에만 '다시 불러오기' 버튼을 낸다
+- **세대 번호로 늦게 온 응답을 버린다.** 정렬을 바꾼 직후 이전 필터의 응답이 도착해 섞이는 걸 막는다.
+  `finally` 의 플래그 해제도 세대가 같을 때만 한다 — 아니면 이미 버려진 요청이 새 요청의 in-flight 를 풀어 버린다
+- **id 로 중복을 걸러낸다.** offset 방식이라 보는 사이 새 항목이 앞에 끼면 같은 행이 두 번 온다
+
+**eslint `react-hooks/set-state-in-effect` 를 우회하지 않고 구조를 맞췄다**
+`load(true)` 를 effect 에서 직접 부르면 규칙에 걸린다. 이 규칙은 **호출된 async 함수 안까지 추적**해서,
+"동기 setState 를 await 뒤로 옮긴다"만으로는 안 풀렸다. 최종적으로 세 가지를 했다:
+(1) 필터 변경 시 초기화는 effect 가 아니라 **렌더 중 조정**(`prevKey` 비교, React 공식 패턴),
+(2) `load` 의 동기 구간에서는 ref 만 만지고 setState 는 전부 await 뒤,
+(3) effect 에서는 `(async () => { await load(true) })()` 로 감싼다 — 코드베이스의 다른 목록 화면과 같은 형태.
+`buildUrl` 을 담는 ref 갱신도 렌더 중이라 `react-hooks/refs` 에 걸려서 effect 로 옮겼고,
+**그 effect 는 로딩 effect 보다 먼저 선언해야 한다**(effect 는 선언 순서로 실행되므로 key 와 buildUrl 이
+같은 렌더에서 함께 바뀔 때 새 URL 이 쓰인다).
+
+**검증**
+- **API 계약**: 훅과 같은 방식으로 순회해 일괄 조회 결과와 대조. topsters(4건)·tournaments(3건)를
+  `limit=1`·`limit=2` 로 각각 완주 — **중복 0, 순서 완전 일치**, limit 미만이 오는 지점에서 정확히 종료.
+  딱 나누어떨어지면 빈 페이지 1회를 더 받고 끝난다(훅도 같은 동작)
+- **정렬 4종 + 검색**(topster popular / tournament popular_all·popular_month / topster q=a) 전부
+  offset 순회 = 일괄 조회. 인기순은 집계 서브쿼리로 정렬해 tie-break 가 없으면 페이지 경계가 흔들리는데, 그러지 않았다
+- `tsc --noEmit` 통과, `next build` 통과, eslint **신규 0건**(전체 2건은 기존 `search/page.tsx`·`Navbar.tsx`)
+- 프로덕션 서버로 주요 페이지 5개 200, `/topsters` SSR HTML 에 **sentinel div 가 정확히 1개** 렌더되는 것 확인
+
+**환경 함정 — CLAUDE.md 의 실행 절차가 그대로는 안 먹었다**
+`uvicorn --port 8000` 이 `[Errno 13] 바인딩 권한 거부`로 죽었다. 포트 점유가 아니라
+`netsh interface ipv4 show excludedportrange protocol=tcp` 에 **7902~8401 이 통째로 예약**돼 있어서다
+(8/26 에 3040~3539 로 겪은 것과 같은 현상이고 구간만 바뀌었다 — Docker Desktop 이 뜨면 생긴다).
+이번엔 검증용으로 백엔드 8500, 프론트 3600 을 썼다. **다음에 8000 이 안 뜨면 프로세스부터 찾지 말고
+예약 구간을 먼저 볼 것.**
+
+**안 한 것**
+- **브라우저에서 실제 스크롤은 못 돌렸다** — playwright 가 여전히 없다(설치 없이는 헤드리스 구동 불가).
+  IntersectionObserver 가 실제로 발화하는지, `main` root 설정이 맞는지는 **코드와 SSR DOM 까지만** 확인했다
+- 로컬 데이터가 탑스터 4·월드컵 3건뿐이라 `limit=30` 기본값에서는 2페이지째가 아예 발생하지 않는다.
+  위 검증은 `limit` 을 1~2로 낮춰 계약만 확인한 것이다
+- 프로필의 내 목록·유저별 목록은 그대로 `limit` 고정이다. 이번엔 목록 두 곳만 바꿨다
+
 ### 2026-08-27 (계속) — 리뷰·감성 태그를 구현 범위에서 제외
 
 **결정: 앨범/곡 평가 기능은 이번 범위에서 만들지 않는다.** 폐기가 아니라 보류다 — 나중에 추가할 수 있다.
@@ -834,3 +899,5 @@ Spotify 연동 백엔드, 프론트 기획(`_workspace/planning.md`), QA 리뷰(
 | 2026-08-26 | docs: 월드컵 댓글 영역 반영과 세션 기록 | docs | 커밋 `433b81a` |
 | 2026-08-27 | fix: 재생 버튼 색 예산 위반, GET 프리플라이트, 아티스트 앨범 싱글 노이즈 | backend, frontend | 커밋 `07383ba` |
 | 2026-08-27 | docs: 완료 3건 과제 보드에서 제거, 8/27 세션 기록 | docs | 커밋 `ff1a39a` |
+| 2026-08-27 | docs: 리뷰·감성 태그를 구현 범위에서 제외 | CLAUDE.md, _workspace, docs | 커밋 `8bb3945` |
+| 2026-08-27 | docs(design): 색 예산에 선택 상태 폼 컨트롤 예외 명문화 | DESIGN.md | 커밋 `2609251` |
