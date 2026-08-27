@@ -21,8 +21,24 @@ class MusicCache(Base):
     __tablename__ = "music_cache"
 
     # iTunes id는 전역 고유하지만 트랙과 앨범이 같은 번호를 쓸 수 있으므로 타입까지 묶어 PK로 둔다.
-    item_type = Column(String, primary_key=True)  # "album" | "track"
-    item_id = Column(String, primary_key=True)    # iTunes collectionId / trackId
+    #
+    # 배치 조회용 두 종류로 시작했다가 단건 조회 경로(2026-08-27)까지 같은 테이블을 쓰게 됐다.
+    # 종류마다 item_id의 의미와 payload 모양이 다르다:
+    #
+    #   item_type           | item_id                                  | payload
+    #   --------------------|------------------------------------------|---------------------------
+    #   album               | collectionId                             | AlbumSummary
+    #   track               | trackId                                  | TrackSearchItem
+    #   artist_detail       | artistId                                 | ArtistDetail
+    #   album_tracks        | "{albumId}:{market}"                     | AlbumWithTracks
+    #   artist_albums       | "{artistId}:{market}:{limit}:{singles}"   | {"items": [AlbumSummary]}
+    #   artist_top_tracks   | "{artistId}:{market}"                    | {"items": [TrackSearchItem]}
+    #
+    # 목록류의 item_id에 파라미터를 다 붙이는 이유는 그것들이 응답을 가르기 때문이다 —
+    # 하나라도 빠지면 필터를 끈 요청이 켠 결과를 받는다.
+    # TTL은 services/music_cache.py 의 ITEM_TYPE_TTL_DAYS 가 정본이다.
+    item_type = Column(String, primary_key=True)
+    item_id = Column(String, primary_key=True)
     # NULL = tombstone. iTunes lookup이 이 ID를 못 찾는다는 사실 자체를 기록한 것이다.
     # 검색은 돌려주는데 lookup으로는 안 풀리는 앨범 ID가 실제로 존재해서 필요하다.
     #

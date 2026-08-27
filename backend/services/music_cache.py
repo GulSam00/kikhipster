@@ -39,6 +39,31 @@ MISSING_TTL_DAYS = 1
 DETAIL_TTL_DAYS = 30
 LISTING_TTL_DAYS = 1
 
+# item_type 별 payload 유효 기간. **조회와 정리가 같은 표를 본다.**
+#
+# 처음엔 TTL을 읽는 쪽(라우터가 인자로 넘김)과 지우는 쪽(purge가 자체 기준 사용)에
+# 나눠 뒀는데, 목록류를 1일로 줄였을 때 purge 쪽이 따라오지 않아 하루면 무효가 되는 행이
+# 29일 더 남았다. 한 곳에서 정의해 그런 어긋남을 없앤다.
+ITEM_TYPE_TTL_DAYS = {
+    # 배치 조회 (services/music_api.py 의 _map_album / _map_track 결과)
+    "album": CACHE_TTL_DAYS,
+    "track": CACHE_TTL_DAYS,
+    # 단건 상세 — 사실상 불변
+    "artist_detail": DETAIL_TTL_DAYS,
+    "album_tracks": DETAIL_TTL_DAYS,
+    # 단건 목록 — 신보가 나오면 바뀐다
+    "artist_albums": LISTING_TTL_DAYS,
+    "artist_top_tracks": LISTING_TTL_DAYS,
+}
+
+# 표에 없는 타입(나중에 캐시를 붙였는데 여기 등록을 잊은 경우)은 길게 잡아 둔다.
+# 짧게 잡으면 등록을 잊었다는 이유만으로 조용히 캐시가 안 먹는다.
+DEFAULT_TTL_DAYS = CACHE_TTL_DAYS
+
+
+def ttl_for(item_type: str) -> int:
+    return ITEM_TYPE_TTL_DAYS.get(item_type, DEFAULT_TTL_DAYS)
+
 
 def get_cached(db: Session, item_type: str, ids: list[str]) -> tuple[dict[str, dict], set[str]]:
     """만료되지 않은 캐시를 (조회된 것, 없다고 확인된 것) 으로 나눠 돌려준다.
@@ -58,7 +83,7 @@ def get_cached(db: Session, item_type: str, ids: list[str]) -> tuple[dict[str, d
     hits: dict[str, dict] = {}
     missing: set[str] = set()
     for r in rows:
-        ttl = CACHE_TTL_DAYS if r.payload is not None else MISSING_TTL_DAYS
+        ttl = ttl_for(item_type) if r.payload is not None else MISSING_TTL_DAYS
         if r.fetched_at < now - timedelta(days=ttl):
             continue
         if r.payload is None:
@@ -100,8 +125,11 @@ def put_cached(db: Session, item_type: str, items: list[dict], requested: list[s
     db.commit()
 
 
-def get_cached_one(db: Session, item_type: str, key: str, ttl_days: int) -> dict | None:
+def get_cached_one(db: Session, item_type: str, key: str) -> dict | None:
     """단건 조회 경로용. 만료되지 않은 payload를 돌려주고, 없거나 만료면 None.
+
+    TTL은 호출부가 정하지 않고 `ITEM_TYPE_TTL_DAYS` 에서 가져온다 — 정리(purge)와 같은
+    표를 봐야 둘이 어긋나지 않는다.
 
     배치 경로(get_cached)와 달리 tombstone을 쓰지 않는다 — 단건 조회는 "없음"이 곧 404라
     응답 자체가 다르고, 그 404를 캐싱해 봐야 아낄 왕복이 거의 없다.
@@ -113,7 +141,7 @@ def get_cached_one(db: Session, item_type: str, key: str, ttl_days: int) -> dict
     )
     if row is None or row.payload is None:
         return None
-    if row.fetched_at < datetime.utcnow() - timedelta(days=ttl_days):
+    if row.fetched_at < datetime.utcnow() - timedelta(days=ttl_for(item_type)):
         return None
     return row.payload
 
@@ -137,24 +165,33 @@ def purge_expired(db: Session) -> int:
     만료된 행은 다시 조회되면 덮어써지지만, **다시 조회되지 않는 행은 영원히 남는다** —
     한 번 보고 만 앨범, 지워진 탑스터가 참조하던 커버 따위가 그렇다. 그래서 주기적으로 턴다.
 
-    TTL이 종류마다 다르므로(tombstone 1일 / 목록 1일 / 그 외 30일) 가장 긴 TTL을 넘긴 것과
-    tombstone 중 만료된 것을 함께 지운다. 단건 목록 캐시(LISTING_TTL_DAYS)는 30일까지
-    남아 있어도 조회 시점에 만료로 걸러지므로 정확성 문제는 없다 — 여기서는 공간만 회수한다.
+    **item_type 마다 제 TTL로 지운다.** 처음엔 가장 긴 TTL(30일) 하나로만 지웠는데,
+    그러면 하루면 무효가 되는 목록 캐시가 29일을 더 버틴다. 조회 시점에 걸러지니 정확성
+    문제는 없지만 공간이 아깝다 — 목록 payload 한 행이 배치 캐시 행의 10배가 넘는다
+    (실측: artist_albums ~3.6KB vs album ~330B).
     """
     now = datetime.utcnow()
-    deleted = (
-        db.query(MusicCache)
-        .filter(
-            or_(
-                # tombstone: 짧은 TTL
-                (MusicCache.payload.is_(None))
-                & (MusicCache.fetched_at < now - timedelta(days=MISSING_TTL_DAYS)),
-                # 실제 데이터: 가장 긴 TTL 기준
-                (MusicCache.payload.isnot(None))
-                & (MusicCache.fetched_at < now - timedelta(days=CACHE_TTL_DAYS)),
-            )
+
+    # tombstone은 타입과 무관하게 짧은 TTL을 쓴다(payload가 없어 종류를 따질 것도 없다).
+    conditions = [
+        MusicCache.payload.is_(None)
+        & (MusicCache.fetched_at < now - timedelta(days=MISSING_TTL_DAYS))
+    ]
+    for item_type, ttl in ITEM_TYPE_TTL_DAYS.items():
+        conditions.append(
+            (MusicCache.item_type == item_type)
+            & MusicCache.payload.isnot(None)
+            & (MusicCache.fetched_at < now - timedelta(days=ttl))
         )
-        .delete(synchronize_session=False)
+    # 표에 등록되지 않은 타입도 방치하지 않는다.
+    conditions.append(
+        MusicCache.item_type.notin_(list(ITEM_TYPE_TTL_DAYS))
+        & MusicCache.payload.isnot(None)
+        & (MusicCache.fetched_at < now - timedelta(days=DEFAULT_TTL_DAYS))
+    )
+
+    deleted = (
+        db.query(MusicCache).filter(or_(*conditions)).delete(synchronize_session=False)
     )
     db.commit()
     if deleted:

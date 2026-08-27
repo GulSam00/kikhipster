@@ -9,8 +9,6 @@ from sqlalchemy.orm import Session
 
 from database import get_db
 from services.music_cache import (
-    DETAIL_TTL_DAYS,
-    LISTING_TTL_DAYS,
     get_cached,
     get_cached_one,
     put_cached,
@@ -109,15 +107,16 @@ async def _detail_with_cache(
     key: str,
     fetch: Callable[[], Awaitable[dict]],
     model: type[BaseModel],
-    ttl_days: int,
 ) -> dict:
     """단건 조회 경로의 캐시 래퍼. 배치 경로와 같은 테이블을 쓰되 item_type 으로 갈린다.
+
+    TTL은 인자로 받지 않는다 — `ITEM_TYPE_TTL_DAYS` 가 정본이고 정리(purge)도 같은 표를 본다.
 
     캐시를 스키마로 한 번 검증하는 이유는 배치 경로와 같다 — 매핑이나 스키마가 바뀌면
     예전 payload가 더는 안 맞고, 그대로 돌려주면 직렬화에서 500이 난다. 검증에 실패하면
     미스로 취급해 다시 받아오고 덮어쓴다.
     """
-    cached = await run_in_threadpool(get_cached_one, db, item_type, key, ttl_days)
+    cached = await run_in_threadpool(get_cached_one, db, item_type, key)
     if cached is not None:
         try:
             model.model_validate(cached)
@@ -194,7 +193,6 @@ async def get_artist_detail(request: Request, artist_id: str, db: Session = Depe
         artist_id,
         lambda: service.get_artist_detail(artist_id),
         ArtistDetail,
-        DETAIL_TTL_DAYS,
     )
 
 
@@ -226,7 +224,7 @@ async def get_artist_albums(
         return {"items": albums}
 
     cached = await _detail_with_cache(
-        db, "artist_albums", key, fetch, _AlbumListPayload, LISTING_TTL_DAYS
+        db, "artist_albums", key, fetch, _AlbumListPayload
     )
     items = cached["items"]
     # 목록 항목도 배치 캐시에 적어 둔다 — 아티스트 페이지에서 고른 앨범이 곧 탑스터로 간다.
@@ -249,7 +247,6 @@ async def get_album_tracks(
         f"{album_id}:{market}",
         lambda: service.get_album_tracks(album_id, market=market),
         AlbumWithTracks,
-        DETAIL_TTL_DAYS,
     )
     await _warm_item_cache(db, "track", result.get("tracks", []))
     return result
@@ -269,7 +266,7 @@ async def get_artist_top_tracks(
         return {"items": await service.get_artist_top_tracks(artist_id, market=market)}
 
     cached = await _detail_with_cache(
-        db, "artist_top_tracks", f"{artist_id}:{market}", fetch, _TrackListPayload, LISTING_TTL_DAYS
+        db, "artist_top_tracks", f"{artist_id}:{market}", fetch, _TrackListPayload
     )
     items = cached["items"]
     await _warm_item_cache(db, "track", items)
