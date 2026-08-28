@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { ArrowLeft, Minus, TrendingDown, TrendingUp } from 'lucide-react';
+import { ArrowLeft, Disc3, Minus, TrendingDown, TrendingUp } from 'lucide-react';
 import { getRanking } from '@/lib/api/tournaments';
 import CommentSection from '@/components/social/CommentSection';
 import CoverImage from '@/components/common/CoverImage';
@@ -116,11 +116,26 @@ export default async function TournamentRankingPage({
                         <p className="truncate text-sm text-muted-foreground">{item?.subtitle}</p>
                       </div>
                       {item && (
-                        <PoolItemPlayButton
-                          item={item}
-                          itemType={ranking.item_type}
-                          className="shrink-0 rounded-full text-muted-foreground hover:text-foreground"
-                        />
+                        // 재생과 앨범으로 가기를 나란히 둔다 — 후보 그리드와 같은 짝이다.
+                        <div className="flex shrink-0 items-center gap-1">
+                          {ranking.item_type === 'album' && (
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="rounded-full text-muted-foreground hover:text-foreground"
+                              asChild
+                            >
+                              <Link href={`/albums/${item.id}`} aria-label={`${item.title} 앨범 보기`}>
+                                <Disc3 />
+                              </Link>
+                            </Button>
+                          )}
+                          <PoolItemPlayButton
+                            item={item}
+                            itemType={ranking.item_type}
+                            className="rounded-full text-muted-foreground hover:text-foreground"
+                          />
+                        </div>
                       )}
                     </div>
                   </TableCell>

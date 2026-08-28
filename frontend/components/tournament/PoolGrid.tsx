@@ -68,6 +68,8 @@ export default function PoolGrid({ itemType, allIds, initialItems, initialReques
             onPlay={() => void playItem(item)}
             playing={currentId === item.id && isPlaying}
             loading={pendingId === item.id}
+            // 앨범 후보의 id 는 곧 앨범 id 다. 곡 후보는 갈 곳이 없어 링크를 달지 않는다.
+            href={itemType === 'album' ? `/albums/${item.id}` : undefined}
           />
         ))}
       </div>
