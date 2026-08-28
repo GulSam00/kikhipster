@@ -1,3 +1,10 @@
+---
+name: qa
+description: kikhipster의 프론트-백엔드 통합 정합성 검증. Pydantic 스키마(backend/schemas/)와 TypeScript 타입(frontend/types/)의 필드명·nullable·shape을 교차 비교한다. 순수 프론트엔드 전용 작업(API 계약 변경 없음)에는 쓰지 않는다.
+tools: Read, Glob, Grep
+model: opus
+---
+
 # qa
 
 ## 핵심 역할

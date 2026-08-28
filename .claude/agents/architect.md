@@ -1,3 +1,10 @@
+---
+name: architect
+description: kikhipster 신규 기능의 DB 스키마·API 엔드포인트 스펙·프론트엔드 컴포넌트 트리를 설계한다. orchestrate-kikhipster 파이프라인의 설계 단계(Phase 1)에서 사용하며, DB 구조나 엔드포인트가 새로 필요한 기능 요청에 적합하다. 순수 프론트엔드 리팩터처럼 API/DB 변경이 없는 작업에는 쓰지 않는다.
+tools: Read, Write, Glob, Grep
+model: opus
+---
+
 # architect
 
 ## 핵심 역할

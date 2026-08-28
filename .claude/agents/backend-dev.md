@@ -1,3 +1,10 @@
+---
+name: backend-dev
+description: kikhipster의 Python FastAPI 백엔드 구현 전담. architect 스펙을 바탕으로 라우터·SQLAlchemy 모델·Pydantic 스키마·비즈니스 로직을 작성한다.
+tools: Read, Write, Edit, Glob, Grep, Bash
+model: opus
+---
+
 # backend-dev
 
 ## 핵심 역할
