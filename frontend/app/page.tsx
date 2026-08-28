@@ -1,25 +1,21 @@
 import Link from 'next/link';
 import { LayoutGrid, Trophy } from 'lucide-react';
-import { apiFetch } from '@/lib/api';
-import TopsterCard from '@/components/music/TopsterCard';
-import TournamentCard from '@/components/music/TournamentCard';
+import { listTopsters } from '@/lib/api/topsters';
+import { listTournaments } from '@/lib/api/tournaments';
+import TopsterCard from '@/components/topster/TopsterCard';
+import TournamentCard from '@/components/tournament/TournamentCard';
 import { Button } from '@/components/ui/button';
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty';
-import type { Topster } from '@/types/topster';
-import type { TournamentSummary } from '@/types/tournament';
 
-/** 공개 탑스터 전체를 최신순으로 (백엔드가 created_at desc 로 정렬). */
-async function getTopsters(): Promise<Topster[]> {
-  return apiFetch<Topster[]>('/api/topsters/?limit=12&offset=0');
-}
-
-/** 모든 사용자의 월드컵을 최신순으로. */
-async function getTournaments(): Promise<TournamentSummary[]> {
-  return apiFetch<TournamentSummary[]>('/api/tournaments/?sort=recent&limit=6&offset=0');
-}
+/** 홈에 깔 개수. 탑스터는 6열 그리드 두 줄, 월드컵은 3열 두 줄이다. */
+const TOPSTER_COUNT = 12;
+const TOURNAMENT_COUNT = 6;
 
 export default async function HomePage() {
-  const [topsters, tournaments] = await Promise.all([getTopsters(), getTournaments()]);
+  const [topsters, tournaments] = await Promise.all([
+    listTopsters(TOPSTER_COUNT),
+    listTournaments('recent', TOURNAMENT_COUNT),
+  ]);
 
   return (
     <div className="mx-auto w-full max-w-6xl px-4 py-8">

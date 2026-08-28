@@ -3,12 +3,13 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { toast } from 'sonner';
-import { apiFetch, ApiError } from '@/lib/api';
-import TopsterEditor, { type TopsterEditorInitial } from '@/components/music/TopsterEditor';
+import { ApiError } from '@/lib/api/client';
+import { getTopster, updateTopster } from '@/lib/api/topsters';
+import TopsterEditor, { type TopsterEditorInitial } from '@/components/topster/TopsterEditor';
 import { Spinner } from '@/components/ui/spinner';
-import { useAlbumItems } from '@/lib/album-covers';
-import type { PoolItem } from '@/lib/pool-item';
-import { useMe } from '@/lib/use-me';
+import { useAlbumItems } from '@/lib/hooks/use-album-covers';
+import type { PoolItem } from '@/lib/domain/pool-item';
+import { useMe } from '@/lib/hooks/use-me';
 import type { Topster, TopsterCreateBody } from '@/types/topster';
 
 export default function EditTopsterPage() {
@@ -25,7 +26,7 @@ export default function EditTopsterPage() {
   const albums = useAlbumItems(albumIds);
 
   useEffect(() => {
-    apiFetch<Topster>(`/api/topsters/${id}`)
+    getTopster(id)
       .then(setTopster)
       .catch((err) => {
         if (!(err instanceof ApiError && (err.status === 404 || err.status === 403))) {
@@ -76,7 +77,7 @@ export default function EditTopsterPage() {
   }, [topster, ready, albums]);
 
   async function save(body: TopsterCreateBody) {
-    await apiFetch(`/api/topsters/${id}`, { method: 'PUT', body: JSON.stringify(body) });
+    await updateTopster(id, body);
     toast.success('탑스터를 수정했습니다');
     router.push(`/topsters/${id}`);
   }

@@ -1,8 +1,7 @@
 import { ImageResponse } from 'next/og';
-import { apiFetch } from '@/lib/api';
-import { fetchPoolItems, ITEM_TYPE_LABEL } from '@/lib/pool-item';
-import { OG_CONTENT_TYPE, OG_SIZE, OgShell } from '@/lib/og';
-import type { TournamentDetail } from '@/types/tournament';
+import { getTournament } from '@/lib/api/tournaments';
+import { fetchPoolItems, ITEM_TYPE_LABEL } from '@/lib/domain/pool-item';
+import { OG_CONTENT_TYPE, OG_SIZE, OgShell } from '@/lib/render/og';
 
 export const size = OG_SIZE;
 export const contentType = OG_CONTENT_TYPE;
@@ -19,7 +18,7 @@ export default async function Image({ params }: { params: Promise<{ id: string }
   let covers: string[] = [];
 
   try {
-    const t = await apiFetch<TournamentDetail>(`/api/tournaments/${id}`);
+    const t = await getTournament(id);
     title = t.title;
     subtitle =
       t.description ||

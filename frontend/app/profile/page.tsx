@@ -5,13 +5,17 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { LayoutGrid, Plus, TriangleAlert, Trophy } from 'lucide-react';
 import { toast } from 'sonner';
-import { apiFetch, ApiError } from '@/lib/api';
-import { useInfiniteList } from '@/lib/use-infinite-list';
-import InfiniteListFooter from '@/components/music/InfiniteListFooter';
+import { ApiError } from '@/lib/api/client';
+import type { Me } from '@/types/user';
+import { getMe } from '@/lib/api/auth';
+import { myTopstersPath, topsterPath } from '@/lib/api/topsters';
+import { myTournamentsPath, tournamentPath } from '@/lib/api/tournaments';
+import { useInfiniteList } from '@/lib/hooks/use-infinite-list';
+import InfiniteListFooter from '@/components/common/InfiniteListFooter';
 import { Skeleton } from '@/components/ui/skeleton';
-import OwnerItemActions from '@/components/music/OwnerItemActions';
-import TopsterCard from '@/components/music/TopsterCard';
-import TournamentCard from '@/components/music/TournamentCard';
+import OwnerItemActions from '@/components/common/OwnerItemActions';
+import TopsterCard from '@/components/topster/TopsterCard';
+import TournamentCard from '@/components/tournament/TournamentCard';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -20,13 +24,6 @@ import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTi
 import { Spinner } from '@/components/ui/spinner';
 import type { Topster } from '@/types/topster';
 import type { TournamentSummary } from '@/types/tournament';
-
-interface Me {
-  id: string;
-  email: string;
-  nickname: string;
-  provider: string;
-}
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -38,7 +35,7 @@ export default function ProfilePage() {
     if (!localStorage.getItem('access_token')) { router.push('/login'); return; }
     async function load() {
       try {
-        const user = await apiFetch<Me>('/api/auth/me');
+        const user = await getMe();
         setMe(user);
         localStorage.setItem('user_id', user.id);
       } catch (err) {
@@ -58,13 +55,11 @@ export default function ProfilePage() {
   // 목록은 사용자 확인이 끝난 뒤에 부른다 — 비로그인 상태로 먼저 때리면
   // 로그인 화면으로 넘어가기 전에 401 토스트가 뜬다.
   const buildTopsters = useCallback(
-    ({ limit, offset }: { limit: number; offset: number }) =>
-      `/api/topsters/me/list?limit=${limit}&offset=${offset}`,
+    (page: { limit: number; offset: number }) => myTopstersPath(page),
     [],
   );
   const buildTournaments = useCallback(
-    ({ limit, offset }: { limit: number; offset: number }) =>
-      `/api/tournaments/me/list?limit=${limit}&offset=${offset}`,
+    (page: { limit: number; offset: number }) => myTournamentsPath(page),
     [],
   );
 
@@ -175,7 +170,7 @@ export default function ProfilePage() {
                 actions={
                   <OwnerItemActions
                     editHref={`/topsters/${t.id}/edit`}
-                    deletePath={`/api/topsters/${t.id}`}
+                    deletePath={topsterPath(t.id)}
                     name={t.title}
                     losesOnDelete="댓글도 함께 지워집니다."
                     // 서버가 이미 지웠으므로 목록만 맞춰준다 — 다시 불러오면 왕복이 한 번 더 는다.
@@ -241,7 +236,7 @@ export default function ProfilePage() {
                 actions={
                   <OwnerItemActions
                     editHref={`/tournament/${t.id}/edit`}
-                    deletePath={`/api/tournaments/${t.id}`}
+                    deletePath={tournamentPath(t.id)}
                     name={t.title}
                     losesOnDelete="플레이 기록·랭킹·댓글이 함께 지워집니다."
                     onDeleted={() => tournamentList.removeItem(t.id)}

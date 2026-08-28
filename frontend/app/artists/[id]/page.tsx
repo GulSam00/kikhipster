@@ -1,9 +1,15 @@
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import { Mic2 } from 'lucide-react';
-import { apiFetch, ApiError } from '@/lib/api';
+import { ApiError } from '@/lib/api/client';
+// 지역 래퍼(404 -> null)와 이름이 겹쳐 별칭을 준다.
+import {
+  getArtist as fetchArtist,
+  getArtistAlbums as fetchArtistAlbums,
+  getArtistTopTracks as fetchArtistTopTracks,
+} from '@/lib/api/music';
 import AlbumCard from '@/components/music/AlbumCard';
-import LikeButton from '@/components/music/LikeButton';
+import LikeButton from '@/components/social/LikeButton';
 import TrackRow from '@/components/music/TrackRow';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
@@ -11,7 +17,7 @@ import type { AlbumSummary, ArtistDetail, TrackSearchItem } from '@/types/music'
 
 async function getArtist(id: string): Promise<ArtistDetail | null> {
   try {
-    return await apiFetch<ArtistDetail>(`/api/music/artists/${id}`);
+    return await fetchArtist(id);
   } catch (err) {
     if (err instanceof ApiError && err.status === 404) return null;
     throw err;
@@ -20,7 +26,7 @@ async function getArtist(id: string): Promise<ArtistDetail | null> {
 
 async function getTopTracks(id: string): Promise<TrackSearchItem[]> {
   try {
-    return await apiFetch<TrackSearchItem[]>(`/api/music/artists/${id}/top-tracks`);
+    return await fetchArtistTopTracks(id);
   } catch {
     return [];
   }
@@ -28,7 +34,7 @@ async function getTopTracks(id: string): Promise<TrackSearchItem[]> {
 
 async function getAlbums(id: string): Promise<AlbumSummary[]> {
   try {
-    return await apiFetch<AlbumSummary[]>(`/api/music/artists/${id}/albums`);
+    return await fetchArtistAlbums(id);
   } catch {
     return [];
   }

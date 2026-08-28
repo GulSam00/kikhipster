@@ -3,13 +3,14 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { toast } from 'sonner';
-import { apiFetch, ApiError } from '@/lib/api';
+import { ApiError } from '@/lib/api/client';
+import { getTournament, updateTournament } from '@/lib/api/tournaments';
 import TournamentEditor, {
   type TournamentEditorInitial,
-} from '@/components/music/TournamentEditor';
+} from '@/components/tournament/TournamentEditor';
 import { Spinner } from '@/components/ui/spinner';
-import { fetchPoolItems } from '@/lib/pool-item';
-import { useMe } from '@/lib/use-me';
+import { fetchPoolItems } from '@/lib/domain/pool-item';
+import { useMe } from '@/lib/hooks/use-me';
 import type { TournamentCreateBody, TournamentDetail } from '@/types/tournament';
 
 export default function EditTournamentPage() {
@@ -24,7 +25,7 @@ export default function EditTournamentPage() {
     let alive = true;
     (async () => {
       try {
-        const t = await apiFetch<TournamentDetail>(`/api/tournaments/${id}`);
+        const t = await getTournament(id);
         if (!alive) return;
         setTournament(t);
 
@@ -62,13 +63,10 @@ export default function EditTournamentPage() {
 
   async function save(body: TournamentCreateBody) {
     // item_type 은 보내지 않는다 — 백엔드가 무시하기도 하고, 바뀔 수 있다는 인상을 주면 안 된다.
-    await apiFetch(`/api/tournaments/${id}`, {
-      method: 'PUT',
-      body: JSON.stringify({
-        title: body.title,
-        description: body.description,
-        item_ids: body.item_ids,
-      }),
+    await updateTournament(id, {
+      title: body.title,
+      description: body.description,
+      item_ids: body.item_ids,
     });
     toast.success('월드컵을 수정했습니다');
     router.push(`/tournament/${id}`);

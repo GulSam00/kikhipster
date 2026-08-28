@@ -6,16 +6,16 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { BarChart3, GitBranch, Swords, Trophy } from 'lucide-react';
 import { toast } from 'sonner';
-import { apiFetch } from '@/lib/api';
-import BracketBackground from '@/components/music/BracketBackground';
-import FullBracket from '@/components/music/FullBracket';
+import { getPlay, voteRound } from '@/lib/api/plays';
+import BracketBackground from '@/components/tournament/BracketBackground';
+import FullBracket from '@/components/tournament/FullBracket';
 import TrackRow from '@/components/music/TrackRow';
-import { ItemFallbackIcon } from '@/components/music/PoolItemTile';
+import { ItemFallbackIcon } from '@/components/tournament/PoolItemTile';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { nextMatch, roundLabel } from '@/lib/bracket';
-import { fetchPoolItems, type PoolItem } from '@/lib/pool-item';
+import { nextMatch, roundLabel } from '@/lib/domain/bracket';
+import { fetchPoolItems, type PoolItem } from '@/lib/domain/pool-item';
 import type { Play, PlayRound } from '@/types/tournament';
 
 export default function PlayPage() {
@@ -45,7 +45,7 @@ export default function PlayPage() {
   useEffect(() => {
     (async () => {
       try {
-        const p = await apiFetch<Play>(`/api/plays/${playId}`);
+        const p = await getPlay(playId);
         setPlay(p);
         await loadItems(p);
       } catch {
@@ -63,10 +63,7 @@ export default function PlayPage() {
     // 서버 응답을 기다리기 전에 표시를 먼저 바꿄다 — 누른 직후가 이 피드백이 의미 있는 순간이다.
     setJustPicked(winnerId);
     try {
-      const updated = await apiFetch<Play>(`/api/plays/${playId}/rounds/${roundId}/vote`, {
-        method: 'POST',
-        body: JSON.stringify({ winner_id: winnerId }),
-      });
+      const updated = await voteRound(playId, roundId, winnerId);
       // 올라가는 표시를 한 박자 보여준 뒤 다음 경기로 넘긴다.
       // prefers-reduced-motion 이면 전환을 기다리게 할 이유가 없어 곱바로 넘긴다.
       const reduced =
@@ -214,7 +211,7 @@ function PlayMatch({
                   type="button"
                   onClick={() => onVote(itemId, match.id)}
                   disabled={voting}
-                  className="flex w-full flex-col items-center gap-3 rounded-lg outline-none disabled:opacity-50"
+                  className="flex w-full cursor-pointer flex-col items-center gap-3 rounded-lg outline-none disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {/* 카드가 화면을 크게 쓰도록 커버를 정사각으로 꽉 채운다(예전엔 112px 고정). */}
                   <div className="relative aspect-square w-full overflow-hidden rounded-lg bg-muted">

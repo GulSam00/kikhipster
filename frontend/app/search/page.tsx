@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { SearchIcon } from 'lucide-react';
 import { toast } from 'sonner';
-import { apiFetch } from '@/lib/api';
+import { searchAlbums, searchArtists, searchTracks } from '@/lib/api/music';
 import ArtistCard from '@/components/music/ArtistCard';
 import AlbumCard from '@/components/music/AlbumCard';
 import TrackRow from '@/components/music/TrackRow';
@@ -48,13 +48,13 @@ export default function SearchPage() {
     setLoading(true);
     try {
       if (t === 'artists') {
-        const res = await apiFetch<{ items: ArtistSummary[] }>(`/api/music/search/artists?q=${encodeURIComponent(q)}&limit=20`);
+        const res = { items: await searchArtists(q) };
         setArtists(res.items);
       } else if (t === 'albums') {
-        const res = await apiFetch<{ items: AlbumSummary[] }>(`/api/music/search/albums?q=${encodeURIComponent(q)}&limit=20`);
+        const res = { items: await searchAlbums(q) };
         setAlbums(res.items);
       } else {
-        const res = await apiFetch<{ items: TrackSearchItem[] }>(`/api/music/search/tracks?q=${encodeURIComponent(q)}&limit=20`);
+        const res = { items: await searchTracks(q) };
         setTracks(res.items);
       }
     } catch {

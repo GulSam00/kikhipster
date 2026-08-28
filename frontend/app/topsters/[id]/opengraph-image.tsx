@@ -1,8 +1,7 @@
 import { ImageResponse } from 'next/og';
-import { apiFetch } from '@/lib/api';
-import { OG_CONTENT_TYPE, OG_SIZE, OgShell } from '@/lib/og';
-import type { AlbumSummary } from '@/types/music';
-import type { Topster } from '@/types/topster';
+import { getAlbumsByIds } from '@/lib/api/music';
+import { getTopster } from '@/lib/api/topsters';
+import { OG_CONTENT_TYPE, OG_SIZE, OgShell } from '@/lib/render/og';
 
 export const size = OG_SIZE;
 export const contentType = OG_CONTENT_TYPE;
@@ -19,7 +18,7 @@ export default async function Image({ params }: { params: Promise<{ id: string }
   let covers: string[] = [];
 
   try {
-    const t = await apiFetch<Topster>(`/api/topsters/${id}`);
+    const t = await getTopster(id);
     title = t.title;
     subtitle = t.description || `${t.user.nickname} 님의 ${t.width}×${t.height} 앨범 탑스터`;
 
@@ -30,7 +29,7 @@ export default async function Image({ params }: { params: Promise<{ id: string }
       .slice(0, COVER_COUNT);
 
     if (ids.length > 0) {
-      const albums = await apiFetch<AlbumSummary[]>(`/api/music/albums?ids=${ids.join(',')}`);
+      const albums = await getAlbumsByIds(ids);
       covers = albums.map((a) => a.cover_url).filter((u): u is string => !!u);
     }
   } catch {

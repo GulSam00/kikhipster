@@ -1,19 +1,16 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { apiFetch } from '@/lib/api';
-import TopsterEditor from '@/components/music/TopsterEditor';
+import { createTopster } from '@/lib/api/topsters';
+import TopsterEditor from '@/components/topster/TopsterEditor';
 import type { TopsterCreateBody } from '@/types/topster';
 
 export default function NewTopsterPage() {
   const router = useRouter();
 
   async function create(body: TopsterCreateBody) {
-    const res = await apiFetch<{ id: string }>('/api/topsters/', {
-      method: 'POST',
-      body: JSON.stringify(body),
-    });
-    router.push(`/topsters/${res.id}`);
+    const created = await createTopster(body);
+    router.push(`/topsters/${created.id}`);
   }
 
   return (

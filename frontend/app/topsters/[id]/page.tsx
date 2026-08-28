@@ -1,7 +1,6 @@
 import type { Metadata } from 'next';
-import { apiFetch } from '@/lib/api';
+import { getTopster } from '@/lib/api/topsters';
 import TopsterDetail from './TopsterDetail';
-import type { Topster } from '@/types/topster';
 
 /**
  * 이 페이지는 **메타데이터 때문에만** Server Component다.
@@ -18,7 +17,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { id } = await params;
   try {
-    const t = await apiFetch<Topster>(`/api/topsters/${id}`);
+    const t = await getTopster(id);
     const summary =
       t.description || `${t.user.nickname} 님의 ${t.width}×${t.height} 앨범 탑스터`;
     return {

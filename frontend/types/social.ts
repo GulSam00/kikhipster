@@ -25,4 +25,10 @@ export interface LikeStatus {
   like_count: number;
 }
 
-export type LikeTargetType = 'topster' | 'album' | 'track' | 'artist' | 'comment';
+export type LikeTargetType =
+  | 'topster'
+  | 'tournament'
+  | 'album'
+  | 'track'
+  | 'artist'
+  | 'comment';

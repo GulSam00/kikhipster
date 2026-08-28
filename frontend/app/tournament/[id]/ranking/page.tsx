@@ -1,10 +1,10 @@
 import Link from 'next/link';
-import Image from 'next/image';
 import { ArrowLeft, Minus, TrendingDown, TrendingUp } from 'lucide-react';
-import { apiFetch } from '@/lib/api';
-import CommentSection from '@/components/music/CommentSection';
-import ShareButton from '@/components/music/ShareButton';
-import { ItemFallbackIcon } from '@/components/music/PoolItemTile';
+import { getRanking } from '@/lib/api/tournaments';
+import CommentSection from '@/components/social/CommentSection';
+import CoverImage from '@/components/common/CoverImage';
+import ShareButton from '@/components/common/ShareButton';
+import { ItemFallbackIcon } from '@/components/tournament/PoolItemTile';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import {
@@ -16,8 +16,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { fetchPoolItems, ITEM_TYPE_LABEL } from '@/lib/pool-item';
-import type { TournamentRanking } from '@/types/tournament';
+import { fetchPoolItems, ITEM_TYPE_LABEL } from '@/lib/domain/pool-item';
 
 function percent(value: number) {
   return `${Math.round(value * 100)}%`;
@@ -26,19 +25,19 @@ function percent(value: number) {
 /** 순위 추이 셀. 신규(비교 시점에 표본 없음)는 대시가 아니라 'NEW'로 구분한다. */
 function TrendCell({ delta }: { delta: number | null }) {
   if (delta === null) {
-    return <span className="text-xs text-muted-foreground">NEW</span>;
+    return <span className="text-sm text-muted-foreground">NEW</span>;
   }
   if (delta === 0) {
     return (
-      <span className="flex items-center gap-0.5 text-xs text-muted-foreground">
-        <Minus className="size-3" />
+      <span className="flex items-center gap-0.5 text-sm text-muted-foreground">
+        <Minus className="size-4" />
       </span>
     );
   }
   const up = delta > 0;
   return (
-    <span className="flex items-center gap-0.5 text-xs tabular-nums">
-      {up ? <TrendingUp className="size-3" /> : <TrendingDown className="size-3" />}
+    <span className="flex items-center gap-0.5 text-sm tabular-nums">
+      {up ? <TrendingUp className="size-4" /> : <TrendingDown className="size-4" />}
       {Math.abs(delta)}
     </span>
   );
@@ -50,7 +49,7 @@ export default async function TournamentRankingPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const ranking = await apiFetch<TournamentRanking>(`/api/tournaments/${id}/ranking`);
+  const ranking = await getRanking(id);
 
   const items = await fetchPoolItems(
     ranking.item_type,
@@ -82,7 +81,7 @@ export default async function TournamentRankingPage({
         <Table className="mb-8">
           <TableHeader>
             <TableRow>
-              <TableHead className="w-10">순위</TableHead>
+              <TableHead className="w-12">순위</TableHead>
               <TableHead>{label}</TableHead>
               <TableHead className="text-right">우승 비율</TableHead>
               <TableHead className="text-right">승률</TableHead>
@@ -94,48 +93,49 @@ export default async function TournamentRankingPage({
               const item = itemMap[row.item_id];
               return (
                 <TableRow key={row.item_id}>
-                  <TableCell className="font-medium tabular-nums">{row.rank}</TableCell>
+                  <TableCell className="py-3 text-lg font-medium tabular-nums">
+                    {row.rank}
+                  </TableCell>
 
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <div className="relative size-10 shrink-0 overflow-hidden rounded-md bg-muted">
-                        {item?.coverUrl ? (
-                          <Image
-                            src={item.coverUrl}
-                            alt={item.title}
-                            fill
-                            className="object-cover"
-                          />
-                        ) : (
-                          <div className="flex size-full items-center justify-center text-muted-foreground">
-                            <ItemFallbackIcon itemType={ranking.item_type} className="size-4" />
-                          </div>
-                        )}
-                      </div>
+                  <TableCell className="py-3">
+                    <div className="flex items-center gap-3">
+                      <CoverImage
+                        src={item?.coverUrl}
+                        alt={item?.title ?? ''}
+                        fallback={
+                          <ItemFallbackIcon itemType={ranking.item_type} className="size-6" />
+                        }
+                        className="size-16 shrink-0 rounded-md"
+                        sizes="64px"
+                      />
                       <div className="min-w-0">
-                        <p className="truncate text-sm font-medium">
+                        <p className="truncate text-lg font-medium">
                           {item?.title ?? row.item_id}
                         </p>
-                        <p className="truncate text-xs text-muted-foreground">{item?.subtitle}</p>
+                        <p className="truncate text-sm text-muted-foreground">{item?.subtitle}</p>
                       </div>
                     </div>
                   </TableCell>
 
-                  <TableCell className="text-right tabular-nums">
-                    <span className="text-sm">{percent(row.championship_rate)}</span>
-                    <span className="ml-1 text-xs text-muted-foreground">
+                  {/*
+                    비율과 분수를 위아래로 나눈다. 행이 커지면서 한 줄에 붙여 놓은 두 숫자가
+                    빈 가로 공간에 떠 보였다 — 큰 값이 비율, 작은 값이 그 근거라는 관계도 이쪽이 낫다.
+                  */}
+                  <TableCell className="py-3 text-right tabular-nums">
+                    <p className="text-lg">{percent(row.championship_rate)}</p>
+                    <p className="text-sm text-muted-foreground">
                       {row.championship_count}/{row.play_count}
-                    </span>
+                    </p>
                   </TableCell>
 
-                  <TableCell className="text-right tabular-nums">
-                    <span className="text-sm">{percent(row.match_win_rate)}</span>
-                    <span className="ml-1 text-xs text-muted-foreground">
+                  <TableCell className="py-3 text-right tabular-nums">
+                    <p className="text-lg">{percent(row.match_win_rate)}</p>
+                    <p className="text-sm text-muted-foreground">
                       {row.match_win_count}/{row.match_count}
-                    </span>
+                    </p>
                   </TableCell>
 
-                  <TableCell>
+                  <TableCell className="py-3">
                     <div className="flex justify-end">
                       <TrendCell delta={row.rank_delta} />
                     </div>

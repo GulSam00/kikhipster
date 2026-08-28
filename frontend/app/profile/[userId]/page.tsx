@@ -5,12 +5,16 @@ import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { LayoutGrid, TriangleAlert, Trophy, UserX } from 'lucide-react';
 import { toast } from 'sonner';
-import { apiFetch, ApiError } from '@/lib/api';
-import { useInfiniteList } from '@/lib/use-infinite-list';
-import InfiniteListFooter from '@/components/music/InfiniteListFooter';
+import { ApiError } from '@/lib/api/client';
+import type { PublicUser } from '@/types/user';
+import { getUser } from '@/lib/api/auth';
+import { userTopstersPath } from '@/lib/api/topsters';
+import { userTournamentsPath } from '@/lib/api/tournaments';
+import { useInfiniteList } from '@/lib/hooks/use-infinite-list';
+import InfiniteListFooter from '@/components/common/InfiniteListFooter';
 import { Skeleton } from '@/components/ui/skeleton';
-import TopsterCard from '@/components/music/TopsterCard';
-import TournamentCard from '@/components/music/TournamentCard';
+import TopsterCard from '@/components/topster/TopsterCard';
+import TournamentCard from '@/components/tournament/TournamentCard';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -19,12 +23,6 @@ import { Empty, EmptyContent, EmptyHeader, EmptyMedia, EmptyTitle } from '@/comp
 import { Spinner } from '@/components/ui/spinner';
 import type { Topster } from '@/types/topster';
 import type { TournamentSummary } from '@/types/tournament';
-
-interface PublicUser {
-  id: string;
-  nickname: string;
-  provider: string;
-}
 
 export default function UserProfilePage() {
   const { userId } = useParams<{ userId: string }>();
@@ -37,7 +35,7 @@ export default function UserProfilePage() {
     if (!userId) return;
     async function load() {
       try {
-        setUser(await apiFetch<PublicUser>(`/api/auth/users/${userId}`));
+        setUser(await getUser(userId));
       } catch (err) {
         if (err instanceof ApiError && err.status === 404) {
           setNotFound(true);
@@ -54,13 +52,11 @@ export default function UserProfilePage() {
 
   // 없는 사용자면 목록을 부를 이유가 없다 — user 가 확인된 뒤에만 요청한다.
   const buildTopsters = useCallback(
-    ({ limit, offset }: { limit: number; offset: number }) =>
-      `/api/topsters/user/${userId}?limit=${limit}&offset=${offset}`,
+    (page: { limit: number; offset: number }) => userTopstersPath(userId, page),
     [userId],
   );
   const buildTournaments = useCallback(
-    ({ limit, offset }: { limit: number; offset: number }) =>
-      `/api/tournaments/user/${userId}?limit=${limit}&offset=${offset}`,
+    (page: { limit: number; offset: number }) => userTournamentsPath(userId, page),
     [userId],
   );
 

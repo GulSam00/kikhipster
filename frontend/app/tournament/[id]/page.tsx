@@ -1,17 +1,19 @@
-import type { Metadata } from 'next';
-import Link from 'next/link';
-import { BarChart3, Play } from 'lucide-react';
-import { apiFetch } from '@/lib/api';
-import CommentSection from '@/components/music/CommentSection';
-import OwnerActions from '@/components/music/OwnerActions';
-import PoolGrid from '@/components/music/PoolGrid';
-import ShareButton from '@/components/music/ShareButton';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
-import { fetchPoolItems, ITEM_TYPE_LABEL } from '@/lib/pool-item';
-import { formatDate } from '@/lib/utils';
-import type { TournamentDetail } from '@/types/tournament';
+import type { Metadata } from "next";
+import Link from "next/link";
+import { BarChart3 } from "lucide-react";
+import { getTournament, tournamentPath } from "@/lib/api/tournaments";
+import CommentSection from "@/components/social/CommentSection";
+import DetailActionBar from "@/components/common/DetailActionBar";
+import DetailHeader from "@/components/common/DetailHeader";
+import LikeButton from "@/components/social/LikeButton";
+import OwnerMenu from "@/components/common/OwnerMenu";
+import PlayLauncher from "@/components/tournament/PlayLauncher";
+import PoolGrid from "@/components/tournament/PoolGrid";
+import ShareButton from "@/components/common/ShareButton";
+import ViewCounter from "@/components/common/ViewCounter";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import { fetchPoolItems, ITEM_TYPE_LABEL } from "@/lib/domain/pool-item";
 
 /**
  * 첫 화면에서 서버가 미리 받아 두는 개수. 풀이 최대 512개라 전부 그리면
@@ -31,18 +33,18 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { id } = await params;
   try {
-    const t = await apiFetch<TournamentDetail>(`/api/tournaments/${id}`);
+    const t = await getTournament(id);
     const summary =
       t.description ||
       `${ITEM_TYPE_LABEL[t.item_type]} ${t.item_count}개로 겨루는 월드컵 · 플레이 ${t.play_count}회`;
     return {
       title: t.title,
       description: summary,
-      openGraph: { title: t.title, description: summary, type: 'article' },
+      openGraph: { title: t.title, description: summary, type: "article" },
     };
   } catch {
     // 없는 월드컵이면 페이지 렌더에서 어차피 에러 경계로 간다 — 메타에서 터뜨리지 않는다.
-    return { title: '월드컵' };
+    return { title: "월드컵" };
   }
 }
 
@@ -52,64 +54,37 @@ export default async function TournamentDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const tournament = await apiFetch<TournamentDetail>(`/api/tournaments/${id}`);
+  const tournament = await getTournament(id);
 
   const shownIds = tournament.item_ids.slice(0, POOL_PREVIEW_LIMIT);
   const items = await fetchPoolItems(tournament.item_type, shownIds);
 
   return (
     <div className="mx-auto w-full max-w-4xl px-4 py-8">
-      <div className="mb-2 flex items-center gap-1.5">
-        <Badge variant="secondary" className="px-1.5 text-[10px]">
-          {ITEM_TYPE_LABEL[tournament.item_type]} {tournament.item_count}
-        </Badge>
-        <Badge variant="outline" className="px-1.5 text-[10px]">
-          플레이 {tournament.play_count}
-        </Badge>
-      </div>
+      {/* 이 페이지는 Server Component라 조회 기록만 클라이언트로 뺐다. */}
+      <ViewCounter target="tournament" id={tournament.id} />
 
-      <h1 className="mb-1 font-heading text-2xl font-bold">{tournament.title}</h1>
-      <p className="mb-3 text-sm text-muted-foreground">
-        {tournament.user.nickname} · {formatDate(tournament.created_at)}
-      </p>
-      {tournament.description && (
-        <p className="mb-6 text-sm whitespace-pre-wrap">{tournament.description}</p>
-      )}
-
-      {/* 강수는 다음 화면에서 고른다 — playId 는 강수를 정해야 생기므로 여기서는 이동만 한다. */}
-      <div className="mb-4">
-        {tournament.available_sizes.length === 0 ? (
-          <p className="text-sm text-muted-foreground">풀이 4개 미만이라 플레이할 수 없습니다.</p>
-        ) : (
-          <Button asChild size="lg" className="h-11">
-            <Link href={`/tournament/${tournament.id}/play`}>
-              <Play />
-              시작하기
-            </Link>
-          </Button>
-        )}
-      </div>
-
-      <div className="mb-8 flex flex-wrap gap-2">
-        <Button asChild variant="outline" size="lg">
-          <Link href={`/tournament/${tournament.id}/ranking`}>
-            <BarChart3 />
-            랭킹보기
-          </Link>
-        </Button>
-        <ShareButton path={`/tournament/${tournament.id}`} />
-        {/* 이 페이지는 Server Component라 로그인 사용자를 모른다 — 버튼만 클라이언트로 뺐다. */}
-        <OwnerActions
-          ownerId={tournament.user.id}
-          editHref={`/tournament/${tournament.id}/edit`}
-          deletePath={`/api/tournaments/${tournament.id}`}
-          name={tournament.title}
-          losesOnDelete="플레이 기록·랭킹·댓글이 함께 지워집니다."
-          redirectTo="/tournament"
-        />
-      </div>
-
-      <Separator className="mb-6" />
+      <DetailHeader
+        title={tournament.title}
+        authorId={tournament.user.id}
+        authorNickname={tournament.user.nickname}
+        createdAt={tournament.created_at}
+        viewCount={tournament.view_count}
+        likeCount={tournament.like_count}
+        commentCount={tournament.comment_count}
+        description={tournament.description}
+        ownerMenu={
+          /* 이 페이지는 Server Component라 로그인 사용자를 모른다 — 메뉴만 클라이언트다. */
+          <OwnerMenu
+            ownerId={tournament.user.id}
+            editHref={`/tournament/${tournament.id}/edit`}
+            deletePath={tournamentPath(tournament.id)}
+            name={tournament.title}
+            losesOnDelete="플레이 기록·랭킹·댓글이 함께 지워집니다."
+            redirectTo="/tournament"
+          />
+        }
+      />
 
       <h2 className="mb-4 font-heading text-lg font-bold">
         후보 {tournament.item_count}
@@ -127,7 +102,40 @@ export default async function TournamentDetailPage({
         />
       )}
 
-      <Separator className="my-6" />
+      <div className="mt-6">
+        <DetailActionBar
+          primary={
+            <>
+              {/* 강수를 고르면 그 자리에서 판이 만들어지고 /play/{playId} 로 넘어간다. */}
+              <PlayLauncher
+                tournamentId={tournament.id}
+                availableSizes={tournament.available_sizes}
+              />
+              <Button asChild variant="outline" size="lg" className="h-11">
+                <Link href={`/tournament/${tournament.id}/ranking`}>
+                  <BarChart3 />
+                  랭킹보기
+                </Link>
+              </Button>
+            </>
+          }
+          engage={
+            <>
+              <LikeButton
+                targetType="tournament"
+                targetId={tournament.id}
+                name={tournament.title}
+              />
+              <ShareButton
+                path={`/tournament/${tournament.id}`}
+                className="rounded-full"
+              />
+            </>
+          }
+        />
+      </div>
+
+      <Separator className="mb-6" />
 
       <CommentSection targetType="tournament" targetId={tournament.id} />
     </div>

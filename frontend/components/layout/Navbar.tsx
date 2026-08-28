@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react';
 import { Home, Search, LayoutGrid, Trophy, User, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { clearMeCache } from '@/lib/use-me';
+import { clearMeCache } from '@/lib/hooks/use-me';
 
 const navLinks = [
   { href: '/search', label: '검색', icon: Search },

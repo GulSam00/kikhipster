@@ -2,7 +2,7 @@
 
 import { Pause, Play } from 'lucide-react';
 import { usePlayer } from '@/contexts/PlayerContext';
-import LikeButton from '@/components/music/LikeButton';
+import LikeButton from '@/components/social/LikeButton';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';

@@ -1,17 +1,24 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import Link from 'next/link';
+import { Download } from 'lucide-react';
 import { toast } from 'sonner';
-import { apiFetch, ApiError } from '@/lib/api';
-import CommentSection from '@/components/music/CommentSection';
-import LikeButton from '@/components/music/LikeButton';
-import OwnerActions from '@/components/music/OwnerActions';
-import ShareButton from '@/components/music/ShareButton';
-import TopsterCanvas from '@/components/music/TopsterCanvas';
+import { ApiError } from '@/lib/api/client';
+import { getTopster, topsterPath } from '@/lib/api/topsters';
+import CommentSection from '@/components/social/CommentSection';
+import DetailActionBar from '@/components/common/DetailActionBar';
+import DetailHeader from '@/components/common/DetailHeader';
+import LikeButton from '@/components/social/LikeButton';
+import OwnerMenu from '@/components/common/OwnerMenu';
+import ShareButton from '@/components/common/ShareButton';
+import TopsterCanvas from '@/components/topster/TopsterCanvas';
+import ViewCounter from '@/components/common/ViewCounter';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Spinner } from '@/components/ui/spinner';
-import { useAlbumItems } from '@/lib/album-covers';
+import { useAlbumItems } from '@/lib/hooks/use-album-covers';
+import { downloadTopsterImage } from '@/lib/render/topster-image';
 import type { Topster } from '@/types/topster';
 
 /**
@@ -24,6 +31,7 @@ import type { Topster } from '@/types/topster';
 export default function TopsterDetail({ id }: { id: string }) {
   const [topster, setTopster] = useState<Topster | null>(null);
   const [loading, setLoading] = useState(true);
+  const [downloading, setDownloading] = useState(false);
   const albumIds = useMemo(
     () => topster?.items.map((it) => it.album_spotify_id) ?? [],
     [topster],
@@ -31,7 +39,7 @@ export default function TopsterDetail({ id }: { id: string }) {
   const albums = useAlbumItems(albumIds);
 
   useEffect(() => {
-    apiFetch<Topster>(`/api/topsters/${id}`)
+    getTopster(id)
       .then(setTopster)
       .catch((err) => {
         if (!(err instanceof ApiError && err.status === 404)) {
@@ -40,6 +48,25 @@ export default function TopsterDetail({ id }: { id: string }) {
       })
       .finally(() => setLoading(false));
   }, [id]);
+
+  async function handleDownload() {
+    if (!topster) return;
+    setDownloading(true);
+    try {
+      // 편집기와 같은 함수다. 남의 탑스터를 보다가도 저장할 수 있어야 해서 이쪽에도 붙였다
+      // (2026-08-27 이전에는 만들기·수정 화면에서만 저장할 수 있었다).
+      await downloadTopsterImage({
+        options: topster,
+        title: topster.title,
+        items: topster.items,
+        albums,
+      });
+    } catch {
+      toast.error('이미지를 만들지 못했습니다');
+    } finally {
+      setDownloading(false);
+    }
+  }
 
   if (loading) {
     return (
@@ -59,19 +86,36 @@ export default function TopsterDetail({ id }: { id: string }) {
   }
 
   return (
-    <div className="mx-auto w-full max-w-5xl px-4 py-8">
-      <div className="mb-6">
-        <h1 className="mb-1 font-heading text-2xl font-bold">{topster.title}</h1>
-        {topster.description && (
-          <p className="mb-2 text-sm text-muted-foreground">{topster.description}</p>
-        )}
-        <p className="text-xs text-muted-foreground">
-          by{' '}
-          <Link href={`/profile/${topster.user.id}`} className="transition-colors hover:text-primary">
-            {topster.user.nickname}
-          </Link>
-        </p>
-      </div>
+    <div className="mx-auto w-full max-w-4xl px-4 py-8">
+      {/* 실제로 탑스터를 찾은 뒤에만 센다 — 위의 404 분기가 먼저 걸러진다. */}
+      <ViewCounter target="topster" id={topster.id} />
+
+      <DetailHeader
+        title={topster.title}
+        authorId={topster.user.id}
+        authorNickname={topster.user.nickname}
+        createdAt={topster.created_at}
+        viewCount={topster.view_count}
+        likeCount={topster.like_count}
+        commentCount={topster.comment_count}
+        description={topster.description}
+        badges={
+          <Badge variant="secondary" className="px-1.5 text-[10px]">
+            {topster.width}×{topster.height}
+          </Badge>
+        }
+        ownerMenu={
+          /* 격자·배경색·넘버링은 수정 화면에서 고친다. */
+          <OwnerMenu
+            ownerId={topster.user.id}
+            editHref={`/topsters/${topster.id}/edit`}
+            deletePath={topsterPath(topster.id)}
+            name={topster.title}
+            losesOnDelete="댓글도 함께 지워집니다."
+            redirectTo="/topsters"
+          />
+        }
+      />
 
       <TopsterCanvas
         options={topster}
@@ -81,20 +125,25 @@ export default function TopsterDetail({ id }: { id: string }) {
         className="mb-6"
       />
 
-      <div className="mb-8 flex items-center gap-2">
-        <LikeButton targetType="topster" targetId={topster.id} name={topster.title} />
-        <ShareButton path={`/topsters/${topster.id}`} label="링크 복사" className="rounded-full" />
-        {/* 격자·배경색·넘버링은 수정 화면에서 고친다. 삭제는 2026-08-27부터 여기에 있다. */}
-        <OwnerActions
-          ownerId={topster.user.id}
-          editHref={`/topsters/${topster.id}/edit`}
-          deletePath={`/api/topsters/${topster.id}`}
-          name={topster.title}
-          losesOnDelete="댓글도 함께 지워집니다."
-          redirectTo="/topsters"
-          buttonClassName="rounded-full"
-        />
-      </div>
+      <DetailActionBar
+        primary={
+          <Button
+            onClick={handleDownload}
+            disabled={downloading || topster.items.length === 0}
+            size="lg"
+            className="h-11"
+          >
+            <Download />
+            {downloading ? '만드는 중...' : '이미지 저장'}
+          </Button>
+        }
+        engage={
+          <>
+            <LikeButton targetType="topster" targetId={topster.id} name={topster.title} />
+            <ShareButton path={`/topsters/${topster.id}`} className="rounded-full" />
+          </>
+        }
+      />
 
       <Separator className="mb-6" />
 

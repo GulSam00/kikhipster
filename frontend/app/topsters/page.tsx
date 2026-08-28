@@ -3,9 +3,10 @@
 import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { LayoutGrid, Plus, Search } from 'lucide-react';
-import { useInfiniteList } from '@/lib/use-infinite-list';
-import InfiniteListFooter from '@/components/music/InfiniteListFooter';
-import TopsterCard from '@/components/music/TopsterCard';
+import { topsterListPath } from '@/lib/api/topsters';
+import { useInfiniteList } from '@/lib/hooks/use-infinite-list';
+import InfiniteListFooter from '@/components/common/InfiniteListFooter';
+import TopsterCard from '@/components/topster/TopsterCard';
 import { Button } from '@/components/ui/button';
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty';
 import { Input } from '@/components/ui/input';
@@ -31,11 +32,8 @@ export default function TopstersPage() {
   }, [q]);
 
   const buildUrl = useCallback(
-    ({ limit, offset }: { limit: number; offset: number }) => {
-      const params = new URLSearchParams({ sort, limit: String(limit), offset: String(offset) });
-      if (debouncedQ) params.set('q', debouncedQ);
-      return `/api/topsters/?${params}`;
-    },
+    (page: { limit: number; offset: number }) =>
+      topsterListPath(page, { sort, q: debouncedQ }),
     [sort, debouncedQ],
   );
 

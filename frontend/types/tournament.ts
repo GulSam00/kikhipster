@@ -13,6 +13,10 @@ export interface TournamentSummary {
   item_type: TournamentItemType;
   item_count: number;
   play_count: number;
+  /** 상세를 연 횟수. 플레이 수와 다르다 — 들어와 보기만 해도 오른다. */
+  view_count: number;
+  like_count: number;
+  comment_count: number;
   created_at: string;
   user: TournamentUser;
   preview_item_ids: string[];
@@ -26,6 +30,9 @@ export interface TournamentDetail {
   item_ids: string[];
   item_count: number;
   play_count: number;
+  view_count: number;
+  like_count: number;
+  comment_count: number;
   created_at: string;
   user: TournamentUser;
   /** 풀 크기 이하인 강수만 온다. 풀이 5개면 [4]. */

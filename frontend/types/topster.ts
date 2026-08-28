@@ -46,7 +46,10 @@ export interface Topster extends TopsterOptions {
   created_at: string;
   user: TopsterUser;
   items: TopsterItem[];
+  /** 상세를 연 횟수. 상세 GET 이 아니라 `POST /api/topsters/{id}/view` 로만 오른다. */
+  view_count: number;
   like_count: number;
+  comment_count: number;
 }
 
 export interface TopsterCreateBody extends TopsterOptions {

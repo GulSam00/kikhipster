@@ -1,29 +1,37 @@
-'use client';
+"use client";
 
-import { useCallback, useEffect, useState } from 'react';
-import Link from 'next/link';
-import { Plus, Search, Trophy } from 'lucide-react';
-import { useInfiniteList } from '@/lib/use-infinite-list';
-import InfiniteListFooter from '@/components/music/InfiniteListFooter';
-import TournamentCard from '@/components/music/TournamentCard';
-import { Button } from '@/components/ui/button';
-import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty';
-import { Input } from '@/components/ui/input';
-import { Skeleton } from '@/components/ui/skeleton';
-import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
-import type { TournamentSort, TournamentSummary } from '@/types/tournament';
+import { useCallback, useEffect, useState } from "react";
+import Link from "next/link";
+import { Plus, Search, Trophy } from "lucide-react";
+import { tournamentListPath } from "@/lib/api/tournaments";
+import { useInfiniteList } from "@/lib/hooks/use-infinite-list";
+import InfiniteListFooter from "@/components/common/InfiniteListFooter";
+import TournamentCard from "@/components/tournament/TournamentCard";
+import { Button } from "@/components/ui/button";
+import {
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/components/ui/empty";
+import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import type { TournamentSort, TournamentSummary } from "@/types/tournament";
 
 const SORTS: { value: TournamentSort; label: string }[] = [
-  { value: 'recent', label: '최신순' },
-  { value: 'popular_all', label: '인기 전체' },
-  { value: 'popular_year', label: '인기 올해' },
-  { value: 'popular_month', label: '인기 이번 달' },
+  { value: "recent", label: "최신순" },
+  { value: "popular_all", label: "인기 전체" },
+  { value: "popular_year", label: "인기 올해" },
+  { value: "popular_month", label: "인기 이번 달" },
 ];
 
 export default function TournamentDashboardPage() {
-  const [q, setQ] = useState('');
-  const [debouncedQ, setDebouncedQ] = useState('');
-  const [sort, setSort] = useState<TournamentSort>('recent');
+  const [q, setQ] = useState("");
+  const [debouncedQ, setDebouncedQ] = useState("");
+  const [sort, setSort] = useState<TournamentSort>("recent");
 
   useEffect(() => {
     const t = setTimeout(() => setDebouncedQ(q.trim()), 300);
@@ -31,20 +39,25 @@ export default function TournamentDashboardPage() {
   }, [q]);
 
   const buildUrl = useCallback(
-    ({ limit, offset }: { limit: number; offset: number }) => {
-      const params = new URLSearchParams({ sort, limit: String(limit), offset: String(offset) });
-      if (debouncedQ) params.set('q', debouncedQ);
-      return `/api/tournaments/?${params}`;
-    },
+    (page: { limit: number; offset: number }) =>
+      tournamentListPath(page, { sort, q: debouncedQ }),
     [sort, debouncedQ],
   );
 
-  const { items, loading, loadingMore, reachedEnd, failed, retry, sentinelRef, limit } =
-    useInfiniteList<TournamentSummary>({
-      key: `${sort}|${debouncedQ}`,
-      buildUrl,
-      errorMessage: '월드컵 목록을 불러오지 못했습니다',
-    });
+  const {
+    items,
+    loading,
+    loadingMore,
+    reachedEnd,
+    failed,
+    retry,
+    sentinelRef,
+    limit,
+  } = useInfiniteList<TournamentSummary>({
+    key: `${sort}|${debouncedQ}`,
+    buildUrl,
+    errorMessage: "월드컵 목록을 불러오지 못했습니다",
+  });
 
   return (
     <div className="mx-auto w-full max-w-6xl px-4 py-8">
@@ -94,11 +107,13 @@ export default function TournamentDashboardPage() {
             <EmptyMedia variant="icon">
               <Trophy />
             </EmptyMedia>
-            <EmptyTitle>{debouncedQ ? '검색 결과가 없습니다' : '아직 월드컵이 없습니다'}</EmptyTitle>
+            <EmptyTitle>
+              {debouncedQ ? "검색 결과가 없습니다" : "아직 월드컵이 없습니다"}
+            </EmptyTitle>
             <EmptyDescription>
               {debouncedQ
-                ? '다른 검색어로 찾아보세요.'
-                : '좋아하는 곡이나 앨범을 모아 첫 월드컵을 만들어보세요.'}
+                ? "다른 검색어로 찾아보세요."
+                : "좋아하는 곡이나 앨범을 모아 첫 월드컵을 만들어보세요."}
             </EmptyDescription>
           </EmptyHeader>
           {!debouncedQ && (
