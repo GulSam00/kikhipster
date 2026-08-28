@@ -1411,3 +1411,4 @@ Spotify 연동 백엔드, 프론트 기획(`_workspace/planning.md`), QA 리뷰(
 | 2026-08-27 | docs: T5 6건 완료 반영, 세션 기록 | docs | 커밋 `ae4b7cc` |
 | 2026-08-28 | feat(backend): 조회수 컬럼과 전용 증가 엔드포인트, 목록·상세에 집계 3종 | backend | 커밋 `f00d5a5` |
 | 2026-08-28 | refactor(frontend): 컴포넌트를 도메인별로, lib 을 역할별로 재편 + 상세 UI 통일 | frontend | 커밋 `c0a0ee1` |
+| 2026-08-28 | docs: 8/27~8/28 세션 기록, 구현 범위·규약 갱신 | .claude, CLAUDE.md, DESIGN.md, docs | 커밋 `f31b9fe` |
