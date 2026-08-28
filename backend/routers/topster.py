@@ -8,7 +8,8 @@ from database import get_db
 from models.like import Like
 from models.topster import Topster, TopsterItem
 from models.user import User
-from routers.comment import purge_comments
+from routers.comment import comment_counts, purge_comments
+from routers.like import like_counts
 from routers.deps import get_current_user
 from schemas.topster import TopsterCreate, TopsterResponse, TopsterUpdate
 
@@ -28,23 +29,52 @@ OPTION_FIELDS = (
 
 
 def _build_response(
-    topster: Topster, db: Session, like_count: int | None = None
+    topster: Topster,
+    db: Session,
+    like_count: int | None = None,
+    comment_count: int | None = None,
 ) -> TopsterResponse:
-    """목록처럼 좋아요 수를 이미 집계해 둔 경로는 like_count를 넘겨 N+1 쿼리를 피한다."""
+    """목록처럼 수를 이미 집계해 둔 경로는 인자로 넘겨 N+1 쿼리를 피한다."""
+    target_id = str(topster.id)
     if like_count is None:
-        like_count = (
-            db.query(Like).filter_by(target_type="topster", target_id=str(topster.id)).count()
-        )
+        like_count = db.query(Like).filter_by(target_type="topster", target_id=target_id).count()
+    if comment_count is None:
+        comment_count = comment_counts(db, "topster", [target_id]).get(target_id, 0)
     return TopsterResponse(
-        id=str(topster.id),
+        id=target_id,
         title=topster.title,
         description=topster.description,
         created_at=topster.created_at,
         user=topster.user,
         items=topster.items,
+        view_count=topster.view_count,
         like_count=like_count,
+        comment_count=comment_count,
         **{f: getattr(topster, f) for f in OPTION_FIELDS},
     )
+
+
+def _list_responses(
+    topsters: list[Topster], db: Session, likes: dict[str, int] | None = None
+) -> list[TopsterResponse]:
+    """목록 응답. 좋아요·댓글 수를 각각 한 번의 group by 로 모아 채운다 —
+    카드마다 세면 20장짜리 목록에 쿼리가 40번 나간다.
+
+    `likes` 는 정렬 기준으로 이미 조인해 둔 목록만 넘긴다.
+    """
+    ids = [str(t.id) for t in topsters]
+    if likes is None:
+        likes = like_counts(db, "topster", ids)
+    comments = comment_counts(db, "topster", ids)
+    return [
+        _build_response(
+            t,
+            db,
+            like_count=likes.get(str(t.id), 0),
+            comment_count=comments.get(str(t.id), 0),
+        )
+        for t in topsters
+    ]
 
 
 @router.get("/", response_model=list[TopsterResponse])
@@ -100,7 +130,9 @@ def list_topsters(
         )
 
     rows = query.offset(offset).limit(limit).all()
-    return [_build_response(t, db, like_count=count) for t, count in rows]
+    return _list_responses(
+        [t for t, _ in rows], db, likes={str(t.id): count for t, count in rows}
+    )
 
 
 @router.post("/", response_model=TopsterResponse, status_code=201)
@@ -140,6 +172,26 @@ def get_topster(
     if not topster:
         raise HTTPException(status_code=404, detail="탑스터를 찾을 수 없습니다")
     return _build_response(topster, db)
+
+
+@router.post("/{topster_id}/view", status_code=204)
+def mark_topster_viewed(topster_id: str, db: Session = Depends(get_db)):
+    """상세를 열어 본 것을 기록한다. 비로그인도 센다.
+
+    **상세 GET 이 아니라 이 라우트에서만 오른다.** GET 에서 올리면 수정 화면,
+    OG 썸네일 생성, Next 프리페치까지 전부 조회로 세어진다. 같은 사람이 새로고침을
+    반복하는 것은 프론트가 sessionStorage 로 한 번 거르지만, 서버는 정확한 유니크
+    집계를 목표로 하지 않는다 — 카드에 보여줄 대략의 인기 지표다.
+    """
+    updated = (
+        db.query(Topster)
+        .filter_by(id=topster_id)
+        # 읽어서 +1 하고 쓰면 동시 조회에서 한쪽이 덮인다. UPDATE 한 문장으로 올린다.
+        .update({Topster.view_count: Topster.view_count + 1}, synchronize_session=False)
+    )
+    if not updated:
+        raise HTTPException(status_code=404, detail="탑스터를 찾을 수 없습니다")
+    db.commit()
 
 
 @router.put("/{topster_id}", response_model=TopsterResponse)
@@ -210,7 +262,7 @@ def list_user_topsters(
         .limit(limit)
         .all()
     )
-    return [_build_response(t, db) for t in topsters]
+    return _list_responses(topsters, db)
 
 
 @router.get("/me/list", response_model=list[TopsterResponse])
@@ -228,4 +280,4 @@ def list_my_topsters(
         .limit(limit)
         .all()
     )
-    return [_build_response(t, db) for t in topsters]
+    return _list_responses(topsters, db)

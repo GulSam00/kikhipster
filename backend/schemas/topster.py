@@ -101,6 +101,9 @@ class TopsterResponse(BaseModel):
     created_at: datetime
     user: TopsterUserInfo
     items: list[TopsterItemResponse] = []
+    # 카드·상세가 함께 쓰는 집계 3종. 목록 경로는 한 번의 group by 로 모아 채운다.
+    view_count: int = 0
     like_count: int = 0
+    comment_count: int = 0
 
     model_config = {"from_attributes": True}

@@ -52,6 +52,10 @@ class TournamentSummaryResponse(BaseModel):
     item_type: ItemType
     item_count: int
     play_count: int
+    # 카드에 함께 나가는 집계 3종. play_count 와 달리 view_count 는 "들어와 본 횟수"다.
+    view_count: int = 0
+    like_count: int = 0
+    comment_count: int = 0
     created_at: datetime
     user: TournamentUserInfo
     # 카드 썸네일용 상위 4개 item_id. 클라이언트가 배치 조회로 커버를 채운다.
@@ -66,6 +70,9 @@ class TournamentDetailResponse(BaseModel):
     item_ids: list[str] = []
     item_count: int
     play_count: int
+    view_count: int = 0
+    like_count: int = 0
+    comment_count: int = 0
     created_at: datetime
     user: TournamentUserInfo
     # 이 월드컵에서 고를 수 있는 강수 (풀 크기 이하인 2의 거듭제곱)

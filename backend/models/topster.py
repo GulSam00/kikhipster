@@ -29,6 +29,9 @@ class Topster(Base):
     show_title = Column(Boolean, nullable=False, default=True)
     show_album_info = Column(Boolean, nullable=False, default=True)
     show_numbering = Column(Boolean, nullable=False, default=False)
+    # 상세를 연 횟수. 상세 GET 이 아니라 전용 POST /{id}/view 로만 오른다 —
+    # GET 에서 올리면 수정 화면·OG 썸네일·프리페치까지 조회로 세어진다.
+    view_count = Column(Integer, nullable=False, server_default="0", default=0)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
 
     user = relationship(

@@ -16,7 +16,8 @@ from models.tournament import (
     TournamentRound,
 )
 from models.user import User
-from routers.comment import purge_comments
+from routers.comment import comment_counts, purge_comments
+from routers.like import like_counts
 from routers.deps import get_current_user, get_optional_user
 from schemas.tournament import (
     MAX_POOL,
@@ -105,6 +106,12 @@ def _summaries(rows, db: Session) -> list[TournamentSummaryResponse]:
         .all()
     )
 
+    # 좋아요·댓글은 (target_type, target_id) 로 붙어 있고 target_id 가 String 이라
+    # UUID 를 문자열로 바꿔 묻는다. 둘 다 한 번의 group by 로 끝난다.
+    str_ids = [str(tid) for tid in tournament_ids]
+    likes = like_counts(db, "tournament", str_ids)
+    comments = comment_counts(db, "tournament", str_ids)
+
     return [
         TournamentSummaryResponse(
             id=str(t.id),
@@ -113,6 +120,9 @@ def _summaries(rows, db: Session) -> list[TournamentSummaryResponse]:
             item_type=t.item_type,
             item_count=counts.get(t.id, 0),
             play_count=total,
+            view_count=t.view_count,
+            like_count=likes.get(str(t.id), 0),
+            comment_count=comments.get(str(t.id), 0),
             created_at=t.created_at,
             user=t.user,
             preview_item_ids=previews.get(t.id, []),
@@ -198,14 +208,18 @@ def _detail_response(tournament: Tournament, db: Session) -> TournamentDetailRes
     play_count = (
         db.query(func.count(TournamentPlay.id)).filter_by(tournament_id=tournament.id).scalar() or 0
     )
+    target_id = str(tournament.id)
     return TournamentDetailResponse(
-        id=str(tournament.id),
+        id=target_id,
         title=tournament.title,
         description=tournament.description,
         item_type=tournament.item_type,
         item_ids=item_ids,
         item_count=len(item_ids),
         play_count=play_count,
+        view_count=tournament.view_count,
+        like_count=like_counts(db, "tournament", [target_id]).get(target_id, 0),
+        comment_count=comment_counts(db, "tournament", [target_id]).get(target_id, 0),
         created_at=tournament.created_at,
         user=tournament.user,
         available_sizes=_available_sizes(len(item_ids)),
@@ -237,6 +251,21 @@ def create_tournament(
 @router.get("/{tournament_id}", response_model=TournamentDetailResponse)
 def get_tournament(tournament_id: str, db: Session = Depends(get_db)):
     return _detail_response(_get_tournament_or_404(tournament_id, db), db)
+
+
+@router.post("/{tournament_id}/view", status_code=204)
+def mark_tournament_viewed(tournament_id: str, db: Session = Depends(get_db)):
+    """상세를 열어 본 것을 기록한다. 규칙은 탑스터 쪽과 같다 —
+    상세 GET 이 아니라 이 라우트에서만 오르고, 중복은 프론트가 한 번 거른다.
+    """
+    updated = (
+        db.query(Tournament)
+        .filter_by(id=tournament_id)
+        .update({Tournament.view_count: Tournament.view_count + 1}, synchronize_session=False)
+    )
+    if not updated:
+        raise HTTPException(status_code=404, detail="월드컵을 찾을 수 없습니다")
+    db.commit()
 
 
 @router.put("/{tournament_id}", response_model=TournamentDetailResponse)

@@ -3,6 +3,7 @@ from __future__ import annotations
 from datetime import datetime
 
 from fastapi import APIRouter, Depends, HTTPException, Path, Query
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from database import get_db
@@ -102,6 +103,20 @@ def _delete(target_type, target_id, comment_id, current_user, db):
 def purge_comments(target_type: str, target_id: str, db: Session) -> None:
     """대상 삭제 시 호출한다. FK가 없어 DB가 대신 지워주지 않는다."""
     db.query(Comment).filter_by(target_type=target_type, target_id=str(target_id)).delete()
+
+
+def comment_counts(db: Session, target_type: str, target_ids: list[str]) -> dict[str, int]:
+    """여러 대상의 댓글 수를 한 번에 센다. `like_counts` 와 같은 규약이다 —
+    댓글이 없는 대상은 키에 없으므로 호출부가 0으로 채운다."""
+    if not target_ids:
+        return {}
+    rows = (
+        db.query(Comment.target_id, func.count(Comment.id))
+        .filter(Comment.target_type == target_type, Comment.target_id.in_(target_ids))
+        .group_by(Comment.target_id)
+        .all()
+    )
+    return {tid: count for tid, count in rows}
 
 
 # --------------------------------------------------------------------------

@@ -31,6 +31,9 @@ class Tournament(Base):
     description = Column(String, nullable=False, default="")
     # 풀에 담기는 대상 종류. 한 월드컵 안에서는 섞이지 않는다.
     item_type = Column(String, nullable=False)  # "track" | "album"
+    # 상세를 연 횟수. 플레이 수(play_count)와는 다르다 — 들어와 보기만 해도 오른다.
+    # Topster.view_count 와 같은 규칙으로 전용 POST /{id}/view 에서만 증가한다.
+    view_count = Column(Integer, nullable=False, server_default="0", default=0)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False, index=True)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
 

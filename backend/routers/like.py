@@ -17,6 +17,25 @@ def _like_count(db: Session, target_type: str, target_id: str) -> int:
     return db.query(Like).filter_by(target_type=target_type, target_id=target_id).count()
 
 
+def like_counts(db: Session, target_type: str, target_ids: list[str]) -> dict[str, int]:
+    """여러 대상의 좋아요 수를 한 번에 센다. 목록 카드가 쓰는 경로다.
+
+    카드마다 `_like_count` 를 부르면 목록 20장에 쿼리가 20번 나간다. 반환은
+    좋아요가 하나도 없는 대상을 키에서 빼므로 **호출부가 0으로 기본값을 채워야 한다**.
+    `target_ids` 는 문자열이어야 한다 — `Like.target_id` 가 String 이라 UUID 객체를
+    그대로 넣으면 매칭되지 않는다.
+    """
+    if not target_ids:
+        return {}
+    rows = (
+        db.query(Like.target_id, func.count(Like.id))
+        .filter(Like.target_type == target_type, Like.target_id.in_(target_ids))
+        .group_by(Like.target_id)
+        .all()
+    )
+    return {tid: count for tid, count in rows}
+
+
 # ---------------------------------------------------------------------------
 # 배치 조회
 #
