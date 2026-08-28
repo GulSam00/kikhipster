@@ -1,39 +1,19 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
 import type { CSSProperties } from 'react';
+import { useBoxSize, type BoxSize } from '@/lib/hooks/use-box-size';
 
-export interface BoxSize {
-  width: number;
-  height: number;
-}
-
+export type { BoxSize };
 /**
- * 격자가 들어갈 영역의 크기를 실측한다.
+ * 격자가 들어갈 영역의 크기를 실측한다. 실체는 `use-box-size.ts` 의 범용 훅이다 —
+ * 기존 import 경로(`@/lib/hooks/use-topster-grid`)를 쓰는 곳이 이미 있어 여기서도 내보낸다.
  *
  * 왜 CSS로 안 하나: 셀 크기를 `grid-template-rows: repeat(h, min(100%, ...)/h)` 처럼 쓰면
  * **행 트랙의 백분율은 블록 크기 기준**인데 그 값이 불확정이라 트랙이 무너진다
  * (실측: 3x3 셀이 16x5px로 찌그러졌다). 열은 되고 행은 안 되는 비대칭이라 CSS만으로
  * 우회하기 어려워 영역을 재서 px로 못 박는다.
  */
-export function useBoxSize<T extends HTMLElement>() {
-  const ref = useRef<T>(null);
-  const [box, setBox] = useState<BoxSize>({ width: 0, height: 0 });
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    // setState 는 옵저버 콜백 안에서만 일어난다 — effect 본문에서 부르면 연쇄 렌더가 된다.
-    const ro = new ResizeObserver(([entry]) => {
-      const r = entry.contentRect;
-      setBox({ width: Math.floor(r.width), height: Math.floor(r.height) });
-    });
-    ro.observe(el);
-    return () => ro.disconnect();
-  }, []);
-
-  return [ref, box] as const;
-}
+export { useBoxSize };
 
 /**
  * 셀 한 변(px).

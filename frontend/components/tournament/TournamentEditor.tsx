@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, type ReactNode } from 'react';
+import { type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import {
@@ -13,8 +13,6 @@ import {
   Search,
   X,
 } from 'lucide-react';
-import { toast } from 'sonner';
-import { getAlbumWithTracks, searchAlbums, searchTracks } from '@/lib/api/music';
 import { TOURNAMENT_MAX_POOL, TOURNAMENT_MIN_POOL } from '@/lib/domain/limits';
 import PoolItemTile, { ItemFallbackIcon } from '@/components/tournament/PoolItemTile';
 import { Button } from '@/components/ui/button';
@@ -26,29 +24,15 @@ import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { albumToPoolItem, trackToPoolItem, type PoolItem } from '@/lib/domain/pool-item';
+import { useTournamentDraft, type SearchMode, type TournamentDraftInitial } from '@/lib/hooks/use-tournament-draft';
 import { cn } from '@/lib/utils';
-import type { AlbumSummary, TrackSearchItem } from '@/types/music';
 import type { TournamentItemType, TournamentCreateBody } from '@/types/tournament';
 
-// 값의 정본은 `lib/domain/limits.ts` — 백엔드와 맞춰야 하는 규칙이라 화면마다 적지 않는다.
-const MIN_POOL = TOURNAMENT_MIN_POOL;
-const MAX_POOL = TOURNAMENT_MAX_POOL;
-
-type Step = 'type' | 'meta' | 'pool';
-/** 곡 월드컵에서는 곡으로도, 앨범을 펼쳐서도 담을 수 있다. */
-type SearchMode = 'track' | 'album';
-
-/** 수정 화면이 기존 월드컵을 채워 넣을 때 쓰는 초기값. */
-export interface TournamentEditorInitial {
-  itemType: TournamentItemType;
-  title: string;
-  description: string;
-  pool: PoolItem[];
-}
+export type { TournamentDraftInitial as TournamentEditorInitial };
 
 interface Props {
   /** 없으면 새 월드컵. 있으면 그 값으로 시작하고 종류 선택 단계를 건너뛴다. */
-  initial?: TournamentEditorInitial;
+  initial?: TournamentDraftInitial;
   onSubmit: (body: TournamentCreateBody) => Promise<void>;
   /** 첫 단계에서 '이전'을 눌렀을 때 갈 곳. */
   backHref: string;
@@ -64,142 +48,39 @@ interface Props {
  *
  * **수정 모드에는 종류(곡/앨범) 선택 단계가 없다.** 백엔드도 `item_type` 은 안 바꾼다 —
  * 이미 치러진 플레이의 대진과 종류가 어긋나기 때문이다. 그래서 단계가 3개가 아니라 2개다.
+ *
+ * 상태 로직은 `useTournamentDraft` 에 있다 — 이 컴포넌트는 UI 렌더링만 한다.
  */
 export default function TournamentEditor({ initial, onSubmit, backHref, extraActions }: Props) {
   const router = useRouter();
-  const isEdit = initial !== undefined;
-  const totalSteps = isEdit ? 2 : 3;
-
-  const [step, setStep] = useState<Step>(isEdit ? 'meta' : 'type');
-  const [itemType, setItemType] = useState<TournamentItemType>(initial?.itemType ?? 'track');
-  const [title, setTitle] = useState(initial?.title ?? '');
-  const [description, setDescription] = useState(initial?.description ?? '');
-
-  const [searchMode, setSearchMode] = useState<SearchMode>('track');
-  const [q, setQ] = useState('');
-  const [debouncedQ, setDebouncedQ] = useState('');
-  const [trackResults, setTrackResults] = useState<TrackSearchItem[]>([]);
-  const [albumResults, setAlbumResults] = useState<AlbumSummary[]>([]);
-
-  /** 펼쳐놓은 앨범의 수록곡 캐시. 같은 앨범을 다시 펼칠 때 재요청하지 않는다. */
-  const [expanded, setExpanded] = useState<string | null>(null);
-  const [albumTracks, setAlbumTracks] = useState<Record<string, TrackSearchItem[]>>({});
-
-  const [pool, setPool] = useState<PoolItem[]>(initial?.pool ?? []);
-  const [submitting, setSubmitting] = useState(false);
-
-  useEffect(() => {
-    if (!localStorage.getItem('access_token')) router.push('/login');
-  }, [router]);
-
-  useEffect(() => {
-    const t = setTimeout(() => setDebouncedQ(q.trim()), 300);
-    return () => clearTimeout(t);
-  }, [q]);
-
-  // 앨범 월드컵이면 앨범 검색만 쓴다.
-  const effectiveMode: SearchMode = itemType === 'album' ? 'album' : searchMode;
-
-  useEffect(() => {
-    // 검색어가 비면 결과를 state에서 지우는 대신 렌더 단계에서 걸러낸다.
-    // effect 본문에서 동기 setState를 하면 연쇄 렌더가 생긴다.
-    if (!debouncedQ) return;
-    let alive = true;
-    (async () => {
-      try {
-        if (effectiveMode === 'track') {
-          const items = await searchTracks(debouncedQ, 50);
-          if (alive) setTrackResults(items);
-        } else {
-          const items = await searchAlbums(debouncedQ, 50);
-          if (alive) setAlbumResults(items);
-        }
-      } catch {
-        toast.error('검색에 실패했습니다');
-      }
-    })();
-    return () => {
-      alive = false;
-    };
-  }, [debouncedQ, effectiveMode]);
-
-  const inPool = (id: string) => pool.some((p) => p.id === id);
-
-  // 검색어를 지우면 직전 결과가 남아 있으므로 렌더 시점에 비운다.
-  const shownTracks = debouncedQ ? trackResults : [];
-  const shownAlbums = debouncedQ ? albumResults : [];
-
-  function addItems(items: PoolItem[]) {
-    setPool((prev) => {
-      const existing = new Set(prev.map((p) => p.id));
-      const fresh = items.filter((i) => !existing.has(i.id));
-      if (fresh.length === 0) return prev;
-
-      const room = MAX_POOL - prev.length;
-      if (room <= 0) {
-        toast.error(`최대 ${MAX_POOL}개까지만 담을 수 있습니다`);
-        return prev;
-      }
-      if (fresh.length > room) {
-        toast.warning(`${room}개만 추가했습니다 (최대 ${MAX_POOL}개)`);
-        return [...prev, ...fresh.slice(0, room)];
-      }
-      return [...prev, ...fresh];
-    });
-  }
-
-  function toggleItem(item: PoolItem) {
-    if (inPool(item.id)) {
-      setPool((prev) => prev.filter((p) => p.id !== item.id));
-    } else {
-      addItems([item]);
-    }
-  }
-
-  async function expandAlbum(album: AlbumSummary) {
-    if (expanded === album.id) {
-      setExpanded(null);
-      return;
-    }
-    setExpanded(album.id);
-    if (albumTracks[album.id]) return;
-
-    try {
-      const res = await getAlbumWithTracks(album.id);
-      // 앨범 트랙 응답에는 커버가 없다 — 앨범 커버를 물려준다.
-      const withCover: TrackSearchItem[] = res.tracks.map((t) => ({
-        id: t.id,
-        name: t.name,
-        artists: t.artists.length > 0 ? t.artists : [album.artist_name],
-        album: { id: album.id, name: album.title, cover_url: album.cover_url },
-        duration_ms: t.duration_ms,
-        popularity: 0,
-        explicit: false,
-        preview_url: t.preview_url,
-      }));
-      setAlbumTracks((prev) => ({ ...prev, [album.id]: withCover }));
-    } catch {
-      toast.error('앨범 수록곡을 불러오지 못했습니다');
-      setExpanded(null);
-    }
-  }
-
-  async function submit() {
-    if (pool.length < MIN_POOL) return;
-    setSubmitting(true);
-    try {
-      await onSubmit({
-        title: title.trim(),
-        description: description.trim(),
-        item_type: itemType,
-        item_ids: pool.map((p) => p.id),
-      });
-      // 성공하면 페이지가 이동시킨다. submitting 을 되돌리지 않는 건 이중 제출을 막기 위함.
-    } catch {
-      toast.error(isEdit ? '저장에 실패했습니다' : '월드컵 생성에 실패했습니다');
-      setSubmitting(false);
-    }
-  }
+  const {
+    isEdit,
+    totalSteps,
+    step,
+    setStep,
+    selectItemType,
+    itemType,
+    title,
+    setTitle,
+    description,
+    setDescription,
+    searchMode,
+    setSearchMode,
+    effectiveMode,
+    q,
+    setQ,
+    shownTracks,
+    shownAlbums,
+    expanded,
+    albumTracks,
+    expandAlbum,
+    pool,
+    inPool,
+    addItems,
+    toggleItem,
+    submitting,
+    submit,
+  } = useTournamentDraft({ initial, onSubmit });
 
   // ---------------------------------------------------------------- step 1
   if (step === 'type') {
@@ -222,11 +103,7 @@ export default function TournamentEditor({ initial, onSubmit, backHref, extraAct
             <button
               key={value}
               type="button"
-              onClick={() => {
-                setItemType(value);
-                setPool([]);
-                setStep('meta');
-              }}
+              onClick={() => selectItemType(value)}
               className="rounded-xl text-left outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
             >
               <Card className="h-full transition-colors hover:bg-accent">
@@ -300,7 +177,7 @@ export default function TournamentEditor({ initial, onSubmit, backHref, extraAct
 
       <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
         <p className="text-sm text-muted-foreground tabular-nums">
-          {pool.length}개 담김 · 최소 {MIN_POOL} / 최대 {MAX_POOL}
+          {pool.length}개 담김 · 최소 {TOURNAMENT_MIN_POOL} / 최대 {TOURNAMENT_MAX_POOL}
         </p>
         {itemType === 'track' && (
           <Tabs value={searchMode} onValueChange={(v) => setSearchMode(v as SearchMode)}>
@@ -436,15 +313,15 @@ export default function TournamentEditor({ initial, onSubmit, backHref, extraAct
         <Button
           size="lg"
           className="h-11 flex-1"
-          disabled={pool.length < MIN_POOL || submitting}
+          disabled={pool.length < TOURNAMENT_MIN_POOL || submitting}
           onClick={submit}
         >
           {submitting
             ? isEdit
               ? '저장 중...'
               : '만드는 중...'
-            : pool.length < MIN_POOL
-              ? `${MIN_POOL - pool.length}개 더 담아주세요`
+            : pool.length < TOURNAMENT_MIN_POOL
+              ? `${TOURNAMENT_MIN_POOL - pool.length}개 더 담아주세요`
               : isEdit
                 ? `${pool.length}개로 저장`
                 : `${pool.length}개로 월드컵 만들기`}

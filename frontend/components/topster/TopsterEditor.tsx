@@ -1,17 +1,10 @@
 'use client';
 
-import { useEffect, useMemo, useState, type ReactNode } from 'react';
+import { type ReactNode } from 'react';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
-import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
+import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { Download, Plus, X } from 'lucide-react';
-import { toast } from 'sonner';
-import { searchAlbums } from '@/lib/api/music';
-import {
-  TOPSTER_MAX_CELLS,
-  TOPSTER_MAX_SIDE,
-  TOPSTER_MIN_SIDE,
-} from '@/lib/domain/limits';
+import { clampTopsterSide, TOPSTER_MAX_CELLS, TOPSTER_MAX_SIDE, TOPSTER_MIN_SIDE } from '@/lib/domain/limits';
 import TopsterAlbumList from '@/components/topster/TopsterAlbumList';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -20,48 +13,23 @@ import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
-import { albumToPoolItem, type PoolItem } from '@/lib/domain/pool-item';
 import { computeCell, gridOffsetTop, topsterGridStyle, useBoxSize } from '@/lib/hooks/use-topster-grid';
-import { downloadTopsterImage } from '@/lib/render/topster-image';
+import { useTopsterDraft, type TopsterDraftInitial } from '@/lib/hooks/use-topster-draft';
 import { cn } from '@/lib/utils';
-import type { AlbumSummary } from '@/types/music';
-import {
-  DEFAULT_TOPSTER_OPTIONS,
-  type TopsterCreateBody,
-  type TopsterOptions,
-} from '@/types/topster';
+import type { TopsterCreateBody } from '@/types/topster';
 
-interface GridItem {
-  position: number;
-  album: PoolItem | null;
-}
-
-/** 수정 화면이 기존 탑스터를 채워 넣을 때 쓰는 초기값. */
-export interface TopsterEditorInitial {
-  title: string;
-  description: string;
-  options: TopsterOptions;
-  /** 인덱스가 곧 격자 position 이다. 빈 칸은 null. */
-  placements: (PoolItem | null)[];
-}
+export type { TopsterDraftInitial as TopsterEditorInitial };
 
 interface Props {
   heading: string;
   submitLabel: string;
   savingLabel: string;
   /** 없으면 새 탑스터, 있으면 그 값으로 시작한다. */
-  initial?: TopsterEditorInitial;
+  initial?: TopsterDraftInitial;
   onSubmit: (body: TopsterCreateBody) => Promise<void>;
   /** 저장 버튼 줄에 덧붙일 동작 — 수정 화면의 '삭제' 같은 것. */
   extraActions?: ReactNode;
 }
-
-// 값의 정본은 `lib/domain/limits.ts` — 백엔드와 맞춰야 하는 규칙이라 화면마다 적지 않는다.
-const MIN_SIDE = TOPSTER_MIN_SIDE;
-const MAX_SIDE = TOPSTER_MAX_SIDE;
-const MAX_CELLS = TOPSTER_MAX_CELLS;
-
-const NEW_DEFAULTS: TopsterOptions = { ...DEFAULT_TOPSTER_OPTIONS, width: 3, height: 3 };
 
 /**
  * 탑스터 만들기·수정 공용 에디터.
@@ -69,6 +37,8 @@ const NEW_DEFAULTS: TopsterOptions = { ...DEFAULT_TOPSTER_OPTIONS, width: 3, hei
  * `/topsters/new` 와 `/topsters/[id]/edit` 가 같은 화면을 쓴다. 저장 방식(POST/PUT)만
  * 달라서 `onSubmit` 으로 빼고 나머지는 통째로 공유한다 — 표시 옵션이 8종이라 화면을
  * 복제하면 옵션이 늘 때마다 두 곳을 고쳐야 한다.
+ *
+ * 상태 로직은 `useTopsterDraft` 에 있다 — 이 컴포넌트는 UI 렌더링만 한다.
  */
 export default function TopsterEditor({
   heading,
@@ -78,136 +48,33 @@ export default function TopsterEditor({
   onSubmit,
   extraActions,
 }: Props) {
-  const router = useRouter();
-  const [title, setTitle] = useState(initial?.title ?? '');
-  const [description, setDescription] = useState(initial?.description ?? '');
-  const [options, setOptions] = useState<TopsterOptions>(initial?.options ?? NEW_DEFAULTS);
-  // 배치는 '칸 수'와 독립적으로 들고 있는다. 격자를 줄였다 늘려도 원래 앨범이 살아난다.
-  const [placements, setPlacements] = useState<(PoolItem | null)[]>(initial?.placements ?? []);
-  const [searchQ, setSearchQ] = useState('');
-  const [searchResults, setSearchResults] = useState<AlbumSummary[]>([]);
-  const [saving, setSaving] = useState(false);
-  const [downloading, setDownloading] = useState(false);
-  const [error, setError] = useState('');
+  const {
+    title,
+    setTitle,
+    description,
+    setDescription,
+    options,
+    setOption,
+    cellCount,
+    grid,
+    placed,
+    albums,
+    searchQ,
+    setSearchQ,
+    searchResults,
+    saving,
+    downloading,
+    error,
+    placeAlbum,
+    removeAlbum,
+    onDragEnd,
+    handleDownload,
+    handleSave,
+  } = useTopsterDraft({ initial, onSubmit });
 
-  const cellCount = options.width * options.height;
   const [gridBoxRef, gridBox] = useBoxSize<HTMLDivElement>();
   const cellPx = computeCell(options.width, options.height, options.cell_gap, gridBox);
   const listOffsetTop = gridOffsetTop(options.height, options.cell_gap, cellPx, gridBox);
-
-  function setOption<K extends keyof TopsterOptions>(key: K, value: TopsterOptions[K]) {
-    setOptions((prev) => ({ ...prev, [key]: value }));
-  }
-
-  useEffect(() => {
-    if (!localStorage.getItem('access_token')) {
-      router.push('/login');
-    }
-  }, [router]);
-
-  // 격자는 상태가 아니라 파생값이다 — effect로 동기화하면 연쇄 렌더가 생긴다.
-  // 격자를 줄이면 넘치는 배치는 화면에서 빠질 뿐 placements 에는 남는다.
-  const grid: GridItem[] = useMemo(
-    () => Array.from({ length: cellCount }, (_, i) => ({ position: i, album: placements[i] ?? null })),
-    [cellCount, placements],
-  );
-
-  useEffect(() => {
-    const q = searchQ.trim();
-    // setState는 전부 타이머 콜백 안에서만 일어난다 — effect 본문에서 동기로 부르면
-    // 연쇄 렌더가 생긴다(프로젝트 eslint가 막는다).
-    const t = setTimeout(async () => {
-      if (!q) {
-        setSearchResults([]);
-        return;
-      }
-      try {
-        setSearchResults(await searchAlbums(q, 10));
-      } catch {
-        toast.error('앨범 검색에 실패했습니다');
-      }
-    }, 300);
-    return () => clearTimeout(t);
-  }, [searchQ]);
-
-  const placed = useMemo(
-    () =>
-      grid
-        .filter((g) => g.album)
-        .map((g) => ({ album_spotify_id: g.album!.id, position: g.position })),
-    [grid],
-  );
-
-  /** placements 를 최소 cellCount 길이로 맞춘 뒤 조작한다. */
-  function updatePlacements(fn: (draft: (PoolItem | null)[]) => void) {
-    setPlacements((prev) => {
-      const next = Array.from({ length: Math.max(cellCount, prev.length) }, (_, i) => prev[i] ?? null);
-      fn(next);
-      return next;
-    });
-  }
-
-  // 목록·다운로드는 TopsterAlbumList / topster-image 가 쓰는 PoolItem 모양을 요구한다.
-  // 배치 자체를 PoolItem 으로 들고 있어 추가 조회 없이 그대로 모은다 — 수정 화면이
-  // 기존 아이템을 `/api/music/albums?ids=` 로 받아 그대로 넣을 수 있는 것도 이 덕분이다.
-  const albums = useMemo(() => {
-    const m = new Map<string, PoolItem | null>();
-    grid.forEach((g) => {
-      if (g.album) m.set(g.album.id, g.album);
-    });
-    return m;
-  }, [grid]);
-
-  function placeAlbum(album: AlbumSummary) {
-    if (placed.length >= cellCount) {
-      toast.error('빈 칸이 없습니다. 옵션에서 격자를 넓혀보세요');
-      return;
-    }
-    // 빈 칸은 반드시 **업데이터 안에서** 찾는다. 렌더 시점의 grid 로 찾으면 한 배치 안에서
-    // 연속 클릭했을 때 전부 같은 칸을 가리켜 서로 덮어쓴다(실제로 재현됨).
-    updatePlacements((d) => {
-      const idx = d.findIndex((a, i) => i < cellCount && !a);
-      if (idx !== -1) d[idx] = albumToPoolItem(album);
-    });
-  }
-
-  function removeAlbum(position: number) {
-    updatePlacements((d) => { d[position] = null; });
-  }
-
-  function onDragEnd(result: DropResult) {
-    if (!result.destination) return;
-    const from = result.source.index;
-    const to = result.destination.index;
-    updatePlacements((d) => { [d[from], d[to]] = [d[to], d[from]]; });
-  }
-
-  async function handleDownload() {
-    setDownloading(true);
-    try {
-      await downloadTopsterImage({ options, title, items: placed, albums });
-    } catch {
-      toast.error('이미지를 만들지 못했습니다');
-    } finally {
-      setDownloading(false);
-    }
-  }
-
-  async function handleSave() {
-    if (!title.trim()) {
-      setError('제목을 입력해주세요');
-      return;
-    }
-    setSaving(true);
-    setError('');
-    try {
-      await onSubmit({ title, description, ...options, items: placed });
-    } catch {
-      setError('저장에 실패했습니다. 다시 시도해주세요.');
-    } finally {
-      setSaving(false);
-    }
-  }
 
   return (
     // layout 의 main 이 "헤더를 뺀 높이"를 definite 하게 주므로 h-full 로 그대로 받는다.
@@ -310,10 +177,10 @@ export default function TopsterEditor({
                   <Input
                     id="opt-width"
                     type="number"
-                    min={MIN_SIDE}
-                    max={MAX_SIDE}
+                    min={TOPSTER_MIN_SIDE}
+                    max={TOPSTER_MAX_SIDE}
                     value={options.width}
-                    onChange={(e) => setOption('width', clampSide(e.target.value, options.height))}
+                    onChange={(e) => setOption('width', clampTopsterSide(e.target.value, options.height))}
                     className="h-10"
                   />
                 </div>
@@ -322,16 +189,16 @@ export default function TopsterEditor({
                   <Input
                     id="opt-height"
                     type="number"
-                    min={MIN_SIDE}
-                    max={MAX_SIDE}
+                    min={TOPSTER_MIN_SIDE}
+                    max={TOPSTER_MAX_SIDE}
                     value={options.height}
-                    onChange={(e) => setOption('height', clampSide(e.target.value, options.width))}
+                    onChange={(e) => setOption('height', clampTopsterSide(e.target.value, options.width))}
                     className="h-10"
                   />
                 </div>
               </div>
               <p className="-mt-2 text-xs text-muted-foreground">
-                {options.width}×{options.height} = {cellCount}칸 (최대 {MAX_CELLS}칸)
+                {options.width}×{options.height} = {cellCount}칸 (최대 {TOPSTER_MAX_CELLS}칸)
               </p>
 
               <div className="grid gap-2">
@@ -504,14 +371,6 @@ export default function TopsterEditor({
       </div>
     </div>
   );
-}
-
-/** 칸 수는 MIN_SIDE~MAX_SIDE 이고 전체 칸이 MAX_CELLS 를 넘지 않아야 한다 — 백엔드와 같은 규칙. */
-function clampSide(raw: string, other: number): number {
-  const n = Math.round(Number(raw));
-  if (!Number.isFinite(n)) return MIN_SIDE;
-  const capped = Math.min(MAX_SIDE, Math.max(MIN_SIDE, n));
-  return Math.min(capped, Math.max(MIN_SIDE, Math.floor(MAX_CELLS / Math.max(other, 1))));
 }
 
 function OptionToggle({

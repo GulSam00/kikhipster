@@ -25,3 +25,20 @@ export const TOURNAMENT_MAX_POOL = 512;
  * 화면에 실제로 뜨는 값은 서버가 풀 크기에 맞춰 걸러 준 `available_sizes` 다.
  */
 export const VALID_PLAY_SIZES = [4, 8, 16, 32, 64, 128] as const;
+
+/**
+ * 탑스터 격자 한 변의 입력값을 규칙 안으로 눌러 담는다.
+ *
+ * 칸 수는 MIN_SIDE~MAX_SIDE 이고 전체 칸(가로×세로)이 MAX_CELLS 를 넘지 않아야 한다 —
+ * 백엔드와 같은 규칙. `other` 는 반대 축(가로를 바꾸면 세로, 세로를 바꾸면 가로)의
+ * 현재 값이다.
+ */
+export function clampTopsterSide(raw: string, other: number): number {
+  const n = Math.round(Number(raw));
+  if (!Number.isFinite(n)) return TOPSTER_MIN_SIDE;
+  const capped = Math.min(TOPSTER_MAX_SIDE, Math.max(TOPSTER_MIN_SIDE, n));
+  return Math.min(
+    capped,
+    Math.max(TOPSTER_MIN_SIDE, Math.floor(TOPSTER_MAX_CELLS / Math.max(other, 1))),
+  );
+}

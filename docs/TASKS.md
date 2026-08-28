@@ -2,7 +2,7 @@
 
 > 이 파일이 **할 일의 정본**이다. CLAUDE.md에는 과제를 적지 않는다.
 > 완료된 항목은 여기서 지우고 `docs/WORKLOG.md` 에 기록한다.
-> 최종 갱신: 2026-08-27
+> 최종 갱신: 2026-08-28
 
 ---
 
@@ -32,10 +32,6 @@
   답답하지 않은지(원래 `max-w-5xl` 이었다) · **`PlayLauncher` 의 select 를 열어 강수를 바꾸고
   시작이 되는지**(POST→`/play/{id}` 경로 자체는 curl 로 200 을 확인했다) · **펼쳐진 목록이
   컨트롤 바로 아래에 같은 너비로 뜨는지** — `SelectContent` 는 Portal 이라 열기 전엔 DOM 에 없다
-- [ ] **에디터 두 개가 아직 크다 (2026-08-28).** `TopsterEditor` 578줄 / `TournamentEditor` 577줄로
-  둘이 프론트 전체의 13%다. 한 파일에 검색·풀 관리·드래그앤드롭·옵션 편집·저장이 다 있고
-  훅 호출이 각각 15~17개다. 상태 로직을 `useTopsterDraft()` / `useTournamentDraft()` 로 빼면
-  UI 만 남는다 — 파일이 크게 움직여서 lib 재편과 분리해 뒀다
 - [ ] **월드컵 편집기의 '빼기' 오버레이를 눈으로 확인하지 못했다 (2026-08-28).** 담긴 목록은
   항목을 담아야 나타나서 SSR 로는 빈 상태만 보인다. 타일에 hover·키보드 포커스했을 때
   딤과 X 가 뜨는지, 클릭이 실제로 빼는지 봐야 한다
@@ -51,8 +47,13 @@
 - [ ] **예전에 담긴 싱글·EP 후보는 그대로 남아 있다.** 싱글·EP 제외 필터(2026-08-23)보다 먼저
   만든 월드컵의 후보 목록에는 `- Single` / `- EP` 항목이 들어 있다. 검색 경로는 이미 막혀 있어
   **코드가 아니라 데이터 문제**다 — 그 월드컵을 수정해서 빼거나, 일괄 정리 스크립트를 짜야 한다
-- [ ] **대진표에 실제 연결선을 안 그렸다.** `FullBracket` 은 라운드를 열로 놓고 균등 간격으로 쌓기만 한다.
-  좁은 폭에서 읽기 쉬우라고 그렇게 둔 건데, 큰 강수에서 짝이 어디서 오는지 눈으로 따라가기 어렵다
+- [ ] **대진표 연결선(SVG)을 브라우저로 확인하지 못했다 (2026-08-28).** `FullBracket` 이 각 경기
+  중심 좌표를 `space-around` 배치 공식으로 계산해 실제 트리 선을 그리도록 바꿨다(수학적으로는
+  자식 두 경기 중심의 평균이 부모 경기 중심과 정확히 일치함을 증명해 뒀다). 이 화면은
+  `/play/{id}` 안에서 우측 상단 버튼을 눌러야 나오는 Client Component라 SSR HTML로는
+  볼 수 없다 — `tsc`·`next build`·eslint까지만 확인했다. **직접 봐야 하는 것**: 8강 이상에서
+  실제로 두 경기가 다음 라운드 한 자리로 합쳐지는 게 눈으로 보이는지, 선 색(`stroke-border`)이
+  다크 배경에서 잘 보이는지
 
 ### T4. AWS 아키텍처 실습 (기능 확장 이후)
 
@@ -98,5 +99,5 @@
 | **조회수** | `topsters.view_count` · `tournaments.view_count`. **상세 GET 이 아니라 전용 `POST /{id}/view` 에서만 오른다** — GET 에서 올리면 수정 화면·OG 썸네일 생성·프리페치까지 조회로 세어진다. 상세 화면의 `ViewCounter`(아무것도 그리지 않는 클라이언트 컴포넌트)가 마운트 시 한 번 부르고, 같은 탭의 중복은 `sessionStorage` 로 거른다(StrictMode 이중 실행 방어 겸용). 증가는 `UPDATE … view_count + 1` 한 문장이라 동시 조회에 안전 |
 | **재생** | **큐 기반 재생기.** iTunes 30초 미리듣기가 유일한 음원이다(전곡 재생은 API 자체가 안 준다). 어느 화면에서든 곡·앨범을 누르면 **재생목록 끝에 붙고 그 자리에서 재생**되며, 끝나면 다음 곡으로 넘어간다. 앨범은 미리듣기가 없어 **수록곡을 받아 통째로 큐에 붙인다**(`albumQueueTracks`). 하단 `PlayerDock` 은 **fixed 가 아니라 레이아웃 흐름 안**에 있어 본문을 가리지 않는다 — 모바일 탭바 여백(`pb-16`)도 여기가 들고 있다(예전엔 `main`). 컨트롤은 이전/재생/다음 + 위치 슬라이더, 목록 버튼을 누르면 위로 `PlayerQueue` 가 펼쳐져 손잡이 드래그로 순서를 바꾸고 개별 빼기·전체 비우기를 한다(`@hello-pangea/dnd`, 탑스터 편집기와 같은 것). 재생 버튼이 붙는 곳: 곡 행(`TrackRow` — 검색·앨범 상세·아티스트 상세) · 앨범 카드(hover 시) · 앨범 상세 '전체 재생' · **월드컵 후보 그리드·대결 화면·랭킹표**. **앨범 월드컵의 후보·랭킹에는 재생 버튼 옆에 `/albums/{id}` 로 가는 버튼이 나란히 붙는다**(후보 id 가 곯 앨범 id 다). 타일 전체를 링크로 덮지 않은 것은, 그 타일이 편집기에서는 '빼기' `<button>` 이라 같은 컴포넌트에 링크를 깔 수 없기 때문이다. **탑스터에는 붙이지 않았다** — 격자와 목록은 사용자가 색을 고른 작품 렌더라 UI 크롬을 얹으면 PNG 와 화면이 달라진다 |
 | **컴포넌트 구조** | `components/` 를 도메인별로 나눴다 (2026-08-28) — `ui`(shadcn) · `common`(DetailHeader·DetailActionBar·ItemStats·**CoverImage**·OwnerMenu·OwnerItemActions·ShareButton·ViewCounter·InfiniteListFooter) · `music`(AlbumCard·ArtistCard·TrackRow) · `topster`(4) · `tournament`(7) · `social`(CommentSection·LikeButton) · `layout`(Navbar·MiniPlayer). **새 컴포넌트를 만들기 전에 `common/` 을 먼저 본다.** shadcn 프리미티브 중 로컬 수정한 파일은 맨 위 `// [kikhipster]` 주석으로 표시한다(현재 button·select·dropdown-menu·checkbox·toggle·tabs — 전부 `cursor-pointer` 때문) |
-| **프론트 계층** | `lib/` 을 역할별로 나눴다 (2026-08-28) — `api`(엔드포인트 문자열은 **여기에만**. `client`·`auth`·`topsters`·`tournaments`·`plays`·`music`·`likes`·`comments`) · `hooks`(6개) · `domain`(`bracket`·`pool-item`·**`limits`** — 백엔드와 맞춰야 하는 규칙 상수) · `render`(`topster-image`·`og`). **`app/`·`components/` 에서 `apiFetch` 를 직접 부르지 않는다.** 목록류는 `useInfiniteList` 가 경로를 받는 구조라 함수 대신 **경로 빌더**(`topsterListPath` 등)를 쓴다. 사용자 타입은 `types/user.ts` 한 곳 |
+| **프론트 계층** | `lib/` 을 역할별로 나눴다 (2026-08-28) — `api`(엔드포인트 문자열은 **여기에만**. `client`·`auth`·`topsters`·`tournaments`·`plays`·`music`·`likes`·`comments`) · `hooks`(11개 — `use-topster-draft`·`use-tournament-draft`가 각 에디터의 상태 로직을 들고 있고, `use-box-size`는 `use-topster-grid`에서 뽑은 범용 사이즈 실측 훅, `use-require-auth`는 두 draft 훅이 공유하는 로그인 리다이렉트) · `domain`(`bracket`·`pool-item`·**`limits`** — 백엔드와 맞춰야 하는 규칙 상수, `clampTopsterSide` 도 여기) · `render`(`topster-image`·`og`). **`app/`·`components/` 에서 `apiFetch` 를 직접 부르지 않는다.** 목록류는 `useInfiniteList` 가 경로를 받는 구조라 함수 대신 **경로 빌더**(`topsterListPath` 등)를 쓴다. 사용자 타입은 `types/user.ts` 한 곳 |
 | **프론트** | 페이지 17개 — `/`, `/search`, `/artists/[id]`, `/albums/[id]`, `/topsters`, `/topsters/new`, `/topsters/[id]`, **`/topsters/[id]/edit`**, `/tournament`, **`/tournament`(대시보드)**, **`/tournament/new`(3단계 위저드)**, **`/tournament/[id]`**, **`/tournament/[id]/edit`**, **`/tournament/[id]/ranking`**, **`/play/[playId]`**, `/profile`, `/profile/[userId]`, `/login`, `/auth/callback`. `PlayerContext` + `MiniPlayer` 로 30초 미리듣기. **탑스터 목록·월드컵 대시보드·프로필(내·유저별) 모두 무한 스크롤**(`lib/hooks/use-infinite-list.ts` — offset 기반, 응답이 `limit` 미만이면 마지막 페이지로 판정. 실패하면 자동 로딩을 멈추고 '다시 불러오기' 버튼을 낸다). **탑스터는 `TopsterEditor`, 월드컵은 `TournamentEditor` 를 만들기·수정이 공유한다.** **프로필에는 내 탑스터와 내 월드컵이 함께 나열되고 카드마다 수정·삭제가 붙는다**. **월드컵 상세의 후보는 앞 24개를 SSR 로 내려주고 나머지는 '더 보기'(48개씩)로 이어 받는다**. **탑스터·월드컵 상세는 같은 골격을 쓴다**(`DetailHeader` + 콘텐츠 + `DetailActionBar`, 폭도 `max-w-4xl` 로 통일). 헤더는 `배지(탑스터의 격자 크기 — 월드컵은 쓰지 않는다) → 제목 → 작성자·날짜 → 집계 → 설명` 이고 우측에 소유자만 보는 `⋯` 메뉴(`OwnerMenu` — 수정·삭제, 삭제 확인은 `lib/hooks/use-delete-item.ts` 토스트 한 벌)가 붙는다. 좋아요·공유는 **콘텐츠 아래** 액션 줄 오른쪽, 1차 CTA(월드컵 `PlayLauncher`·랭킹보기 / 탑스터 이미지 저장)는 같은 줄 왼쪽이다. **두 상세 모두 OG 메타데이터와 썸네일을 낸다**(`opengraph-image.tsx` — 실제 앨범 커버 최대 9장 모자이크). **플레이 화면은 카드가 화면을 크게 쓰고, 배경에 현재 라운드 인근 대진표가 깔리며(sm 이상), 우측 상단 버튼으로 전체 대진표로 전환한다**. 화면 가운데에 **`8강 1/4` 진행 표시**, 커버 우측 상단에 재생, 카드 하단에 **'선택' 버튼**(커버 클릭은 더 이상 투표가 아니다). 우승 화면은 **큰 커버 + 우승 비율·승률**(랭킹 응답에서 그 항목 한 줄)을 보여 준다. **탑스터·월드컵 카드는 조회·좋아요·댓글 수를 같은 `ItemStats` 한 줄로 보여준다** — 월드컵의 '앨범 N'·'플레이 N' 배지는 **카드와 상세 양쪽에서 뺐다**(후보 수는 상세의 `후보 N` 제목에, 누적 플레이 수는 랭킹 화면 머리말에 남아 있다). **카드의 '시작하기'는 상세(`/tournament/{id}`)로 간다** — 강수 선택 화면(`/tournament/{id}/play`)은 2026-08-27에 없앴고 그 자리는 상세의 `PlayLauncher` 가 대신한다 |

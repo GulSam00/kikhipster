@@ -8,6 +8,86 @@
 
 ## 세션 기록
 
+### 2026-08-28 (계속) — 에디터 훅 분리, 대진표 실제 연결선
+
+TASKS.md에 남아 있던 T5 후속 두 건을 처리했다.
+
+**부수적으로 발견한 것 — `.claude/agents/*.md` 4개에 frontmatter가 없었다**
+`orchestrate-kikhipster` 스킬이 부르는 `architect`/`frontend-dev`/`backend-dev`/`qa` 네 서브에이전트가
+Agent 도구에 전혀 등록돼 있지 않았다. 원인은 `.claude/agents/architect.md` 등이 `# architect` 로
+바로 시작하는 평범한 마크다운이었던 것 — Claude Code가 서브에이전트로 인식하려면 파일 맨 위에
+`name`/`description`/`tools`/`model` YAML frontmatter가 있어야 한다. `git ls-files`·`git log` 로
+확인한 결과 **로컬 문제가 아니라 최초 하네스 세팅 커밋(`35cec32`)부터 이 상태로 커밋돼 있었다**
+(다른 컴퓨터에서 받아도 동일). 4개 파일에 frontmatter를 추가해 정식 등록했다 — 다만 **서브에이전트
+목록은 세션 시작 시 한 번만 로드**돼서 이번 세션에는 반영되지 않았고, 다음 세션부터 정상 동작한다.
+이번 세션의 실제 구현은 그래서 오케스트레이터 파이프라인 없이 직접 진행했다.
+
+**① 에디터 훅 분리 — `useTopsterDraft` / `useTournamentDraft`**
+`TopsterEditor`(580줄)와 `TournamentEditor`(575줄)에서 상태·조작 로직을 훅으로 뽑고 컴포넌트에는
+JSX만 남겼다. 두 훅 다 `lib/hooks/use-require-auth.ts`(신규, 두 에디터에 토씨 하나 안 틀리고
+중복돼 있던 로그인 리다이렉트 effect)를 함께 쓴다.
+
+**`use-topster-grid.ts` 와는 다른 층위다** — 그쪽(`useBoxSize`/`computeCell`)은 격자 셀의 픽셀
+크기를 재는 순수 계산이고 상태가 없다. 헷갈리지 않게 `useBoxSize` 자체를 `lib/hooks/use-box-size.ts`
+로 뽑아 도메인 중립 훅으로 만들고 `use-topster-grid.ts` 는 그걸 재노출하는 방식으로 바꿨다 —
+덕분에 아래 ②의 대진표 연결선에서도 같은 훅으로 컨테이너 높이를 잰다.
+
+`TopsterEditor` 쪽에서 격자 칸 수를 규칙 안으로 눌러 담던 `clampSide` 함수는 컴포넌트 지역
+함수였는데, 이번에 `lib/domain/limits.ts` 로 옮겨 `clampTopsterSide` 로 이름 붙였다 — 백엔드
+규칙 상수 옆에 규칙을 강제하는 함수도 같이 두는 게 자연스럽고, 훅과 컴포넌트 양쪽에서 재사용된다.
+
+`TournamentEditor` 쪽은 3단계 위저드라 **"어느 단계로 갈지"는 훅에, "뒤로가기가 실제로 어디로
+가는지"는 컴포넌트에** 남겼다 — 1단계의 '이전'은 `backHref`(페이지별 prop)로 에디터 자체를
+벗어나는데, 그건 훅이 몰라도 되는 페이지 차원의 일이다. `selectItemType()` 만 훅에 노출해서
+"종류 선택 + 풀 비우기 + meta 단계로 이동"을 한 동작으로 묶었다.
+
+**② `FullBracket` 에 실제 연결선을 그렸다**
+전체 대진표 뷰가 라운드를 열로 놓고 `justify-around` 로 균등 간격 배치만 하던 걸, 경기 쌍이
+다음 라운드 어느 자리로 합쳐지는지 보여주는 SVG 트리 선으로 바꿨다. `BracketBackground`(대결
+화면 배경 트리, 현재 경기~다음 자리까지만 그리는 별개 컴포넌트)는 건드리지 않았다 — 이번 요청은
+전체 대진표 뷰(`FullBracket`)로 한정했다.
+
+**DOM 측정 없이 좌표를 낼 수 있다는 걸 수학으로 확인하고 시작했다.** 각 라운드 열은
+`justify-content: space-around` 로 N개 경기를 높이 H 안에 고르게 놓으므로, i번째(0-index)
+경기 중심의 세로 좌표는 `H*(i+0.5)/N` 이다 — 경기 카드 자체의 높이와 무관하다. 이 공식으로
+자식 두 경기(`2j`, `2j+1`)의 중심을 평균하면:
+
+```
+(H*(2j+0.5)/N + H*(2j+1.5)/N) / 2 = H*(2j+1)/N = H*(j+0.5)/(N/2)
+```
+
+이게 정확히 부모 경기(다음 라운드에서 `N/2`개 중 `j`번째)의 중심 공식과 같다. 즉 **자식 두
+경기의 중심을 잇는 세로선의 중점이 부모로 가는 가로선의 시작점과 저절로 맞아떨어진다** —
+`ResizeObserver` 로 열 전체의 높이 H 하나만 재면(`use-box-size.ts`), 나머지 좌표는 각 라운드의
+경기 수(`round.matches.length`, 서버가 이미 주는 값)만으로 계산된다.
+
+가로 좌표는 측정 대신 못박았다 — 열 너비를 `min-w-44` 에서 `w-44 shrink-0`(고정 176px)으로
+바꾸고 간격(`gap-4`, 16px)과 합쳐 `k*192` 로 열 경계를 계산한다. 폭이 유동적이면 truncate된
+텍스트 길이에 따라 열 경계가 흔들려 선이 카드 모서리에서 어긋날 수 있어, 정확한 연결선을
+위해 폭을 고정하는 쪽을 택했다.
+
+선은 `<path d="M x y H mid V y2 H x">` 로 자식 두 경기를 하나의 세로 트렁크로 묶고, 그 트렁크의
+중점에서 부모 경기로 가는 가로선을 별도 path 로 그린다. 색은 `stroke-border`(시맨틱 토큰) —
+임의 hex 없음.
+
+**서버가 라운드를 한 번에 다 안 만든다는 걸 확인하고 안심했다** — `backend/routers/play.py` 를
+읽어 보니 다음 라운드는 **현재 라운드 전 경기가 끝나야** 한꺼번에 생성된다(`vote_round`).
+즉 `play.rounds` 에는 항상 "완결된 라운드들 + 현재 진행 중인 라운드" 만 있고, 내 연결선 계산은
+`round.matches.length` 를 실제 배열 길이에서 그대로 읽으므로 아직 안 만들어진 미래 라운드를
+가정하지 않는다 — 어느 시점에 그려도 존재하는 열들 사이만 정확히 잇는다.
+
+**검증**
+- `tsc --noEmit`·`next build` 통과, eslint **신규 0건**(전체 2건은 기존 `Navbar`·`search`)
+- 페이지 4종 200 — 메인·`/topsters/new`·`/tournament/new`·`/tournament`(대시보드), `/play/nonexistent`
+  도 200(클라이언트에서 토스트+리다이렉트, 페이지 크래시 아님)
+- `TopsterEditorInitial`/`TournamentEditorInitial` re-export 로 기존 import 경로(`app/topsters/[id]/edit`,
+  `app/tournament/[id]/edit`)는 그대로 컴파일된다
+
+**안 한 것 — 사람이 봐야 한다**
+- 대진표 연결선은 `/play/{id}` 안에서 버튼을 눌러야 나오는 Client Component라 SSR로 확인 불가.
+  8강 이상 실제 플레이로 선이 카드 사이를 정확히 잇는지, `stroke-border` 색이 다크 배경에서
+  잘 보이는지는 직접 봐야 한다(TASKS에 남김)
+
 ### 2026-08-28 (계속) — 대결 화면 진행 표시, 선택 버튼 분리, 우승 화면 성적
 
 **① "어느 쪽이 더 좋으신가요?" 를 진행 표시로 바꿨다**
@@ -1537,3 +1617,4 @@ Spotify 연동 백엔드, 프론트 기획(`_workspace/planning.md`), QA 리뷰(
 | 2026-08-28 | docs: 재생기 세션 기록, 구현 범위에 '재생' 추가 | docs | 커밋 `9c435a6` |
 | 2026-08-28 | feat(tournament): 앨범 후보·랭킹에 재생과 앨범 링크를 나란히 | docs, frontend | 커밋 `2bab815` |
 | 2026-08-28 | feat(play): 진행 표시·선택 버튼·우승 성적 | docs, frontend | 커밋 `44c7e82` |
+| 2026-08-28 | fix(harness): 서브에이전트 4종에 frontmatter 추가 | .claude | 커밋 `488bc79` |
