@@ -1505,3 +1505,4 @@ Spotify 연동 백엔드, 프론트 기획(`_workspace/planning.md`), QA 리뷰(
 | 2026-08-28 | docs: 8/27~8/28 세션 기록, 구현 범위·규약 갱신 | .claude, CLAUDE.md, DESIGN.md, docs | 커밋 `f31b9fe` |
 | 2026-08-28 | feat(player): 큐 기반 재생기 — 어디서 눌러도 재생목록에 쌓고 이어 재생 | backend, frontend | 커밋 `861f3d7` |
 | 2026-08-28 | docs: 재생기 세션 기록, 구현 범위에 '재생' 추가 | docs | 커밋 `9c435a6` |
+| 2026-08-28 | feat(tournament): 앨범 후보·랭킹에 재생과 앨범 링크를 나란히 | docs, frontend | 커밋 `2bab815` |
