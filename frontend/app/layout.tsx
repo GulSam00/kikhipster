@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Geist } from "next/font/google";
 import Navbar from "@/components/layout/Navbar";
-import MiniPlayer from "@/components/layout/MiniPlayer";
+import PlayerDock from "@/components/layout/PlayerDock";
 import { PlayerProvider } from "@/contexts/PlayerContext";
 import { Toaster } from "@/components/ui/sonner";
 import { SITE_NAME, siteUrl } from "@/lib/site";
@@ -49,10 +49,14 @@ export default function RootLayout({
       <body className="flex h-full flex-col overflow-hidden">
         <PlayerProvider>
           <Navbar />
-          <main className="flex min-h-0 flex-1 flex-col overflow-y-auto pb-16 sm:pb-0">
+          {/*
+            모바일 하단 탭바만큼의 여백은 `PlayerDock` 이 들고 있다 — 재생기가 흐름 안에
+            있어서(fixed 아님) main 이 그 아래로 밀리지 않으려면 여백도 그쪽에 있어야 한다.
+          */}
+          <main className="flex min-h-0 flex-1 flex-col overflow-y-auto">
             {children}
           </main>
-          <MiniPlayer />
+          <PlayerDock />
           <Toaster />
         </PlayerProvider>
       </body>

@@ -4,6 +4,7 @@ import { getRanking } from '@/lib/api/tournaments';
 import CommentSection from '@/components/social/CommentSection';
 import CoverImage from '@/components/common/CoverImage';
 import ShareButton from '@/components/common/ShareButton';
+import PoolItemPlayButton from '@/components/tournament/PoolItemPlayButton';
 import { ItemFallbackIcon } from '@/components/tournament/PoolItemTile';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
@@ -108,12 +109,19 @@ export default async function TournamentRankingPage({
                         className="size-16 shrink-0 rounded-md"
                         sizes="64px"
                       />
-                      <div className="min-w-0">
+                      <div className="min-w-0 flex-1">
                         <p className="truncate text-lg font-medium">
                           {item?.title ?? row.item_id}
                         </p>
                         <p className="truncate text-sm text-muted-foreground">{item?.subtitle}</p>
                       </div>
+                      {item && (
+                        <PoolItemPlayButton
+                          item={item}
+                          itemType={ranking.item_type}
+                          className="shrink-0 rounded-full text-muted-foreground hover:text-foreground"
+                        />
+                      )}
                     </div>
                   </TableCell>
 

@@ -26,18 +26,25 @@ function formatMs(ms: number) {
 }
 
 export default function TrackRow({ track, artist, albumCover }: Props) {
-  const { play, currentTrack, isPlaying } = usePlayer();
+  const { enqueueAndPlay, toggle, currentTrack, isPlaying } = usePlayer();
   const isActive = currentTrack?.id === track.id;
 
   function handlePlay() {
     if (!track.preview_url) return;
-    play({
-      id: track.id,
-      name: track.name,
-      artist,
-      albumCover,
-      previewUrl: track.preview_url,
-    });
+    // 지금 이 곡이 재생 중이면 큐를 건드리지 않고 멈추기만 한다.
+    if (isActive) {
+      toggle();
+      return;
+    }
+    enqueueAndPlay([
+      {
+        id: track.id,
+        name: track.name,
+        artist,
+        albumCover,
+        previewUrl: track.preview_url,
+      },
+    ]);
   }
 
   return (

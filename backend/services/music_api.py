@@ -216,25 +216,59 @@ class ITunesMusicService:
         return [self._map_album(a) for a in albums[:want]]
 
     async def get_album_tracks(self, album_id: str, market: str = "KR") -> dict:
-        """앨범 트랙 목록 조회 (preview_url 포함)."""
-        data = await self._request(
-            "/lookup",
-            # 두 가지 iTunes lookup 특이사항이 겹친 곳:
-            # 1) limit 생략 시 트랙을 거의 안 돌려준다(collection 레코드만 옴) → 넉넉히 고정
-            # 2) 여기서 country를 같이 넘기면 트랙 자체가 0개로 잘린다(재현 확인) → 의도적으로 뺌.
-            #    collectionId는 전역 고유값이라 country 없이도 앨범 자체는 정확히 찾힌다.
-            params={"id": album_id, "entity": "song", "limit": 200},
-        )
-        results = data.get("results", [])
+        """앨범 트랙 목록 조회 (preview_url 포함).
+
+        **iTunes lookup은 스토어프론트마다 다르게 답한다** — 세 갈래를 순서대로 탄다.
+        2026-08-28 실측:
+
+        | 요청 | US 앨범(Thriller) | KR 앨범(aespa Armageddon) |
+        |------|-------------------|---------------------------|
+        | `entity=song` (country 없음 = US) | collection 1 + track 9 | **결과 0** |
+        | `entity=song&country=KR`          | collection 1 + track 0 | collection 1 + **track 0** |
+
+        즉 country를 빼면 US 앨범만 되고, KR 앨범은 어느 쪽으로도 트랙이 오지 않는다.
+        예전 주석은 "country를 빼면 트랙이 온다"고 적어 뒀는데 그건 US 앨범 한정이었고,
+        그대로 두면 K-POP 앨범 상세가 전부 404였다(실제로 그랬다).
+        `entity=musicTrack`·`media=music`·다른 country도 전부 확인했지만 안 된다.
+
+        그래서 트랙이 비면 마지막으로 **검색**으로 채운다. 검색 API는 KR 스토어에서도
+        preview_url 을 정상으로 준다. 다만 검색은 앨범 전체를 보장하지 않는다 —
+        위 앨범에서 11곡 중 10곡이 왔다. 없는 것보다 낫다는 판단이다.
+        """
+        # ① country 없이 (= US 스토어). US 앨범은 여기서 트랙까지 다 온다.
+        results = (
+            await self._request(
+                # limit 생략 시 트랙을 거의 안 돌려준다(collection 레코드만 옴) → 넉넉히 고정.
+                "/lookup",
+                params={"id": album_id, "entity": "song", "limit": 200},
+            )
+        ).get("results", [])
         collection = next((r for r in results if r.get("wrapperType") == "collection"), None)
+        raw_tracks = [r for r in results if r.get("wrapperType") == "track"]
+
+        # ② 사용자 스토어프론트. KR 전용 앨범은 여기서만 collection 이 잡힌다.
+        if collection is None:
+            results = (
+                await self._request(
+                    "/lookup",
+                    params={"id": album_id, "entity": "song", "country": market, "limit": 200},
+                )
+            ).get("results", [])
+            collection = next((r for r in results if r.get("wrapperType") == "collection"), None)
+            if not raw_tracks:
+                raw_tracks = [r for r in results if r.get("wrapperType") == "track"]
+
         if not collection:
             raise HTTPException(status_code=404, detail="앨범을 찾을 수 없습니다")
 
         album = self._map_album(collection)
+
+        # ③ 그래도 트랙이 없으면 검색으로 채운다.
+        if not raw_tracks:
+            raw_tracks = await self._search_album_tracks(collection, market)
+
         tracks = []
-        for t in results:
-            if t.get("wrapperType") != "track":
-                continue
+        for t in raw_tracks:
             mapped = self._map_track(t)
             tracks.append({
                 "id": mapped["id"],
@@ -244,8 +278,39 @@ class ITunesMusicService:
                 "preview_url": mapped["preview_url"],
                 "artists": mapped["artists"],
             })
+        tracks.sort(key=lambda t: t["track_number"] or 0)
 
         return {"album": album, "tracks": tracks}
+
+    async def _search_album_tracks(self, collection: dict, market: str) -> list[dict]:
+        """lookup 이 트랙을 안 줄 때 검색으로 수록곡을 긁어 온다.
+
+        `collectionId` 로 거르므로 다른 앨범의 동명 곡이 섞이지는 않는다.
+        검색어에서 " - Single" / " - EP" 같은 꼬리는 떼지 않는다 — 실측에서 붙이든
+        떼든 같은 곡이 왔고, 떼면 오히려 다른 앨범이 앞자리를 차지하는 경우가 있었다.
+        """
+        album_id = str(collection.get("collectionId", ""))
+        term = f"{collection.get('artistName', '')} {collection.get('collectionName', '')}".strip()
+        if not term or not album_id:
+            return []
+
+        data = await self._request(
+            "/search",
+            params={
+                "term": term,
+                "entity": "song",
+                "media": "music",
+                "country": market,
+                "limit": 200,
+            },
+        )
+        found = [
+            r for r in data.get("results", [])
+            if str(r.get("collectionId", "")) == album_id
+        ]
+        if not found:
+            logger.warning("앨범 %s 수록곡을 검색으로도 찾지 못했다 (term=%r)", album_id, term)
+        return found
 
     async def get_artist_top_tracks(
         self, artist_id: str, market: str = "KR"

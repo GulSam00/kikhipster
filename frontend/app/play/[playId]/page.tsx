@@ -4,16 +4,17 @@ import { useCallback, useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import { BarChart3, GitBranch, Swords, Trophy } from 'lucide-react';
+import { BarChart3, GitBranch, Pause, Play as PlayIcon, Swords, Trophy } from 'lucide-react';
 import { toast } from 'sonner';
 import { getPlay, voteRound } from '@/lib/api/plays';
 import BracketBackground from '@/components/tournament/BracketBackground';
 import FullBracket from '@/components/tournament/FullBracket';
-import TrackRow from '@/components/music/TrackRow';
 import { ItemFallbackIcon } from '@/components/tournament/PoolItemTile';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Spinner } from '@/components/ui/spinner';
+import { usePoolPlayer } from '@/lib/hooks/use-pool-player';
 import { nextMatch, roundLabel } from '@/lib/domain/bracket';
 import { fetchPoolItems, type PoolItem } from '@/lib/domain/pool-item';
 import type { Play, PlayRound } from '@/types/tournament';
@@ -184,6 +185,9 @@ function PlayMatch({
   justPicked: string | null;
   onVote: (winnerId: string, roundId: string) => void;
 }) {
+  // 고르기 전에 들어볼 수 있어야 한다 — 곡이면 그 곡, 앨범이면 수록곡 전체가 재생목록으로 간다.
+  const { playItem, pendingId, currentId, isPlaying } = usePoolPlayer(play.item_type);
+
   return (
     <div className="relative flex flex-1 flex-col justify-center">
       <BracketBackground play={play} match={match} items={items} justPicked={justPicked} />
@@ -237,20 +241,27 @@ function PlayMatch({
                   </div>
                 </button>
 
-                {play.item_type === 'track' && item?.previewUrl && (
-                  <div className="w-full">
-                    <TrackRow
-                      track={{
-                        id: item.id,
-                        name: item.title,
-                        duration_ms: item.durationMs ?? 0,
-                        explicit: item.explicit ?? false,
-                        preview_url: item.previewUrl,
-                      }}
-                      artist={item.subtitle}
-                      albumCover={item.coverUrl}
-                    />
-                  </div>
+                {/*
+                  투표 버튼과 형제로 둔다 — 안에 넣으면 버튼 안의 버튼이 되고, 미리듣기를
+                  누르는 순간 투표까지 된다. 곡은 그 자리에서 바로, 앨범은 수록곡을 받아 온다.
+                */}
+                {item && (play.item_type === 'album' || item.previewUrl) && (
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    className="w-full"
+                    onClick={() => void playItem(item)}
+                    disabled={pendingId === item.id}
+                  >
+                    {pendingId === item.id ? (
+                      <Spinner />
+                    ) : currentId === item.id && isPlaying ? (
+                      <Pause />
+                    ) : (
+                      <PlayIcon />
+                    )}
+                    {currentId === item.id && isPlaying ? '일시정지' : '미리듣기'}
+                  </Button>
                 )}
               </CardContent>
             </Card>

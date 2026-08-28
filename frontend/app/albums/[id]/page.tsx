@@ -3,11 +3,14 @@ import { notFound } from 'next/navigation';
 import { Disc3 } from 'lucide-react';
 import { ApiError } from '@/lib/api/client';
 import { getAlbumWithTracks } from '@/lib/api/music';
+import { albumTrackToQueue } from '@/lib/domain/playable';
+import AlbumPlayButton from '@/components/music/AlbumPlayButton';
 import LikeButton from '@/components/social/LikeButton';
 import TrackRow from '@/components/music/TrackRow';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import type { AlbumWithTracks } from '@/types/music';
+import type { QueueTrack } from '@/types/player';
 
 async function getAlbum(id: string): Promise<AlbumWithTracks | null> {
   try {
@@ -28,6 +31,10 @@ export default async function AlbumPage({ params }: { params: Promise<{ id: stri
   // 헤더의 제목·커버·아티스트가 전부 undefined 로 비어 있었다.
   const { album, tracks } = data;
   const year = album.release_date?.slice(0, 4) ?? '';
+  // 수록곡이 이미 여기 있으므로 재생 버튼이 같은 요청을 다시 하지 않게 넘겨 준다.
+  const queue = tracks
+    .map((t) => albumTrackToQueue(t, album))
+    .filter((t): t is QueueTrack => t !== null);
 
   return (
     <div className="mx-auto w-full max-w-6xl px-4 py-8">
@@ -48,7 +55,17 @@ export default async function AlbumPage({ params }: { params: Promise<{ id: stri
           <p className="mb-3 text-sm text-muted-foreground">
             {year} · {album.total_tracks}곡
           </p>
-          <LikeButton targetType="album" targetId={album.id} name={album.title} />
+          <div className="flex items-center gap-2">
+            {queue.length > 0 && (
+              <AlbumPlayButton
+                albumId={album.id}
+                albumTitle={album.title}
+                tracks={queue}
+                label="전체 재생"
+              />
+            )}
+            <LikeButton targetType="album" targetId={album.id} name={album.title} />
+          </div>
         </div>
       </div>
 

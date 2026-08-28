@@ -5,6 +5,7 @@ import { toast } from 'sonner';
 import PoolItemTile from '@/components/tournament/PoolItemTile';
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
+import { usePoolPlayer } from '@/lib/hooks/use-pool-player';
 import { fetchPoolItems, type PoolItem } from '@/lib/domain/pool-item';
 import type { TournamentItemType } from '@/types/tournament';
 
@@ -36,6 +37,8 @@ export default function PoolGrid({ itemType, allIds, initialItems, initialReques
   const [items, setItems] = useState<PoolItem[]>(initialItems);
   const [loading, setLoading] = useState(false);
   const [requested, setRequested] = useState(initialRequested);
+  // 후보를 눌러 바로 들어볼 수 있게 한다 — 곡이면 그 곡, 앨범이면 수록곡 전체가 큐로 간다.
+  const { playItem, pendingId, currentId, isPlaying } = usePoolPlayer(itemType);
 
   const remaining = allIds.length - requested;
 
@@ -58,7 +61,14 @@ export default function PoolGrid({ itemType, allIds, initialItems, initialReques
     <>
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
         {items.map((item) => (
-          <PoolItemTile key={item.id} item={item} itemType={itemType} />
+          <PoolItemTile
+            key={item.id}
+            item={item}
+            itemType={itemType}
+            onPlay={() => void playItem(item)}
+            playing={currentId === item.id && isPlaying}
+            loading={pendingId === item.id}
+          />
         ))}
       </div>
 
