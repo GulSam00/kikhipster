@@ -8,6 +8,323 @@
 
 ## 세션 기록
 
+### 2026-08-28 (계속) — lib 역할별 분리, 데이터 접근 계층, 규칙 상수 통일
+
+"소스가 아키텍처대로 분리돼 있나" 진단에서 나온 것 중 셋을 처리했다.
+(에디터 훅 분리는 파일이 크게 움직여 이번엔 뺐다.)
+
+**① `lib/` 를 역할별로 나눴다 — components 와 축이 다른 게 의도다**
+components 는 방금 **도메인**(topster/tournament/social…)으로 나눴는데 lib 는 **역할**로 나눈다.
+컴포넌트를 역할(cards/forms/modals)로 나누면 탑스터 하나 고치는 데 세 폴더를 오가고,
+lib 를 도메인으로 나누면 `'use client'` 경계가 안 보인다. 계층마다 유용한 축이 다르다.
+
+```
+lib/api/     client(구 api.ts) · auth · topsters · tournaments · plays · music · likes · comments
+lib/hooks/   use-me · use-delete-item · use-infinite-list · use-like-status
+             · use-album-covers · use-topster-grid
+lib/domain/  bracket · pool-item · limits(신규)
+lib/render/  topster-image · og
+lib/utils.ts · lib/site.ts   (어디에도 안 속하는 것만 루트)
+```
+
+**② 엔드포인트 문자열을 `lib/api/` 안에 가뒀다**
+`apiFetch` 가 19개 파일에 흩어져 있었고 `/api/topsters/{id}` 가 7곳, `/api/tournaments/{id}` 가
+7곳에 중복이었다. 지금은 **`app/`·`components/` 의 `apiFetch` 직접 호출이 0건**이고,
+`/api/` 문자열은 `lib/api/` 와 주석에만 남았다.
+
+목록류는 함수가 아니라 **경로 빌더**를 내보낸다(`topsterListPath` 등) — `useInfiniteList` 가
+경로 문자열을 받아 offset 을 붙여가며 부르는 구조라, 데이터를 반환해 버리면 그 훅을 못 쓴다.
+`deletePath` 도 같은 빌더를 쓴다.
+
+**덤으로 나온 중복: 사용자 타입이 세 곳에 서로 다르게 있었다**
+`app/profile/page.tsx` 는 `{id,email,nickname,provider}`, `app/profile/[userId]` 는
+`{id,nickname,provider}`, `lib/hooks/use-me.ts` 는 `{id,nickname}`. 백엔드 `routers/auth.py`
+응답을 확인해 `types/user.ts` 하나로 모았다.
+
+**③ 규칙 상수를 `lib/domain/limits.ts` 로**
+`MIN_POOL=4`·`MAX_POOL=512`·`MAX_CELLS=25` 가 에디터 안에 각각 있었다. 정본은 백엔드지만
+프론트도 같은 값을 알아야 하고, 어긋나면 **프론트는 통과시키고 백엔드가 422 를 뱉는** 모양으로
+터져서 화면에서 원인이 안 보인다. 대응하는 백엔드 위치를 상수마다 주석에 적었다.
+
+**터뜨린 것 둘 — 둘 다 `tsc`·`build` 로는 안 잡혔다**
+- **`ViewCounter` 에 함수 prop 을 줬다가 월드컵 상세가 500.** `onView={() => mark…}` 로
+  바꿨는데 그 페이지는 Server Component 라 함수를 클라이언트로 넘길 수 없다
+  ("Event handlers cannot be passed to Client Component props"). 탑스터 상세는 클라이언트라
+  통과해서 더 헷갈렸다. `target="tournament" id={...}` 처럼 **직렬화되는 값만 받고
+  어느 엔드포인트를 부를지는 컴포넌트 안에서 고르게** 고쳤다
+- **`rm -rf .next/dev` 로 dev 서버를 깨뜨렸다.** turbopack 이 쓰는 중인 캐시라
+  "Failed to open SST file" 로 전 페이지가 500 이 됐다. 코드 문제가 아니었는데 잠깐 그렇게 보였다.
+  **dev 서버가 도는 동안 `.next` 를 지우지 말 것**
+
+**검증**
+- `tsc --noEmit`·`next build` 통과, eslint 신규 0건(전체 2건은 기존)
+- **페이지 15종 전부 200** — 홈·검색·목록 2·만들기 2·프로필·로그인·상세 3·수정 2·아티스트·앨범
+- **백엔드 로그로 경로를 확인했다** — `GET /api/topsters/?limit=12&offset=0`,
+  `/api/tournaments/{id}/ranking` 등이 그대로 도달해 200. 프론트 API 모듈이 만든 문자열이
+  예전과 같다는 뜻이다
+
+### 2026-08-28 (계속) — 커서·프리미티브 로컬 수정·폴더 재편·CoverImage
+
+네 갈래 요청을 한 번에 처리했다.
+
+**① 커서 — shadcn 프리미티브에는 `cursor-pointer` 가 하나도 없었다**
+`Button` 을 포함해 전부. 앱 코드에서 버튼마다 붙이는 대신 **프리미티브 7종을 고쳤다**
+(button, select 트리거·항목, dropdown-menu 항목 4종, checkbox, toggle, tabs).
+select·dropdown 은 원래 `cursor-default` 였는데 이건 네이티브 메뉴를 흉내 내는 shadcn 기본값이라
+그대로 바꿨다. **`npx shadcn add` 로 다시 받으면 사라지므로 파일 맨 위에 `// [kikhipster]`
+주석으로 표시**해 뒀다.
+
+프리미티브가 아닌 raw `<button>` 네 곳(탑스터 검색 결과, 월드컵 앨범 펼치기·후보 토글,
+플레이 투표 카드)에도 직접 넣었다. 투표 카드에는 `disabled:cursor-not-allowed` 도 같이 줬다 —
+투표 중에는 눌리지 않는데 손 모양이 남아 있으면 먹히는 줄 안다.
+
+**② 폴더 — `components/music/` 한 곳에 24개가 쌓여 있었다**
+이름만 보고 무엇이 어디 붙는지 알 수 없었다. 도메인으로 갈랐다:
+`common`(8) · `topster`(4) · `tournament`(7) · `social`(2) · `music`(3, 음악 자체) · `layout`(2).
+`music/` 에 남긴 건 AlbumCard·ArtistCard·TrackRow 뿐이다. 이동 21개, import 갱신 23개 파일.
+
+**③ CoverImage — 같은 세 줄이 아홉 파일에 있었다**
+`relative overflow-hidden bg-muted` + `Image fill object-cover` + "없으면 가운데 아이콘".
+모양(정사각/원형)과 크기만 다르고 구조가 같아 `className` 으로 그 둘만 받게 뽑았다.
+AlbumCard·ArtistCard·PoolItemTile·랭킹표에 적용했다.
+
+**적용하지 않은 두 곳에 이유를 남겼다** — 이게 이번 추출에서 제일 중요한 판단이다:
+- `TournamentEditor` 의 `Cover` 는 **`<button>` 안**이라 콘텐츠 모델이 phrasing content 다.
+  `CoverImage` 는 `<div>` 라 넣으면 무효 마크업이 된다. `<span>` 판을 남겼다
+- 탑스터 격자 셀은 커버가 없을 때 아이콘이 아니라 **색 블록**으로 칸을 표시하고 배경도
+  사용자가 고른 색이라 전제가 다르다
+
+**검증**
+- `tsc --noEmit`·`next build` 통과, eslint 신규 0건(전체 2건은 기존)
+- 페이지 8종 전부 200 (메인·탑스터 목록·월드컵 대시보드·검색·월드컵 만들기·상세 3종)
+- 렌더 확인: 랭킹표 커버 `<img>` 8개(폴백 4개), `cursor-pointer` 가 메인 17·상세 10·랭킹 7곳
+- `kikhipster-frontend` 스킬의 디렉터리 트리도 새 구조로 고쳤다 — 낡은 채로 두면
+  다음 세션이 `components/music/` 에 또 쌓는다
+
+### 2026-08-28 — 월드컵 편집기의 '빼기'를 탑스터와 같은 방식으로
+
+담긴 목록 타일의 제거가 **우측 상단의 작은 X 버튼**이었다. 탑스터 편집기의 격자 셀은 이미
+"클릭하면 제거, hover 하면 딤 위에 X" 방식이라, 같은 화면군에서 제거 방법이 두 가지였다.
+타일 전체를 과녁으로 바꿔 작은 X 를 겨냥할 필요를 없앴다.
+
+**탑스터 쪽을 그대로 베끼지는 않았다.** 격자 셀은 `<div onClick>` 이라 키보드로 접근할 수
+없다(DESIGN.md § Component states 는 raw `<div onClick>` 에 `hover:` 와 `focus-visible:` 을
+요구한다 — BLOCK). `PickedTile` 은 원래 `<Button>` 이라 접근성이 있었으므로, 타일 클릭으로
+바꾸면서 그걸 잃으면 퇴보다. `<button>` 으로 감싸고 `group-focus-visible:opacity-100` 을
+같이 걸어 **키보드 포커스에서도 오버레이가 뜬다.**
+
+용어는 화면의 기존 말인 '빼기'를 유지했다(탑스터는 '제거'). 딤은 커버 이미지 위에 얹히는
+것이라 시맨틱 토큰으로 표현할 수 없어 탑스터와 같은 `bg-black/60` 을 쓰고, radius 는
+`Card` 의 `rounded-xl` 에 맞췄다 — 안 맞추면 모서리에서 딤이 삐져나온다.
+
+**검증**
+- `tsc --noEmit`·`next build` 통과, eslint 신규 0건, `/tournament/new` 200
+- **담긴 목록은 항목을 담아야 나타나므로 SSR 로는 빈 상태만 확인된다** — hover·포커스
+  오버레이는 사람이 봐야 한다
+
+### 2026-08-27 (계속) — 두 상세의 UI 통일, 파괴적 동작 분리
+
+탑스터 상세와 월드컵 상세가 같은 서비스의 화면으로 안 보이는 문제. **먼저 어긋난 지점을
+코드에서 뽑아 표로 만들고 시작했다** — 눈대중으로 "비슷하게" 맞추면 다음에 또 갈린다.
+
+어긋나 있던 것: 컨테이너 폭(5xl/4xl), 헤더 순서, 작성일 유무, 작성자 링크 여부,
+집계 표시(양쪽 다 없음), 공유 라벨('링크 복사'/'공유'), 버튼 radius, 액션 줄이
+콘텐츠 위냐 아래냐.
+
+**표를 만드는 과정에서 실제 버그가 하나 나왔다**
+탑스터 상세의 액션 줄은 `flex items-center` 로 **`flex-wrap` 이 없었다.** 소유자가
+모바일에서 열면 좋아요·공유·수정·삭제 네 개가 `size="lg"` 로 한 줄에 묶여 페이지가
+가로로 밀린다 — § Mobile 의 "가로 스크롤 발생 금지"(BLOCK) 위반이다. 월드컵 쪽은
+`flex flex-wrap` 이라 멀쩡했다. 통일하면서 자연히 사라졌다.
+
+**수정·삭제를 `⋯` 드롭다운으로 뺀 이유는 셋이다**
+- 되돌릴 수 없는 삭제가 좋아요와 **같은 크기로 8px 옆에** 있었다
+- 소유자면 버튼이 4~6개, 방문자면 2~3개라 같은 화면의 줄 길이가 사람마다 달랐다
+- `destructive` 상시 노출이 `primary`(시작하기)와 겹쳐 § Color budget 의
+  "primary와 destructive가 동시에 두드러지면 WARN"(amber↔red-orange 근접)에 걸렸다
+
+`npx shadcn add dropdown-menu` 로 프리미티브를 들였다(package.json 은 안 바뀌었다 —
+radix 의존성이 이미 있었다). 기존 sonner 확인 토스트는 그대로라 **메뉴에서 한 번,
+토스트에서 한 번, 두 단계**가 된다.
+
+**44px 터치 타깃은 프리미티브만으로 못 채운다**
+`button.tsx` 의 아이콘 사이즈는 `icon-lg` 가 36px 로 가장 크다. 보이는 크기를 키우면
+`⋯` 하나가 제목만큼 커지므로, **`after:-inset-1`(4px×2)로 히트 영역만 44px 로 넓혔다.**
+
+**좋아요·공유를 콘텐츠 아래로 내렸다**
+둘 다 내용을 보고 나서 하는 판단이다. 월드컵 상세는 이 줄이 후보 그리드 **위**에 있어서
+후보를 보기도 전에 좋아요를 권하는 순서였다. 1차 CTA(시작하기·랭킹보기 / 이미지 저장)를
+같은 줄 왼쪽에 두고 참여 동작을 오른쪽으로 몰았다(`DetailActionBar`).
+
+**덤으로 메운 구멍: 상세에서 PNG 저장**
+`downloadTopsterImage` 는 `TopsterEditor` 에만 붙어 있었다. 즉 **내가 만드는 중에만**
+저장할 수 있고 남의 탑스터는 방법이 없었다. 순수 함수라 상세에서 그대로 부를 수 있어
+1차 CTA 자리에 넣었다.
+
+**폭은 `max-w-4xl` 로 통일했다.** 탑스터가 `5xl` 이었는데, 캔버스는 높이
+(`h-[min(70vh,560px)]`) 기준으로 셀을 계산해서 격자 자체는 안 줄고 옆의 앨범 목록 칸만
+좁아진다. 실제로 답답한지는 봐야 안다 — TASKS.md 에 남겼다.
+
+**뒤이어 손본 것 (같은 세션)**
+- 월드컵 상세의 '앨범 N'·'플레이 N' 배지도 뺐다. 카드에서만 빼고 상세에는 남겨 뒀었는데,
+  통일된 헤더에서는 그 줄이 제목 위 한 칸을 통째로 차지한다. **후보 수는 `후보 N` 제목에,
+  누적 플레이 수는 랭킹 화면 머리말(`누적 플레이 N판 기준`)에 그대로 있다** — 두 숫자가
+  사라진 게 아니라 한 번씩만 나오게 됐다. 배지 슬롯 자체는 남겨 뒀고 탑스터의 격자 크기만 쓴다
+- '랭킹보기'의 `rounded-full` 을 뗐다. 같은 그룹의 '시작하기'가 기본 `rounded-lg` 라
+  둘이 나란히 있으면 알약 하나만 튄다. 결과적으로 **왼쪽(콘텐츠 동작)은 `rounded-lg`,
+  오른쪽(참여 동작)은 `rounded-full`** 로 그룹이 모양으로도 갈린다
+
+**강수 선택 화면을 없앴다 (같은 세션, 방향 전환)**
+바로 앞 세션에 만든 `/tournament/{id}/play` 를 라우트째 지우고, 상세의 1차 CTA 자리에
+`PlayLauncher`(select + 시작하기)를 놓았다. 그 화면이 하던 일이 **제목·후보 미리보기를
+다시 보여주고 강수를 고르게 하는 것**이라, 방금 그 정보를 다 보여준 상세에서 한 번 더
+페이지를 넘길 이유가 없었다. 고를 값이 하나뿐이라 select 로 충분하다.
+
+딸려 온 것 둘:
+- **카드의 '시작하기'를 상세로 되돌렸다.** 앞 작업에서 `/tournament/{id}/play` 로 보내
+  두었는데 그 주소가 없어졌다. 카드는 좁아서 select 를 넣을 자리가 아니다
+- `PlayStarter`(ToggleGroup 판)를 지웠다. `ToggleGroup` 자체는 탑스터 목록이 계속 쓴다
+
+**SSR 에서 select 가 비어 있던 것**
+`<SelectValue />` 를 비워 두면 Radix 가 선택값을 **클라이언트에서** 채운다. SSR HTML 에
+빈 칸이 나가고 하이드레이션 직후 "8강"이 들어오며 폭이 튄다. 값이 controlled state 라
+`<SelectValue>{size}강</SelectValue>` 로 직접 그려 서버·클라이언트가 같은 글자를 내게 했다.
+
+**select 를 주황으로 올리고, 랭킹 행을 키웠다 (같은 세션, 사용자 피드백)**
+- `PlayLauncher` 의 select 가 `secondary` 라 **주황 버튼 옆에 회색 상자가 붙은 꼴**이었다.
+  둘이 한 동작이라는 게 읽히지 않고 색만 어수선하다. select 도 `bg-primary` 로 올리고
+  경계는 배경색이 아니라 `border-primary-foreground/25` 한 줄로 냈다 — 같은 면 위의
+  분할선이라는 뜻이다. chevron 은 `text-muted-foreground` 기본값이라 주황 위에서 안 보여
+  `text-primary-foreground/70` 으로 덮었다. **덩어리 전체가 primary 강조 하나**로 카운트된다
+- 랭킹 행: 커버 `size-10`→`size-16`, 제목 `text-sm`→`text-lg`, 부제·추이 `text-xs`→`text-sm`,
+  셀에 `py-3`. **비율과 분수를 위아래로 나눴다** — 행이 커지자 한 줄에 붙여 둔 두 숫자가
+  빈 가로 공간에 떠 보였고, 큰 값이 비율·작은 값이 근거라는 관계도 이쪽이 낫다
+
+**그런데 그 주황이 화면에서는 회색이었다 (같은 세션, 사용자 지적)**
+`SelectTrigger` 기본 클래스의 `data-[size=default]:h-8` 과 `dark:bg-input/30` 이
+내가 얹은 `h-11 bg-primary` 를 이기고 있었다. `cn()` 은 `twMerge` 라 **variant 가 다르면
+다른 그룹**으로 보고 둘 다 남기는데, 속성 선택자가 붙은 쪽이 specificity 에서 이긴다.
+게다가 이 앱은 `dark` 고정이라 `dark:` 가 항상 적용된다. 결과적으로 **클래스는 붙어 있는데
+높이 32px·회색**이었다.
+
+**내 검증 방식이 틀렸던 게 진짜 원인이다.** SSR HTML 에서 `bg-primary` 가 보이는 걸 확인하고
+"적용됨"으로 판정했는데, 봐야 했던 건 **기본값이 사라졌는지** 였다. `data-[size=default]:h-11`,
+`dark:bg-primary` 로 같은 variant 를 다시 써서 `twMerge` 가 기본값을 지우게 고쳤고,
+검증도 "남아 있으면 안 되는 클래스 0개"로 바꿨다. **CLAUDE.md 함정 목록에 넣었다.**
+
+**그러고도 높이가 안 맞았다 (같은 세션, 사용자 재지적)**
+색과 `h-11` 을 맞춘 뒤에도 두 요소가 다른 크기로 보였다. 렌더된 클래스를 나란히 놓고서야
+보였는데, **버튼에는 `border`(1px)가 있고 select 에는 `border-0`, 패딩도 `px-2.5` vs `px-4`**
+였다. `globals.css` 의 `* { @apply border-border }` 때문에 버튼에만 테두리가 보이고 폭도 달랐다.
+
+속성별로 하나씩 맞추는 방식 자체가 틀렸다 — **`buttonVariants({ size: 'lg' })` 를 통째로
+얹어** 테두리·패딩·글자·전이를 한 벌로 가져오고, 그 위에 셋만 덮었다: `justify-between`
+(select 는 값과 chevron 을 양끝으로 밀어야 해서 `justify-center` 를 되돌린다),
+`data-[size=default]:h-11`, `dark:bg-primary`(뒤 둘은 위에 적은 variant 규칙 때문).
+대조 결과 `h-11`·`px-2.5`·`gap-1.5`·`text-sm`·`font-medium`·`border`·`rounded-lg` 가 일치한다.
+
+**펼쳐지는 목록도 고쳤다 (같은 세션)**
+`SelectContent` 기본값 `position="item-aligned"` 는 네이티브 select 처럼 **트리거를 덮으면서**
+현재 항목을 트리거 자리에 맞춘다. 여기서는 트리거가 버튼 절반인 컨트롤이라 그게 덮이면
+무엇을 누른 건지 사라진다. `popper` + `align="start"` 로 컨트롤 바로 아래에 펼치고,
+폭은 `min-w-36`(144px) 대신 `min-w-(--radix-select-trigger-width)` 로 잡아 트리거와 같은
+너비에서 시작해 긴 항목("128강")에 맞춰 늘어나게 했다. 항목에는 `py-2` 를 줘서 h-11
+트리거와 밀도를 맞췄다.
+
+**이건 SSR 로 검증할 수 없다** — `SelectContent` 는 Portal 이라 열려야 DOM 에 생긴다.
+`tsc`·`next build` 까지가 한계다.
+
+**마지막으로 두 칸의 너비를 같게 맞췄다.** `flex` 에서는 각자 콘텐츠만큼만 차지해서
+"8강"과 "시작하기"의 폭이 그대로 벌어진다. 컨테이너를 `grid w-fit grid-cols-2` 로 바꾸고
+두 요소에 `w-full` 을 주면 **넓은 쪽에 맞춰 두 칸이 같아진다**. 시작하기의 `Play` 아이콘은
+뺐다 — 칸이 넓어지면서 아이콘+텍스트가 가운데 몰려 오히려 답답했고, chevron 하나만 남은
+select 쪽과도 균형이 맞는다.
+
+같은 의심으로 랭킹표의 `TableCell`(기본 `p-2` + 내가 준 `py-3`)도 확인했다. 이쪽은 variant 가
+없는 순수 유틸리티라 CSS 선언 순서로 갈리는데, **빌드된 CSS 에서 `.py-3`(21018) 이
+`.p-2`(20247) 보다 뒤**라 의도대로 12px 이 먹는다.
+
+**DESIGN.md 를 같이 고쳤다.** § Visual reference 의 랭킹 행이 "Melon 의 행 밀도 최대화 논리를
+이 표에 국소 적용" 이라고 적고 있었는데, 이번 변경이 정확히 그 반대다. 방침을 철회하고 이유를
+남겼다 — **멜론식 밀도는 수백 곡을 스캔하는 차트의 논리이고, 이 표는 후보 수십 개짜리 결과
+화면이다.** § Typography 의 `text-lg` 용도에도 랭킹 행을 더했다.
+
+**검증**
+- `tsc --noEmit`·`next build` 통과, eslint 신규 0건(전체 2건은 기존).
+  라우트를 지운 직후 `tsc` 가 `.next/types/validator.ts` 에서 없는 페이지를 찾는다며 실패했는데,
+  이전 빌드가 만든 캐시라 재빌드로 사라진다
+- `/tournament/{id}/play` → **404**, 메인 카드 링크에 `/play` 없음
+- select 렌더 1개 + `aria-label="강수"`, SSR 초기값 "8강" 표시(고친 뒤)
+- 플레이 생성 경로: `POST /plays {"size":8}` → playId → `/play/{id}` 200.
+  **검증으로 만든 판은 지웠다**(랭킹 집계에 섞이므로)
+- select trigger 에 `bg-primary` 적용·`bg-secondary` 잔존 0, 버튼에 칸막이 클래스 1개
+- 랭킹 SSR: `size-10` 0개 / `size-16` 12행분, 셀 `py-3` 12행×5칸분
+- 배지 제거 후 월드컵 상세의 `data-slot="badge"` 0개, 액션바 radius 실측:
+  시작하기·랭킹보기 `rounded-lg` / 좋아요·공유 `rounded-full`
+- 월드컵 상세 SSR: 요소 순서가 `배지 2 → h1 → 집계 → h2(후보) → 시작하기 → 랭킹보기 →
+  좋아요 → 공유 → h2(댓글)` 로 의도와 일치. `max-w-4xl` 확인. 비로그인이라 ⋯ 메뉴는 없음(정상)
+- 탑스터 상세 200 — 다만 Client Component 라 **SSR HTML 로는 본문을 볼 수 없다**
+
+**안 한 것 — 사람이 봐야 한다**
+- ⋯ 메뉴가 실제로 열리는지, 삭제 2단계가 자연스러운지 (소유자 로그인이 필요해 SSR 로는 못 본다)
+- 상세의 '이미지 저장'이 실제 PNG 를 내려주는지
+- `4xl` 로 좁힌 탑스터 캔버스가 답답하지 않은지
+
+### 2026-08-27 (계속) — 카드 집계 3종, 월드컵 배지 정리, 시작하기 경로
+
+메인 화면 카드 요청 3건. **조회수는 컬럼부터 없었고, 월드컵 좋아요는 누를 데가 없었다** —
+착수 전에 코드를 읽어 둘 다 확인하고 물어서 정했다.
+
+**① 조회수 — 상세 GET 에서 올리지 않기로 했다**
+가장 쉬운 자리는 상세 GET 이지만 그러면 **수정 화면, OG 썸네일 생성, Next 프리페치까지
+전부 조회로 세어진다.** 이 프로젝트는 두 상세가 이미 `opengraph-image.tsx` 를 갖고 있어서
+크롤러가 링크를 긁을 때마다 숫자가 오르게 된다. 전용 `POST /{id}/view` 를 두고 상세 화면의
+`ViewCounter`(아무것도 그리지 않는 클라이언트 컴포넌트)가 마운트 시 한 번만 부르게 했다.
+
+`sessionStorage` 로 거르는 건 중복 방지이자 **개발 모드 방어**다 — StrictMode 가 effect 를
+두 번 실행해서 없으면 로컬에서 매번 2씩 오른다. 증가는 `UPDATE … view_count + 1` 한 문장이다.
+읽어서 +1 하고 쓰면 동시 조회에서 한쪽이 덮인다.
+
+**② 좋아요·댓글 수 — 카드마다 세면 목록 한 장에 쿼리가 40번**
+`Like`·`Comment` 가 둘 다 `(target_type, target_id)` 구조라 배치 집계 헬퍼를 각 라우터에
+하나씩 뒀다(`like_counts`, `comment_counts`). **없는 대상은 키에서 빠지므로 호출부가 0을
+채운다**는 규약을 주석에 적었다. 탑스터의 `user/me` 목록은 원래 좋아요를 카드마다 세고
+있었는데(N+1) 이번에 같이 배치로 내렸다.
+
+`Like.target_id` 는 String 이고 PK 는 UUID라 **문자열로 바꿔 물어야 한다** — 목록 정렬용
+조인이 이미 `cast(Topster.id, String)` 을 쓰고 있던 것과 같은 이유다.
+
+**③ 월드컵 좋아요는 백엔드 작업이 없었다**
+`routers/like.py` 는 `target_type` 을 검증하지 않는다. 그래서 상세에 `LikeButton` 을
+`targetType="tournament"` 로 붙이고 프론트 `LikeTargetType` 에 한 줄 넣은 게 전부다.
+색 예산은 '시작하기'(primary) + 좋아요(눌렸을 때 primary) 2개로 § Color budget 상한 안이다.
+
+**④ 배지 제거와 카드 레이아웃**
+월드컵 카드의 '앨범 N'·'플레이 N' 배지를 빼고 그 자리에 집계 한 줄을 넣었다. 상세의 같은
+배지는 그대로 뒀다 — 요청이 메인 화면 카드였고, 종류·후보 수는 상세에서 여전히 쓸모가 있다.
+탑스터 카드는 **닉네임과 집계를 다른 줄로 나눴다**. 메인은 카드가 6열까지 좁아져서
+한 줄에 두면 닉네임과 숫자가 같이 잘린다.
+
+**⑤ 시작하기 → `/tournament/{id}/play`**
+`/play/{playId}` 로 바로 보내려면 카드에서 강수를 정해 판을 만들어야 해서, 지난 세션에
+분리한 강수 선택 화면이 무의미해진다. 상세를 거치던 한 단계만 줄였다.
+
+**검증**
+- 마이그레이션: 행이 있는 상태로 downgrade→upgrade 왕복 확인
+- `POST /view`: 204, 없는 id 404, 2회·3회 호출 후 목록·상세의 `view_count` 가 각각 2·3 으로 일치
+- 집계: 댓글·좋아요를 직접 심어 목록과 상세가 같은 수를 내는지 확인(검증 행은 남겨 두지 않았다)
+- **쿼리 수 실측**: 탑스터 5장 3회, 월드컵 3장 5회 — 카드 수에 비례하지 않는다
+- **브라우저에서 실제로 동작했다.** 백엔드 로그에 `OPTIONS` 프리플라이트를 동반한
+  `POST /view` 가 찍혔다(curl 은 프리플라이트를 내지 않는다). 열려 있던 탭에서 `ViewCounter`
+  가 돌아 월드컵 조회수가 3→4 로 올랐다
+- SSR HTML: 메인의 `data-slot="badge"` 0개(배지 제거됨), 상세는 2개 유지, 카드마다
+  조회·좋아요·댓글 라벨 3종, '시작하기' href 가 `/play` 로 끝남
+- `tsc --noEmit`·`next build` 통과, eslint 신규 0건(전체 2건은 기존 `Navbar`·검색 화면)
+
+**안 한 것**
+- 조회수에 유니크 집계가 없다. 탭을 새로 열면 다시 센다 — 카드에 보여줄 대략의 인기 지표로 뒀다
+- 댓글 좋아요는 여전히 화면이 없다(모델·API 는 그대로 있다)
+
 ### 2026-08-27 (계속) — T5 기능 요청 6건
 
 접수한 7개 요청(플레이 흐름 2건은 한 덩어리라 6건으로 묶임)을 순서대로 처리했다.
@@ -1091,3 +1408,6 @@ Spotify 연동 백엔드, 프론트 기획(`_workspace/planning.md`), QA 리뷰(
 | 2026-08-27 | feat(frontend): 탑스터·월드컵 공유에 OG 메타데이터와 썸네일 | frontend | 커밋 `e904e81` |
 | 2026-08-27 | feat(tournament): 강수 선택을 /tournament/{id}/play 로 분리 | frontend | 커밋 `6fbb716` |
 | 2026-08-27 | feat(play): 카드 확대, 배경 대진표, 전체 대진표 전환 | DESIGN.md, frontend | 커밋 `134ae7f` |
+| 2026-08-27 | docs: T5 6건 완료 반영, 세션 기록 | docs | 커밋 `ae4b7cc` |
+| 2026-08-28 | feat(backend): 조회수 컬럼과 전용 증가 엔드포인트, 목록·상세에 집계 3종 | backend | 커밋 `f00d5a5` |
+| 2026-08-28 | refactor(frontend): 컴포넌트를 도메인별로, lib 을 역할별로 재편 + 상세 UI 통일 | frontend | 커밋 `c0a0ee1` |

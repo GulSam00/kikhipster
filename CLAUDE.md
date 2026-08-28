@@ -49,6 +49,18 @@ cd frontend && npm run dev                                      # :3300
 - **모든 관계에 `cascade="all, delete-orphan", passive_deletes=True` 를 건다.** 빠뜨리면 부모 삭제 시 자식 FK를 NULL로 UPDATE하려다 `IntegrityError`.
 - **iTunes `/lookup`에 앨범 ID + `entity=song`으로 트랙을 조회할 때 `country` 파라미터를 같이 넘기지 않는다.** 실제로 트랙이 0개로 잘리는 걸 확인함(`limit`도 생략하면 마찬가지). `collectionId`는 전역 고유값이라 country 없이도 정확히 찾힌다. `backend/services/music_api.py`의 `get_album_tracks` 참조.
 
+- **shadcn 프리미티브의 색·크기를 덮을 때는 variant 까지 똑같이 써야 한다.** `cn()` 은
+  `twMerge` 라 **variant 가 다르면 다른 그룹**으로 보고 둘 다 남긴다. 그러면 속성 선택자가
+  붙은 기본값이 specificity 에서 이긴다. `SelectTrigger` 에 `h-11 bg-primary` 를 얹었더니
+  기본값 `data-[size=default]:h-8` 과 `dark:bg-input/30` 이 이겨서 **클래스는 붙었는데
+  높이 32px·회색인 채**로 렌더된 적이 있다(2026-08-27). 이 앱은 `<html class="dark">` 고정이라
+  `dark:` variant 가 **항상** 적용된다는 걸 특히 잊지 말 것 — 덮으려면
+  `data-[size=default]:h-11`, `dark:bg-primary` 처럼 같은 variant 로 다시 쓴다.
+  **SSR HTML 에 클래스가 보이는 것은 적용됐다는 증거가 아니다.** 기본값이 사라졌는지를 본다.
+- **다른 프리미티브를 버튼처럼 보이게 할 때는 `buttonVariants` 를 통째로 얹는다.** 색·높이만
+  따로 맞추면 `border` 유무와 패딩이 어긋나 결국 다른 크기가 된다(`SelectTrigger` 로 실제로 겪음).
+  덮을 것은 그 프리미티브 고유의 동작뿐이다 — select 라면 `justify-between` 정도.
+
 **판단 기준**
 - **화면만 보고 정상 동작을 판단하지 않는다.** (2026-08-20 이전엔 프론트가 호출 실패를 전부 `catch` 로 삼켜 에러 없이 빈 화면으로 렌더링됐다 — Server Component는 `app/error.tsx` 경계, Client Component는 `sonner` 토스트로 정리됨. 새 코드에서 같은 패턴을 반복하지 않는다.) 화면이 정상으로 보여도 `curl` 이나 백엔드 로그로 한 번 더 확인한다.
 - **프론트 UI는 shadcn/ui 위에서 조립한다.** raw `<button>` + Tailwind로 새로 만들지 말고 `@/components/ui/*` 를 먼저 찾는다. 색상은 하드코딩(`bg-zinc-900`, `text-amber-400`) 대신 시맨틱 토큰(`bg-card`, `text-primary`, `text-muted-foreground`, `bg-accent`)을 쓴다. 토큰 정의·레퍼런스 근거는 `DESIGN.md`, 컴포넌트 조립 컨벤션은 `kikhipster-frontend` 스킬.

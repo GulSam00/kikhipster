@@ -21,15 +21,17 @@ frontend/
 │   │   ├── page.tsx            # 토너먼트 목록
 │   │   └── [id]/page.tsx       # 토너먼트 진행
 │   └── profile/[userId]/page.tsx
-├── components/
-│   ├── ui/                     # shadcn/ui 프리미티브 (직접 수정 지양, CLI로 추가)
-│   ├── music/
-│   │   ├── ArtistCard.tsx
-│   │   ├── AlbumCard.tsx
-│   │   ├── TopsterGrid.tsx     # 앨범 커버 그리드 (3x3, 5x5)
-│   │   └── TournamentBracket.tsx
-│   └── layout/
-│       └── Navbar.tsx
+├── components/                 # 2026-08-28에 도메인별로 나눴다 (전에는 music/ 한 곳에 24개)
+│   ├── ui/                     # shadcn/ui 프리미티브. CLI로 추가하되, 로컬 수정한 파일은
+│   │                           #   맨 위에 `// [kikhipster]` 주석으로 표시해 둔다
+│   ├── common/                 # 도메인을 안 타는 조각 — DetailHeader, DetailActionBar,
+│   │                           #   ItemStats, CoverImage, OwnerMenu, ShareButton, ViewCounter …
+│   ├── music/                  # 음악 자체 — AlbumCard, ArtistCard, TrackRow
+│   ├── topster/                # TopsterCard, TopsterCanvas, TopsterEditor, TopsterAlbumList
+│   ├── tournament/             # TournamentCard/Editor, PoolGrid, PoolItemTile,
+│   │                           #   PlayLauncher, BracketBackground, FullBracket
+│   ├── social/                 # CommentSection, LikeButton
+│   └── layout/                 # Navbar, MiniPlayer
 ├── hooks/
 │   ├── useTopster.ts
 │   ├── useTournament.ts
@@ -118,6 +120,10 @@ export interface Like {
 ```
 
 ## 스타일링 원칙 (shadcn/ui + Tailwind)
+
+**컴포넌트를 새로 만들기 전에 `components/common/` 을 먼저 본다.** 커버+폴백은
+`CoverImage`, 상세 헤더는 `DetailHeader`, 조회·좋아요·댓글 줄은 `ItemStats` 가 이미 있다.
+탑스터와 월드컵이 같은 모양을 두 벌 그리고 있던 것을 2026-08-28에 여기로 모았다.
 
 **UI는 shadcn/ui 프리미티브 위에서 조립한다.** 버튼·카드·인풋·탭 등을 raw `<button>` + Tailwind 클래스로 새로 만들지 말고 `@/components/ui/*` 를 먼저 찾는다. 없으면 `pnpm dlx shadcn@latest add <name>` 으로 추가한다.
 
