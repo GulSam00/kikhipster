@@ -25,6 +25,15 @@ interface PlayerContextValue {
   setQueueOpen: (open: boolean) => void;
 
   /**
+   * 0~1. **음소거와 따로 둔다** — 음소거를 풀었을 때 원래 크기로 돌아와야 하기 때문이다.
+   * 실제 오디오에 먹는 값은 `muted ? 0 : volume` 이다.
+   */
+  volume: number;
+  muted: boolean;
+  setVolume: (volume: number) => void;
+  toggleMute: () => void;
+
+  /**
    * 큐 끝에 붙이고 그 첫 곡부터 바로 재생한다. **앱 어디서든 재생의 진입점은 이것 하나다.**
    * 이미 큐에 있는 곡은 다시 넣지 않고 그 자리로 이동한다 — 같은 곡을 두 번 누르면
    * 큐가 늘어나는 대신 처음부터 다시 재생된다.
@@ -45,6 +54,53 @@ const PlayerContext = createContext<PlayerContextValue | null>(null);
 /** prev 를 눌렀을 때 이전 곡으로 갈지 현재 곡을 처음으로 되돌릴지 가르는 기준(초). */
 const RESTART_THRESHOLD = 3;
 
+/**
+ * 볼륨은 브라우저에 남긴다 — 페이지를 옮길 때마다 100%로 돌아가면 매번 다시 줄여야 한다.
+ * 음소거를 **크기와 따로** 적는 이유는, 음소거를 0으로 적으면 다시 켰을 때 원래 크기를
+ * 잃어버리기 때문이다.
+ */
+const VOLUME_KEY = 'player_volume';
+const MUTED_KEY = 'player_muted';
+/** 볼륨이 0인 채로 음소거를 풀면 아무 소리도 안 난다 — 이 값으로 되살린다. */
+const UNMUTE_FALLBACK = 0.5;
+
+function persistVolume(volume: number, muted: boolean) {
+  try {
+    localStorage.setItem(VOLUME_KEY, String(volume));
+    localStorage.setItem(MUTED_KEY, muted ? '1' : '0');
+  } catch {
+    // 사생활 보호 모드 등에서 접근 자체가 던진다. 이번 세션 볼륨에는 영향이 없다.
+  }
+}
+
+/**
+ * 저장해 둔 값을 **초기값으로** 읽는다(effect 가 아니라 lazy initializer).
+ *
+ * 서버에는 `localStorage` 가 없어 여기서 값이 갈리지만 hydration 은 어긋나지 않는다 —
+ * 볼륨을 그리는 것은 `PlayerDock` 뿐이고, 그 안쪽은 `currentTrack` 이 있어야 렌더된다.
+ * 첫 렌더의 큐는 서버·클라이언트 모두 비어 있어서 어느 쪽도 아무것도 그리지 않는다.
+ */
+function readStoredVolume() {
+  if (typeof window === 'undefined') return 1;
+  try {
+    const raw = localStorage.getItem(VOLUME_KEY);
+    const saved = Number(raw);
+    if (raw !== null && Number.isFinite(saved) && saved >= 0 && saved <= 1) return saved;
+  } catch {
+    // 접근 자체가 던지는 환경 — 기본값으로 간다.
+  }
+  return 1;
+}
+
+function readStoredMuted() {
+  if (typeof window === 'undefined') return false;
+  try {
+    return localStorage.getItem(MUTED_KEY) === '1';
+  } catch {
+    return false;
+  }
+}
+
 export function PlayerProvider({ children }: { children: React.ReactNode }) {
   const audioRef = useRef<HTMLAudioElement>(null);
   const [queue, setQueue] = useState<QueueTrack[]>([]);
@@ -53,6 +109,8 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
   const [position, setPosition] = useState(0);
   const [duration, setDuration] = useState(0);
   const [queueOpen, setQueueOpen] = useState(false);
+  const [volume, setVolumeState] = useState(readStoredVolume);
+  const [muted, setMuted] = useState(readStoredMuted);
 
   // 콜백 안에서 최신 값을 봐야 하는데, 의존성에 넣으면 콜백이 매번 새로 만들어져
   // 자식이 통째로 리렌더된다. 렌더가 아니라 커밋 이후에 맞춰 둔다.
@@ -64,6 +122,46 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     indexRef.current = currentIndex;
   }, [currentIndex]);
+
+  const volumeRef = useRef(volume);
+  const mutedRef = useRef(muted);
+  useEffect(() => {
+    volumeRef.current = volume;
+  }, [volume]);
+  useEffect(() => {
+    mutedRef.current = muted;
+  }, [muted]);
+
+  /**
+   * 오디오에 볼륨을 먹인다. `src` 를 갈아 끼워도 엘리먼트의 `volume` 은 유지되므로
+   * 곡 전환마다 다시 걸어 줄 필요는 없다.
+   */
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (audio) audio.volume = muted ? 0 : volume;
+  }, [volume, muted]);
+
+  const setVolume = useCallback((next: number) => {
+    const clamped = Math.min(Math.max(next, 0), 1);
+    setVolumeState(clamped);
+    // 슬라이더를 0까지 내리는 것은 음소거와 같은 뜻이다.
+    setMuted(clamped === 0);
+    persistVolume(clamped, clamped === 0);
+  }, []);
+
+  const toggleMute = useCallback(() => {
+    // 업데이터 안에서 다른 setState 를 부르지 않는다(StrictMode 이중 호출) — ref 로 읽는다.
+    if (!mutedRef.current) {
+      setMuted(true);
+      persistVolume(volumeRef.current, true);
+      return;
+    }
+    // 0인 채로 음소거를 풀면 소리가 안 나니 들리는 크기로 되돌린다.
+    const restored = volumeRef.current === 0 ? UNMUTE_FALLBACK : volumeRef.current;
+    setVolumeState(restored);
+    setMuted(false);
+    persistVolume(restored, false);
+  }, []);
 
   const currentTrack = currentIndex >= 0 ? (queue[currentIndex] ?? null) : null;
   const currentUrl = currentTrack?.previewUrl ?? null;
@@ -225,6 +323,10 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
         duration,
         queueOpen,
         setQueueOpen,
+        volume,
+        muted,
+        setVolume,
+        toggleMute,
         enqueueAndPlay,
         playAt,
         next,

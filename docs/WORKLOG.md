@@ -8,6 +8,85 @@
 
 ## 세션 기록
 
+### 2026-08-30 — 재생 버튼 위치·우승 화면 재생, 준결승·결승 화면, 볼륨 조절
+
+**① 대결 화면의 재생 버튼을 커버 정중앙으로, 크게**
+커버 우측 상단 `size-9` 이던 것을 정중앙 `size-14`(sm 이상 `size-16`)으로 옮겼다.
+이 화면에서 듣기는 곁다리가 아니라 고르기 전에 반드시 하는 일인데, 대결 카드가
+커진 뒤로 모서리의 작은 버튼이 눈에 안 들어왔다. 320px 에서 커버 폭이 110px 안팎이라
+거기까지 64px 을 쓰면 앨범 아트가 거의 안 보여서 **좁은 화면만 한 단계 줄였다**.
+반투명(`bg-secondary/80`) + `backdrop-blur-sm` 이라 무엇을 고르는 중인지는 비쳐 보인다.
+
+**버튼 자체는 움직이지 않는다.** Button 프리미티브 기본값인 hover 색 전환(`transition-all`)과
+누를 때 1px 내려가는 것(`active:not-aria-[haspopup]:translate-y-px`)을 껐다 — 이 화면에서
+움직이는 것은 고른 카드가 남고 진 카드가 물러나는 전환 하나여야 한다. hover 색은 남긴다
+(즉시 바뀔 뿐 — § Component states 의 hover 피드백은 필수다).
+
+끄면서 **정렬 방식을 `-translate-1/2` 에서 `inset-0 m-auto` 로 바꿔야 했다.** 정렬을
+transform 으로 잡아 두면 `active:…translate-y-*` 가 그 transform 을 덮어써서 누르는 순간
+버튼이 자기 높이의 절반만큼 아래로 튄다(처음 붙였을 때 실제로 그런 상태였다). 크기가
+확정된 요소라 `inset-0 m-auto` 로 정렬하면 transform 을 비워 둘 수 있다. `active:` 만
+붙여서는 못 끈다는 것도 확인했다 — variant 가 다르면 twMerge 가 둘 다 남기고 specificity
+에서 기본값이 이긴다(CLAUDE.md). 빌드된 CSS 에서 두 규칙이 같은 variant 로 나오는 것까지
+봤다.
+
+**② 우승 화면에도 같은 버튼**
+판이 끝난 뒤가 오히려 "이게 뭐였더라" 하고 눌러 보는 순간이다. 자리·크기를 대결 화면과
+같게 맞췄다(`COVER_PLAY_BUTTON` 상수 하나를 두 곳이 공유).
+
+**`PoolItemPlayButton` 을 세 곳이 공유하게 했다.** 대결 화면은 `usePoolPlayer` 훅을 직접
+쓰고 자기 버튼을 손으로 그리고 있었는데, 랭킹표가 쓰던 `PoolItemPlayButton` 과 하는 일이
+같았다. 그쪽에 `variant`/`iconClassName` 만 열어 주고 대결·우승 화면이 함께 쓰도록 했다 —
+`play/[playId]/page.tsx` 에서 `usePoolPlayer`·`Spinner`·`Pause`·`PlayIcon` import 가 사라졌다.
+`aria-label` 도 재생/일시정지 상태를 반영하도록 통일했다(랭킹표는 늘 '재생' 이었다).
+
+**③ 준결승·결승 화면을 다르게 차렸다**
+꾸미기 위한 구분이 아니다 — **이 두 라운드에서만 "이기면 어디로 가는지"가 확정된 정보**다.
+16강에서 "이기면 8강" 은 당연해서 쓸모가 없지만, 준결승의 "이기면 결승"·결승의 "이기면 우승"
+은 판이 끝나 간다는 신호다.
+
+- **결승**: 진행 표시를 `text-3xl` + Trophy 아이콘으로 올리고 `1/1` 을 뺐다(경기가 하나뿐이라
+  분수가 정보가 아니다). 카드 간격을 `gap-4 sm:gap-8` 로 벌리고 제목을 `text-base sm:text-lg`
+  로 키웠다 — § Typography 의 "카드 내부 제목은 `text-lg` 를 넘지 않는다" 가 상한이다.
+- **준결승**: 진행 표시는 그대로(`준결승 1/2` 는 여전히 쓸모 있다). 캡션만 붙는다.
+- 두 라운드 모두 캡션 한 줄(`이기는 쪽이 우승합니다` / `이기는 쪽이 결승에 오릅니다`).
+- **배경 대진표를 `opacity-25` → `opacity-40`** 으로 올렸다(`match.round_num <= 2`). 초반
+  라운드에서 이 조각은 배경 무늬에 가깝지만, 남은 경기가 한두 개가 되면 다음 자리에
+  '우승' 이라고 적혀 있는 것 자체가 읽을 값어치가 있다. 판정은 `BracketBackground` 안에서
+  한다 — 이미 `match` 를 받고 있어 prop 을 늘릴 필요가 없었다.
+
+**색은 하나도 안 늘렸다.** 트로피에 `text-primary` 를 안 입힌 이유가 이것이다 — 이 화면의
+primary 는 선택 버튼 두 개로 이미 § Color budget 의 WARN 선(2개)에 걸쳐 있다.
+
+**③ `PlayerDock` 에 볼륨**
+`PlayerContext` 에 `volume`(0~1)·`muted`·`setVolume`·`toggleMute` 를 붙였다.
+
+- **음소거와 크기를 따로 든다.** 음소거를 볼륨 0으로 표현하면 풀었을 때 원래 크기를
+  잃는다. 오디오에 먹이는 값만 `muted ? 0 : volume` 으로 합친다. 슬라이더를 0까지 내리는
+  것은 음소거와 같은 뜻으로 처리한다.
+- **`localStorage` 에 남긴다**(`player_volume`·`player_muted`). 페이지를 옮길 때마다
+  100% 로 돌아가면 매번 다시 줄여야 한다. 읽기는 **effect 가 아니라 lazy initializer** 다 —
+  이 프로젝트의 eslint 는 `react-hooks/set-state-in-effect` 를 error 로 잡는다. 서버에는
+  `localStorage` 가 없어 초기값이 갈리지만, 볼륨을 그리는 `PlayerDock` 안쪽은
+  `currentTrack` 이 있어야 렌더되고 첫 렌더의 큐는 양쪽 다 비어 있어 hydration 은 안 어긋난다.
+- `toggleMute` 는 업데이터 안에서 다른 setState 를 부르지 않도록 ref 로 현재 값을 읽는다
+  (StrictMode 이중 호출).
+
+**자리는 컨트롤 줄이 아니라 위쪽 정보 줄이다.** 아래 컨트롤 줄은 320px 기준으로 이미
+꽉 차 있어서(prev·play·next·시간·`min-w-16` 슬라이더 = 288px, 여유 32px) 40px 버튼을
+하나만 더 끼워도 가로 스크롤이 난다(§ Mobile — BLOCK). 위 줄은 제목이 `flex-1` 이라
+줄어들 자리가 있다. **음소거 버튼은 항상, 슬라이더는 `sm` 이상에서만** — 모바일에는
+하드웨어 볼륨이 있어 정밀 조절보다 즉시 끄기가 쓸모 있다.
+
+볼륨 슬라이더의 Range·Thumb 는 `[&_[data-slot=slider-range]]:bg-muted-foreground` 로 중립색에
+내렸다. 재생 버튼과 재생 위치 슬라이더가 이미 primary 라 여기까지 primary 면
+§ Color budget 의 WARN 선(2개)을 넘는다.
+
+**검증**
+- `tsc --noEmit`·`next build` 통과, eslint **신규 0건**(기존 `Navbar` 1건 그대로)
+- **화면은 눈으로 못 봤다** — Docker 가 꺼져 있어 스택을 못 띄웠고, 세 변경 모두
+  클라이언트 상태라 SSR HTML 로는 확인할 수 없다(TASKS 에 남김)
+
 ### 2026-08-28 (계속) — 에디터 훅 분리, 대진표 실제 연결선
 
 TASKS.md에 남아 있던 T5 후속 두 건을 처리했다.
@@ -1618,3 +1697,5 @@ Spotify 연동 백엔드, 프론트 기획(`_workspace/planning.md`), QA 리뷰(
 | 2026-08-28 | feat(tournament): 앨범 후보·랭킹에 재생과 앨범 링크를 나란히 | docs, frontend | 커밋 `2bab815` |
 | 2026-08-28 | feat(play): 진행 표시·선택 버튼·우승 성적 | docs, frontend | 커밋 `44c7e82` |
 | 2026-08-28 | fix(harness): 서브에이전트 4종에 frontmatter 추가 | .claude | 커밋 `488bc79` |
+| 2026-08-28 | refactor(frontend): 에디터 훅 분리 + 대진표 실제 연결선 | docs, frontend | 커밋 `84c0fb6` |
+| 2026-08-30 | chore(dev): 루트에서 DB+백엔드+프론트를 한 번에 띄우는 런처 | .gitignore, CLAUDE.md, README.md, package.json, scripts | 커밋 `42b91f3` |

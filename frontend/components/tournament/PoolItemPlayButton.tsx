@@ -10,16 +10,30 @@ import type { TournamentItemType } from '@/types/tournament';
 interface Props {
   item: PoolItem;
   itemType: TournamentItemType;
+  /**
+   * 목록에 깔릴 때는 중립색(`ghost`)이 기본이다(DESIGN.md § Color budget).
+   * 커버 위에 얹을 때만 `secondary` 로 배경을 줘서 앨범 아트와 분리한다.
+   */
+  variant?: React.ComponentProps<typeof Button>['variant'];
   className?: string;
+  /** Button 기본 아이콘은 `size-4` 다 — 크게 놓을 땐 여기서 올린다. */
+  iconClassName?: string;
 }
 
 /**
- * 월드컵 항목 하나짜리 재생 버튼. **Server Component 안에서 쓰라고 있는 것**이다
- * (랭킹표처럼 서버에서 그리는 목록) — `PoolGrid` 는 이미 클라이언트라 훅을 직접 쓴다.
+ * 월드컵 항목 하나짜리 재생 버튼.
  *
- * 목록에 여러 개가 깔리므로 중립색이다(DESIGN.md § Color budget).
+ * 랭킹표처럼 서버에서 그리는 목록(Server Component)에서도, 대결·우승 화면처럼 이미
+ * 클라이언트인 곳에서도 같은 것을 쓴다 — `PoolGrid` 만 예외로 훅을 직접 쓴다(타일마다
+ * 다른 상태를 한 훅으로 관리한다).
  */
-export default function PoolItemPlayButton({ item, itemType, className }: Props) {
+export default function PoolItemPlayButton({
+  item,
+  itemType,
+  variant = 'ghost',
+  className,
+  iconClassName,
+}: Props) {
   const { playItem, pendingId, currentId, isPlaying } = usePoolPlayer(itemType);
   const playing = currentId === item.id && isPlaying;
 
@@ -28,14 +42,20 @@ export default function PoolItemPlayButton({ item, itemType, className }: Props)
 
   return (
     <Button
-      variant="ghost"
+      variant={variant}
       size="icon"
       className={className}
       onClick={() => void playItem(item)}
       disabled={pendingId === item.id}
-      aria-label={`${item.title} 재생`}
+      aria-label={`${item.title} ${playing ? '일시정지' : '미리듣기'}`}
     >
-      {pendingId === item.id ? <Spinner /> : playing ? <Pause /> : <Play />}
+      {pendingId === item.id ? (
+        <Spinner className={iconClassName} />
+      ) : playing ? (
+        <Pause className={iconClassName} />
+      ) : (
+        <Play className={iconClassName} />
+      )}
     </Button>
   );
 }

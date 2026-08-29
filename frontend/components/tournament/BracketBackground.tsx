@@ -26,12 +26,26 @@ export default function BracketBackground({ play, match, items, justPicked }: Pr
   const parent = parentMatch(play, match);
   const label = (id: string) => items[id]?.title ?? '…';
 
+  /**
+   * 준결승·결승에서는 배경을 한 단계 진하게 낸다.
+   *
+   * 초반 라운드에서 이 조각은 "아직 갈 길이 멀다"는 배경 무늬에 가깝지만, 남은 경기가
+   * 한두 개가 되면 **다음 자리에 '우승'이라고 적혀 있는 것 자체가 읽을 값어치가 있다**.
+   * 그래도 배경은 배경이라 카드보다 앞서지 않을 만큼만 올린다.
+   */
+  const prominent = match.round_num <= 2;
+
   return (
     <div
       aria-hidden
       className="pointer-events-none absolute inset-0 hidden items-center justify-center overflow-hidden sm:flex"
     >
-      <div className="flex w-full max-w-3xl items-center gap-4 px-6 opacity-25">
+      <div
+        className={[
+          'flex w-full max-w-3xl items-center gap-4 px-6',
+          prominent ? 'opacity-40' : 'opacity-25',
+        ].join(' ')}
+      >
         {/* 현재 경기의 두 자리 */}
         <div className="flex flex-1 flex-col gap-10">
           {[match.item_a_id, match.item_b_id].map((id) => (

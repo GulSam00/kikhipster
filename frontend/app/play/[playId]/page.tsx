@@ -4,21 +4,46 @@ import { useCallback, useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import { BarChart3, GitBranch, Pause, Play as PlayIcon, Swords, Trophy } from 'lucide-react';
+import { BarChart3, GitBranch, Swords, Trophy } from 'lucide-react';
 import { toast } from 'sonner';
 import { getPlay, voteRound } from '@/lib/api/plays';
 import { getRanking } from '@/lib/api/tournaments';
 import BracketBackground from '@/components/tournament/BracketBackground';
 import FullBracket from '@/components/tournament/FullBracket';
+import PoolItemPlayButton from '@/components/tournament/PoolItemPlayButton';
 import { ItemFallbackIcon } from '@/components/tournament/PoolItemTile';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Spinner } from '@/components/ui/spinner';
-import { usePoolPlayer } from '@/lib/hooks/use-pool-player';
 import { nextMatch, roundLabel } from '@/lib/domain/bracket';
 import { fetchPoolItems, type PoolItem } from '@/lib/domain/pool-item';
 import type { Play, PlayRound, TournamentRankingItem } from '@/types/tournament';
+
+/**
+ * 커버 정중앙에 얹는 재생 버튼. 대결 화면과 우승 화면이 같은 자리·같은 크기를 쓴다.
+ *
+ * 56px(모바일)·64px(그 이상) 둘 다 § Mobile 의 44px 최소 히트 영역을 넘는다. 320px 에서
+ * 두 카드가 나란히 설 때 커버 폭이 110px 안팎이라 거기까지 64px 을 쓰면 앨범 아트가
+ * 거의 안 보인다 — 그래서 좁은 화면만 한 단계 줄인다. 반투명 배경 + 블러라 무엇을
+ * 고르는 중인지는 버튼 뒤로 비쳐 보인다.
+ *
+ * **움직임은 뺐다.** Button 프리미티브의 기본값인 hover 색 전환(`transition-all`)과
+ * 누를 때 1px 내려가는 것(`active:…translate-y-px`)을 끈다 — 이 화면에서 움직이는 것은
+ * 고른 카드가 올라가고 진 카드가 물러나는 전환 하나여야 하고, 커버 한가운데 64px 버튼이
+ * 같이 들썩이면 그쪽으로 눈이 간다. hover 색 자체는 남는다(즉시 바뀔 뿐이다) —
+ * § Component states 의 hover 피드백은 필수다.
+ *
+ * `active:` 만 붙여서는 못 끈다. 기본값이 `active:not-aria-[haspopup]:` 라 variant 가
+ * 다르면 twMerge 가 둘 다 남기고 specificity 에서 기본값이 이긴다(CLAUDE.md).
+ *
+ * 가운데 정렬을 `-translate-1/2` 가 아니라 **`inset-0 m-auto`** 로 하는 이유도 같다 —
+ * 정렬을 transform 으로 잡아 두면 `active:…translate-y-*` 가 그 transform 을 덮어써서
+ * 누르는 순간 버튼이 자기 높이의 절반만큼 아래로 튄다. 크기가 확정된 요소라
+ * `inset-0 m-auto` 로 정렬하면 transform 은 비워 둘 수 있다.
+ */
+const COVER_PLAY_BUTTON =
+  'absolute inset-0 m-auto size-14 rounded-full bg-secondary/80 shadow-lg backdrop-blur-sm transition-none active:not-aria-[haspopup]:translate-y-0 sm:size-16';
+const COVER_PLAY_ICON = 'size-6 sm:size-7';
 
 export default function PlayPage() {
   const router = useRouter();
@@ -151,6 +176,22 @@ export default function PlayPage() {
               <ItemFallbackIcon itemType={play.item_type} className="size-12" />
             </div>
           )}
+
+          {/*
+            우승한 곡을 그 자리에서 들을 수 있어야 한다 — 판이 끝나고 나서가 오히려
+            "이게 뭐였더라" 하고 눌러 보는 순간이다. 자리·크기는 대결 화면과 같게
+            맞췄다(커버 정중앙). 색은 secondary — 이 화면의 primary 는 이미
+            Trophy 와 '최종 우승' 두 개다(DESIGN.md § Color budget).
+          */}
+          {winner && (
+            <PoolItemPlayButton
+              item={winner}
+              itemType={play.item_type}
+              variant="secondary"
+              className={COVER_PLAY_BUTTON}
+              iconClassName={COVER_PLAY_ICON}
+            />
+          )}
         </div>
 
         <h2 className="mb-1 font-heading text-2xl font-bold">{winner?.title ?? '알 수 없음'}</h2>
@@ -271,8 +312,21 @@ function PlayMatch({
   /** 이 라운드에서 몇 번째 경기인지. `8강 1/4` 로 보여 준다. */
   progress: { index: number; total: number };
 }) {
-  // 고르기 전에 들어볼 수 있어야 한다 — 곡이면 그 곡, 앨범이면 수록곡 전체가 재생목록으로 간다.
-  const { playItem, pendingId, currentId, isPlaying } = usePoolPlayer(play.item_type);
+  /**
+   * 준결승·결승은 다르게 차린다.
+   *
+   * 꾸미기 위한 구분이 아니라 **이 두 라운드에서만 "이기면 어디로 가는지"가 확정된
+   * 정보이기 때문**이다. 16강에서 "이기면 8강" 은 당연해서 쓸모가 없지만, 준결승의
+   * "이기면 결승"·결승의 "이기면 우승" 은 판이 끝나 간다는 신호다. 남은 경기가 한두
+   * 개뿐이라 배경 대진표도 이때부터 실제로 읽힌다.
+   */
+  const isFinal = match.round_num === 1;
+  const isSemi = match.round_num === 2;
+  const stake = isFinal
+    ? '이기는 쪽이 우승합니다'
+    : isSemi
+      ? '이기는 쪽이 결승에 오릅니다'
+      : null;
 
   return (
     <div className="relative flex flex-1 flex-col justify-center">
@@ -283,15 +337,34 @@ function PlayMatch({
           예전엔 "어느 쪽이 더 좋으신가요?" 가 있던 자리다. 매 경기 같은 문장을 읽는 것보다
           지금 몇 강의 몇 번째인지가 훨씬 쓸모 있다 — 128강이면 이게 없으면 끝이 안 보인다.
         */}
-        <p className="mb-6 text-center font-heading text-2xl font-bold tabular-nums">
-          {roundLabel(match.round_num)} {progress.index}/{progress.total}
-        </p>
+        <div className="mb-6 text-center">
+          <p
+            className={[
+              'flex items-center justify-center gap-2 font-heading font-bold tabular-nums',
+              // h1급을 키우는 것은 이 화면에서 이 한 줄뿐이다(§ Typography 계층 규칙).
+              isFinal ? 'text-3xl' : 'text-2xl',
+            ].join(' ')}
+          >
+            {/*
+              트로피는 색을 입히지 않는다. 이 화면의 primary 는 선택 버튼 두 개로
+              이미 § Color budget 의 WARN 선(2개)에 걸쳐 있다.
+            */}
+            {isFinal && <Trophy className="size-7" />}
+            <span>
+              {roundLabel(match.round_num)}
+              {/* 결승은 한 경기뿐이라 `1/1` 이 정보가 아니다. */}
+              {!isFinal && ` ${progress.index}/${progress.total}`}
+            </span>
+          </p>
+          {stake && <p className="mt-1 text-sm text-muted-foreground">{stake}</p>}
+        </div>
 
-        <div className="grid grid-cols-2 gap-3 sm:gap-6">
+        {/* 결승은 두 장만 남은 화면이라 카드 사이를 벌려 한 장씩 크게 보이게 한다. */}
+        <div
+          className={['grid grid-cols-2', isFinal ? 'gap-4 sm:gap-8' : 'gap-3 sm:gap-6'].join(' ')}
+        >
         {pair.map((itemId) => {
           const item = items[itemId];
-          const playable = !!item && (play.item_type === 'album' || !!item.previewUrl);
-          const nowPlaying = !!item && currentId === item.id && isPlaying;
           return (
             <Card
               key={itemId}
@@ -322,30 +395,31 @@ function PlayMatch({
                   {/*
                     재생은 커버 위에, 투표는 카드 아래에. 예전에는 커버를 누르는 것이 곧
                     투표라 미리듣기 버튼을 그 위에 얹을 수 없었다 — 커버에서 투표를 떼어
-                    내면서 후보 그리드 타일과 같은 자리(커버 우측 상단)를 쓸 수 있게 됐다.
+                    내면서 커버를 통째로 재생 자리로 쓸 수 있게 됐다.
+
+                    우측 상단 `size-9` 이던 것을 **정중앙 `size-16`** 으로 옮겼다. 이 화면에서
+                    듣기는 곁다리가 아니라 고르기 전에 반드시 하는 일이고, 모서리의 작은
+                    버튼은 대결 카드가 커진 지금 눈에 잘 안 들어왔다.
                   */}
-                  {playable && (
-                    <Button
+                  {item && (
+                    <PoolItemPlayButton
+                      item={item}
+                      itemType={play.item_type}
                       variant="secondary"
-                      size="icon"
-                      className="absolute top-2 right-2 size-9 rounded-full bg-secondary/90"
-                      onClick={() => void playItem(item)}
-                      disabled={pendingId === item.id}
-                      aria-label={`${item.title} ${nowPlaying ? '일시정지' : '미리듣기'}`}
-                    >
-                      {pendingId === item.id ? (
-                        <Spinner />
-                      ) : nowPlaying ? (
-                        <Pause />
-                      ) : (
-                        <PlayIcon />
-                      )}
-                    </Button>
+                      className={COVER_PLAY_BUTTON}
+                      iconClassName={COVER_PLAY_ICON}
+                    />
                   )}
                 </div>
 
                 <div className="w-full text-center">
-                  <p className="truncate text-sm font-medium sm:text-base">
+                  {/* 카드 내부 제목은 `text-lg` 를 넘지 않는다(§ Typography 계층 규칙). */}
+                  <p
+                    className={[
+                      'truncate font-medium',
+                      isFinal ? 'text-base sm:text-lg' : 'text-sm sm:text-base',
+                    ].join(' ')}
+                  >
                     {item?.title ?? '알 수 없음'}
                   </p>
                   <p className="truncate text-xs text-muted-foreground">{item?.subtitle}</p>

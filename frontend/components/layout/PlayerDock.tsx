@@ -1,7 +1,18 @@
 'use client';
 
 import Image from 'next/image';
-import { ListMusic, Music2, Pause, Play, SkipBack, SkipForward, X } from 'lucide-react';
+import {
+  ListMusic,
+  Music2,
+  Pause,
+  Play,
+  SkipBack,
+  SkipForward,
+  Volume1,
+  Volume2,
+  VolumeX,
+  X,
+} from 'lucide-react';
 import PlayerQueue from '@/components/layout/PlayerQueue';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
@@ -38,7 +49,14 @@ export default function PlayerDock() {
     prev,
     seek,
     clear,
+    volume,
+    muted,
+    setVolume,
+    toggleMute,
   } = usePlayer();
+
+  // 아이콘이 지금 크기를 말해 준다 — 슬라이더를 못 보는 좁은 화면에서 특히 그렇다.
+  const VolumeIcon = muted || volume === 0 ? VolumeX : volume < 0.5 ? Volume1 : Volume2;
 
   return (
     <div className="shrink-0 pb-16 sm:pb-0">
@@ -77,6 +95,37 @@ export default function PlayerDock() {
                 <ListMusic />
                 <span className="text-xs tabular-nums">{queue.length}</span>
               </Button>
+
+              {/*
+                볼륨은 **아래 컨트롤 줄이 아니라 이 줄에** 뒀다. 아래 줄은 320px 기준으로
+                재생 위치 슬라이더의 최소 폭(`min-w-16`)까지 이미 꽉 차 있어서, 거기에
+                하나를 더 끼우면 가로 스크롤이 난다(§ Mobile — BLOCK). 이 줄은 제목이
+                `flex-1` 이라 줄어들 자리가 있다.
+
+                **음소거 버튼은 항상, 슬라이더는 `sm` 이상에서만.** 모바일에는 하드웨어
+                볼륨이 있어서 정밀 조절보다 즉시 끄기가 쓸모 있다.
+              */}
+              <Button
+                variant="ghost"
+                className="size-10 shrink-0 rounded-full text-muted-foreground hover:text-foreground"
+                onClick={toggleMute}
+                aria-label={muted ? '음소거 해제' : '음소거'}
+                aria-pressed={muted}
+              >
+                <VolumeIcon />
+              </Button>
+              {/*
+                Range·Thumb 를 중립색으로 내린다. 재생 버튼과 재생 위치 슬라이더가 이미
+                primary 라, 여기까지 primary 면 § Color budget 의 WARN 선(2개)을 넘는다.
+              */}
+              <Slider
+                value={[muted ? 0 : volume]}
+                max={1}
+                step={0.01}
+                onValueChange={([v]) => setVolume(v)}
+                aria-label="볼륨"
+                className="hidden w-20 shrink-0 sm:flex [&_[data-slot=slider-range]]:bg-muted-foreground [&_[data-slot=slider-thumb]]:border-muted-foreground"
+              />
 
               {/* 모바일에서는 컨트롤에 자리를 몰아준다 — 비우기는 재생목록 안에도 있다. */}
               <Button
@@ -137,6 +186,7 @@ export default function PlayerDock() {
               <span className="hidden w-9 shrink-0 text-xs text-muted-foreground tabular-nums sm:block">
                 {formatTime(duration)}
               </span>
+
             </div>
           </div>
         </div>
