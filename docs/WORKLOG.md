@@ -1699,3 +1699,4 @@ Spotify 연동 백엔드, 프론트 기획(`_workspace/planning.md`), QA 리뷰(
 | 2026-08-28 | fix(harness): 서브에이전트 4종에 frontmatter 추가 | .claude | 커밋 `488bc79` |
 | 2026-08-28 | refactor(frontend): 에디터 훅 분리 + 대진표 실제 연결선 | docs, frontend | 커밋 `84c0fb6` |
 | 2026-08-30 | chore(dev): 루트에서 DB+백엔드+프론트를 한 번에 띄우는 런처 | .gitignore, CLAUDE.md, README.md, package.json, scripts | 커밋 `42b91f3` |
+| 2026-08-30 | feat(play): 커버 정중앙 재생 버튼·우승 화면 재생·준결승/결승 화면·볼륨 | docs, frontend | 커밋 `cd2aebe` |
