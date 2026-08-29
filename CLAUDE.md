@@ -25,6 +25,12 @@
 ## 로컬 실행
 
 ```
+npm run dev     # 루트에서 한 번에: DB 기동 → healthy 대기 → alembic upgrade → 백엔드(:8000) + 프론트(:3300)
+```
+
+런처는 `scripts/dev.mjs`(Node 기본 모듈만 사용, 루트 의존성 없음). 부품별로 돌릴 때는:
+
+```
 docker compose up -d                                            # Postgres, healthy 확인
 cd backend  && ./venv/Scripts/python.exe -m alembic upgrade head
 cd backend  && ./venv/Scripts/python.exe -m uvicorn main:app --reload --port 8000

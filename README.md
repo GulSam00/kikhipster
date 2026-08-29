@@ -18,12 +18,38 @@ Spotify Web API 기반 음악 취향 기록·공유 서비스. 아티스트/앨�
 kikhipster/
 ├── frontend/            # Next.js. components/ui/ 는 shadcn/ui 프리미티브
 ├── backend/             # FastAPI. 실행 루트를 backend/ 로 고정해야 함
+├── scripts/dev.mjs      # 루트에서 DB+백엔드+프론트를 한 번에 띄우는 런처
 ├── docker-compose.yml   # 로컬 개발용 PostgreSQL
 ├── _workspace/          # 기획·검토 산출물
 └── .claude/             # 개발 하네스 (에이전트 4종 + 스킬 3종)
 ```
 
 ## 로컬 실행
+
+### 한 번에 (권장)
+
+```bash
+npm run dev
+```
+
+루트에서 이 한 줄이면 **DB 기동 → healthy 대기 → `alembic upgrade head` → 백엔드(:8000) + 프론트(:3300)** 까지
+순서대로 올라갑니다. 로그는 `[be]`/`[fe]` 접두사로 구분되고 Ctrl+C 하나로 전부 내려갑니다.
+런처는 `scripts/dev.mjs` 이고 Node 기본 모듈만 쓰므로 **루트에 설치할 의존성이 없습니다**.
+
+```bash
+npm run dev -- --no-db         # 이미 떠 있는 Postgres 를 그대로 쓴다
+npm run dev -- --no-migrate    # 마이그레이션 건너뛰기
+npm run dev -- --only=backend  # 한쪽만 (backend | frontend)
+npm run dev:backend            # 위와 같음
+npm run dev:frontend           # 프론트만 (DB·마이그레이션 건너뜀)
+npm run migrate                # DB 기동 + 마이그레이션만
+npm run db:up / db:down / db:reset
+```
+
+> Docker Desktop 은 런처가 켜 주지 않습니다 — 꺼져 있으면 그렇게 안내하고 멈춥니다.
+> 백엔드는 `backend/venv` 의 파이썬을 씁니다(다른 인터프리터는 `KIKHIPSTER_PYTHON` 환경변수로).
+
+아래는 각 부품을 따로 돌리거나 처음 세팅할 때의 수동 절차입니다.
 
 ### 1. 데이터베이스
 

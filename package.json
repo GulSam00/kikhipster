@@ -1,0 +1,18 @@
+{
+  "name": "kikhipster",
+  "version": "0.1.0",
+  "private": true,
+  "description": "루트에서 로컬 개발 스택(DB + FastAPI + Next.js)을 한 번에 띄우기 위한 런처. 의존성 없음 — npm install 이 필요 없다.",
+  "scripts": {
+    "dev": "node scripts/dev.mjs",
+    "dev:backend": "node scripts/dev.mjs --only=backend",
+    "dev:frontend": "node scripts/dev.mjs --only=frontend --no-db --no-migrate",
+    "migrate": "node scripts/dev.mjs --only=none",
+    "db:up": "docker compose up -d",
+    "db:down": "docker compose down",
+    "db:reset": "docker compose down -v && docker compose up -d"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
