@@ -2144,3 +2144,4 @@ Spotify 연동 백엔드, 프론트 기획(`_workspace/planning.md`), QA 리뷰(
 | 2026-08-31 | feat(comment): 비로그인 댓글 작성·삭제·신고 | backend, frontend | 커밋 `75ef4ae` |
 | 2026-08-31 | feat(play): 라운드 제목 희귀도와 진행 계기판을 React Bits 로 | frontend | 커밋 `1eece1a` |
 | 2026-08-31 | feat(play): 승리 카드가 상대를 튕겨 내고 중앙으로, 결과 화면에 댓글 | backup, frontend | 커밋 `63a9fb9` |
+| 2026-08-31 | docs: 세션 기록·과제 갱신 | _workspace, docs | 커밋 `c78a397` |
