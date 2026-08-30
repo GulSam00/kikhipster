@@ -1,7 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
-import { animate } from "motion/react";
+import { useCallback, useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
@@ -413,85 +412,6 @@ function PlayMatch({
    */
   const isFinal = match.round_num === 1;
   const reduced = useReducedMotion();
-  const cardRefs = useRef<Record<string, HTMLDivElement | null>>({});
-
-  /**
-   * 고른 카드가 상대를 튕겨 내보내고 가운데로 온다.
-   *
-   * **왜 CSS keyframes 가 아니라 스프링인가**(2026-08-30 교체, 이전 판은
-   * `backup/2026-08-30-battle-css-keyframes/`). keyframes 는 정해진 궤적을 재생할 뿐이라
-   * 부딪히는 순간의 반동이 손으로 찍은 값이었다. 스프링은 **목표를 지나쳤다가 되돌아오는
-   * 것이 계산 결과**라 밀고 들어갔다 자리 잡는 동작이 저절로 나온다. 그러면서도 스프링은
-   * 목표값으로 **수렴**하므로 "이긴 카드가 정확히 가운데에 선다"는 요구가 깨지지 않는다
-   * — 물리 엔진(matter-js 등)을 안 쓴 이유가 이것이다. 강체 시뮬레이션은 정해진 좌표에
-   * 서지 않는다.
-   *
-   * 이동 거리를 CSS `calc` 로 만들지 않고 **두 카드의 실제 화면 좌표를 재서** 쓴다.
-   * 두 중심의 중점이 곧 격자의 중앙이라 간격을 따로 알 필요가 없다.
-   */
-  useEffect(() => {
-    if (!justPicked || reduced) return;
-
-    const winnerEl = cardRefs.current[justPicked];
-    const loserId =
-      justPicked === match.item_a_id ? match.item_b_id : match.item_a_id;
-    const loserEl = cardRefs.current[loserId];
-    if (!winnerEl || !loserEl) return;
-
-    const w = winnerEl.getBoundingClientRect();
-    const l = loserEl.getBoundingClientRect();
-    const toCenter = (l.left + l.width / 2 - (w.left + w.width / 2)) / 2;
-    const dir = Math.sign(toCenter) || 1;
-    // 진 카드가 화면 밖으로 완전히 빠지는 거리. 여유 40px.
-    const fly = dir > 0 ? window.innerWidth - l.left + 40 : -(l.right + 40);
-
-    /*
-      **먼저 반대쪽으로 살짝 뺐다가 출발한다**(anticipation). 치기 전에 뒤로 당기는 그
-      동작이라, 이게 있어야 "밀어냈다" 로 읽히고 없으면 그냥 미끄러지는 것으로 보인다.
-
-      이 한 구간만 스프링이 아니라 **키프레임으로 직접 그린다.** 스프링은 목표를 지나쳤다
-      돌아오는 것(follow-through)은 저절로 만들지만 **출발 전에 반대로 빼는 것은 만들지
-      않는다** — 초기 속도를 음수로 주면 비슷해지지만 그러면 수렴 시간이 열려 있어 다음
-      경기가 애니메이션 도중에 끼어들 수 있다. 여기서는 끝나는 시각이 정해져 있어야 한다
-      (투표 핸들러가 680ms 뒤에 판을 넘긴다).
-
-      두 번째 구간의 베지어는 y2 가 1 을 넘어 **중앙을 지나쳐 상대 쪽으로 더 갔다가**
-      돌아온다 — 스프링의 `bounce` 가 하던 일을 그대로 한다.
-    */
-    const windup = Math.min(Math.abs(toCenter) * 0.16, 26);
-    animate(
-      winnerEl,
-      { x: [0, -dir * windup, toCenter] },
-      {
-        duration: 0.62,
-        times: [0, 0.2, 1],
-        ease: ["easeOut", [0.22, 1.1, 0.36, 1]],
-      },
-    );
-    // 커지는 것은 궤적과 무관하므로 스프링 그대로 둔다.
-    animate(
-      winnerEl,
-      { scale: 1.06 },
-      { type: "spring", duration: 0.5, bounce: 0.35 },
-    );
-
-    /*
-      맞고 나가는 쪽은 튕기지 않는다(`bounce: 0`). **뒤로 뺐다가 되돌아온 이긴 카드가
-      실제로 닿는 시점**(0.2초 언저리)에 출발해야 맞아서 밀리는 것으로 읽힌다.
-      0.2 + 0.45 = 0.65초라 대기(680ms) 안에 들어간다.
-    */
-    animate(
-      loserEl,
-      { x: fly, rotate: dir * 18 },
-      { type: "spring", duration: 0.45, bounce: 0, delay: 0.2 },
-    );
-    // 날아가는 내내 불투명해야 한다 — 반투명해지면 그 뒤로 이긴 카드가 비쳐 보인다.
-    animate(
-      loserEl,
-      { opacity: [1, 1, 0] },
-      { duration: 0.45, times: [0, 0.75, 1], delay: 0.2 },
-    );
-  }, [justPicked, reduced, match.item_a_id, match.item_b_id]);
 
   /*
     예전엔 여기서 준결승·결승에 "이기는 쪽이 우승합니다" 같은 한 줄을 제목 아래 붙였다.
@@ -571,50 +491,60 @@ function PlayMatch({
 
         {/*
           진 카드가 화면 밖으로 날아가도 **페이지가 가로로 늘어나면 안 된다**
-          (§ Mobile 의 가로 스크롤 금지는 BLOCK 사안이다). 그래서 가로만 잘라낸다.
-          `overflow-x: clip` 은 `overflow-y: visible` 을 `auto` 로 강등시키지 않으므로
-          (다른 축이 `clip` 이면 `visible` 이 유지된다) 이긴 카드가 커지는 `scale` 은
-          위아래로 안 잘린다. `overflow-x-hidden` 이었으면 잘린다.
-
-          **문제는 잘리는 선이 격자와 정확히 같은 폭이었다는 것이다.** 카드가 칸을 꽉
-          채우고 있어서, 중앙으로 가기 전에 바깥쪽으로 빼는 반동(anticipation)이 나오는
-          족족 잘렸다. 잘리는 선을 카드 바깥으로 밀어 여유를 만든다 — 두 가지를 같이 쓴다.
-
-          ① `-mx-4 px-4` — 래퍼를 페이지 컨테이너의 좌우 여백(`px-4`)만큼 넓히고 그
-             안쪽 패딩으로 격자를 제자리에 돌려놓는다. **레이아웃은 그대로인데 잘리는
-             선만 16px 씩 바깥으로 간다**(clip 은 패딩 상자 기준이라 패딩 안은 안 잘린다).
-             `-mx-4` 가 안전한 최대치다 — 이보다 키우면 래퍼가 컨테이너 바깥으로 나가
-             좁은 화면에서 진짜 가로 스크롤이 생긴다.
-          ② `overflow-clip-margin` — 잘리는 선을 거기서 24px 더 민다. 지원하지 않는
-             브라우저에서는 무시되고 ①의 16px 만 남는다(깨지지 않는다).
-
-          그래서 반동이 안 잘리고 보이는 한계는 **약 40px**(미지원 브라우저는 16px)이다.
-          `windup` 상한을 그보다 크게 잡으면 다시 잘린다.
+          (§ Mobile 의 가로 스크롤 금지는 BLOCK 사안이다). 그래서 격자를 감싼 상자에서
+          가로만 잘라낸다. `overflow-x: clip` 은 `overflow-y: visible` 을 `auto` 로
+          강등시키지 않으므로(다른 축이 `clip` 이면 `visible` 이 유지된다) 이긴 카드가
+          커지는 `scale` 은 위아래로 안 잘린다. `overflow-x-hidden` 이었으면 잘린다.
         */}
-        <div className="-mx-4 overflow-x-clip px-4 py-2 [overflow-clip-margin:1.5rem]">
+        <div className="overflow-x-clip py-2">
           {/*
           결승은 두 장만 남은 화면이라 카드 사이를 벌려 한 장씩 크게 보이게 한다.
-          예전엔 이 간격을 `--battle-gap` 변수로 들고 CSS keyframes 가 읽어 갔는데,
-          이제 이동 거리를 **두 카드의 실제 화면 좌표를 재서** 구하므로 필요 없다.
+          **간격을 유틸리티가 아니라 변수로 들고 있는 이유**: 이긴 카드가 가운데로 가는
+          거리가 `자기 폭 절반 + 간격 절반` 이라 keyframes 안에서 이 값을 읽어야 한다
+          (`--animate-battle-winner`). 값 자체는 Tailwind 기본 4px 격자 그대로다.
         */}
           <div
             className={[
-              "grid grid-cols-2",
-              isFinal ? "gap-4 sm:gap-8" : "gap-3 sm:gap-6",
+              "grid grid-cols-2 gap-(--battle-gap)",
+              isFinal
+                ? "[--battle-gap:--spacing(4)] sm:[--battle-gap:--spacing(8)]"
+                : "[--battle-gap:--spacing(3)] sm:[--battle-gap:--spacing(6)]",
             ].join(" ")}
           >
             {pair.map((itemId) => {
               const item = items[itemId];
+              /*
+              이긴 카드가 진 카드를 튕겨 내보내고 가운데로 온다.
+
+              방향은 이긴 카드가 **어느 칸에 있었는지**로 정해진다 — 왼쪽(0번)이면 오른쪽으로
+              밀고(`1`), 오른쪽이면 왼쪽으로 민다(`-1`). 두 카드가 같은 부호를 써야 한 쪽이
+              다른 쪽을 미는 것처럼 보인다.
+            */
+              const settled = justPicked !== null && !reduced;
               const won = justPicked === itemId;
+              const dir = pair.indexOf(justPicked ?? "") === 0 ? 1 : -1;
 
               const card = (
                 <Card
                   key={itemId}
+                  style={
+                    settled
+                      ? ({ "--battle-dir": dir } as React.CSSProperties)
+                      : undefined
+                  }
                   className={[
-                    "h-full transition-colors duration-300",
-                    // 고른 쪽은 테두리로 표시한다. 움직임은 래퍼에 걸린 스프링이 맡는다.
+                    "h-full transition-all duration-300",
+                    // 고른 쪽은 남고 진 쪽은 물러난다. 배경 대진표에서 승자가 올라가는 것과 같은 박자다.
                     won ? "border-primary" : "",
-                    // 동작 줄이기를 켰으면 날리지 않고 물러나기만 한다.
+                    /*
+                    **밀려나는 카드가 위에 있어야 한다.** 예전엔 이긴 쪽에만 `z-10` 이 있어서
+                    (positioned 요소가 static 요소보다 위에 그려진다) 겹치는 구간에서 이긴
+                    카드가 진 카드를 뚫고 나왔다. 튕겨 나가는 쪽이 앞으로 날아가는 것이므로
+                    가리는 쪽도 그쪽이다.
+                  */
+                    settled && won ? "animate-battle-winner relative z-10" : "",
+                    settled && !won ? "animate-battle-loser relative z-20" : "",
+                    // 동작 줄이기를 켰으면 날리지 않고 예전처럼 물러나기만 한다.
                     reduced && justPicked && !won ? "scale-95 opacity-40" : "",
                   ].join(" ")}
                 >
@@ -699,41 +629,14 @@ function PlayMatch({
               **월드컵은 대부분 휴대폰에서 돌리기 때문**이다. 마우스가 필요한 연출은
               모바일에서 아무 일도 일어나지 않는다.
             */
-              const inner =
-                isFinal && !reduced ? (
-                  <StarBorder className="h-full" speed="7s">
+              if (isFinal && !reduced) {
+                return (
+                  <StarBorder key={itemId} className="h-full" speed="7s">
                     {card}
                   </StarBorder>
-                ) : (
-                  card
                 );
-
-              return (
-                /*
-                애니메이션은 카드가 아니라 이 래퍼에 건다 — 결승에서는 카드가 `StarBorder`
-                안에 들어가서 격자 칸의 주인이 바뀌기 때문이다. 래퍼가 항상 칸의 주인이면
-                두 경우를 같은 코드로 다룰 수 있다.
-
-                **`key` 에 경기 id 를 섞는 게 중요하다.** 이긴 항목은 다음 경기에도 나오므로
-                `key` 가 항목 id 뿐이면 React 가 같은 DOM 노드를 재사용하는데, 그 노드에는
-                `motion` 이 남긴 인라인 transform(가운데로 옮겨 놓은 값)이 그대로 붙어 있다.
-                경기가 바뀌면 새 노드가 되게 해서 그 잔상을 없앤다.
-              */
-                <div
-                  key={`${match.id}-${itemId}`}
-                  ref={(el) => {
-                    cardRefs.current[itemId] = el;
-                  }}
-                  className={[
-                    "h-full",
-                    // 밀려나는 카드가 위에 그려져야 한다. 겹치는 구간에서 이긴 카드가
-                    // 진 카드를 뚫고 나오면 안 된다.
-                    justPicked ? (won ? "relative z-10" : "relative z-20") : "",
-                  ].join(" ")}
-                >
-                  {inner}
-                </div>
-              );
+              }
+              return card;
             })}
           </div>
         </div>
