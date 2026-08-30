@@ -1,259 +1,87 @@
-# QA Report — kikhipster Spotify API 연동 코드 검토
+# QA 보고 — 2026-08-30
 
-**작성일:** 2026-07-06
-**검토 대상 브랜치:** main (35cec32)
-**검토자:** Claude Code (code review mode)
+## 1. 프론트–백 경계면 교차 검증
 
----
+**실행 중인 서버의 `/openapi.json` 과 `frontend/types/social.ts` 를 직접 비교했다**(소스를
+눈으로 맞춘 것이 아니다).
 
-## 검토 파일 목록
+| 필드 | 백엔드 | 프론트 |
+|---|---|---|
+| `author_nickname` | required | `string` |
+| `content` / `created_at` / `updated_at` / `id` / `target_id` | required | `string` |
+| `target_type` | required | `CommentTargetType` |
+| `edited_at` | nullable | `string \| null` |
+| `user` | **nullable** | `CommentUser \| null` |
+| `is_mine` / `reported_by_me` | 기본값 있음 | `boolean` |
+| `report_count` | 기본값 있음 | `number` |
 
-| 파일 | 역할 |
-|------|------|
-| backend/config.py | 환경변수 설정 (pydantic-settings) |
-| backend/services/spotify_auth.py | Spotify Client Credentials 토큰 관리 |
-| backend/services/music_api.py | Spotify Web API 클라이언트 |
-| backend/schemas/music.py | Pydantic 응답 모델 |
-| backend/routers/music.py | FastAPI 라우터 |
-| backend/main.py | 앱 진입점, lifespan, DI |
+**결과: PASS** — 필드 누락·nullable 불일치 0건.
 
----
+`is_mine`·`reported_by_me`·`report_count` 는 OpenAPI 상 기본값이 있어 `required` 가 아니지만
+`_to_response()` 가 **항상** 채워 보내므로 프론트에서 옵셔널로 둘 필요가 없다.
 
-## 발견된 이슈
+## 2. 백엔드 실제 호출 검증 (curl)
 
----
+Docker DB + uvicorn 을 띄우고 실제로 호출했다. 화면이 아니라 응답으로 확인한 것이다.
 
-### [HIGH-1] get_artist_albums 반환 dict에 artist_name 필드 누락
+| 시나리오 | 기대 | 실제 |
+|---|---|---|
+| 비로그인 작성, 닉네임 생략 | `author_nickname="익명"`, `user=null`, `is_mine=true` | ✅ |
+| 비로그인 작성, 닉네임 지정 | 지정한 닉네임 | ✅ |
+| 작성자 토큰 없이 작성 | 400 | ✅ `작성자 토큰이 필요합니다` |
+| 내용이 공백만 | 400 | ✅ `내용을 입력해 주세요` |
+| 남의 댓글 신고 | 204 | ✅ |
+| 같은 사람이 재신고 | 409 | ✅ `이미 신고한 댓글입니다` (부분 유니크 인덱스) |
+| 자기 댓글 신고 | 400 | ✅ `자신의 댓글은 신고할 수 없습니다` |
+| 남의 댓글 삭제 | 403 | ✅ |
+| 토큰 없이 삭제 | 403 | ✅ |
+| 본인 댓글 삭제 | 204 + 목록에서 사라짐 | ✅ |
+| `report_count` 가 보는 사람과 무관한지 | 토큰 유무와 무관하게 같은 값 | ✅ |
+| `reported_by_me` 가 신고자에게만 true 인지 | 신고자만 true | ✅ |
+| 댓글 삭제 시 신고 행 CASCADE | 같이 사라짐 | ✅ (2→1, 남은 신고는 살아있는 댓글을 가리킴) |
+| 레거시 `/api/topsters/{id}/comments` 경로 | 위와 동일하게 동작 | ✅ 전 과정 재현 |
 
-**파일:** backend/services/music_api.py L119~L139
-**심각도:** HIGH
+마이그레이션도 실제 DB 에 적용해 `information_schema` 로 확인했다 —
+`comments.user_id` nullable, `guest_nickname`/`guest_token_hash` 추가,
+`comment_reports` 부분 유니크 인덱스 2개, `comments_author_present` 체크 제약.
 
-**문제:**
-get_artist_albums가 반환하는 각 dict에는 artist_name 키가 없다.
-routers/music.py의 response_model=list[AlbumSummary]는 AlbumSummary를 사용하고,
-AlbumSummary에는 artist_name: str = "" 필드가 선언되어 있다.
+**테스트로 만든 댓글·신고는 전부 지웠다**(`guest_token_hash IS NOT NULL` 기준 0건 확인).
 
-Pydantic v2는 누락된 필드에 기본값이 있으면 ValidationError 없이 통과하므로
-앱은 정상 기동되지만, 모든 응답에서 artist_name이 항상 빈 문자열로 반환된다.
-Spotify /artists/{id}/albums 응답은 각 앨범에 artists 배열을 포함하므로
-데이터는 존재하지만 파싱이 누락된 상태다. 즉시 재현 가능한 데이터 손실 버그다.
+## 3. 프론트 정적 검증
 
-**수정 방법:**
-get_artist_albums 루프 내부에서 artists 키를 추출해 artist_name을 조립한다.
+`tsc --noEmit` · `pnpm build` · `pnpm lint` 통과.
+eslint error 2건은 **이번에 건드리지 않은** `app/search/page.tsx`·`components/layout/Navbar.tsx`
+의 기존 것이다(`react-hooks/set-state-in-effect`).
 
-    artists_list = a.get("artists", [])
-    items.append({
-        "artist_name": artists_list[0].get("name", "") if artists_list else "",
-        ... (other fields unchanged)
-    })
+빌드 CSS 에 새 애니메이션이 실제로 생성된 것까지 확인:
 
----
-### [HIGH-2] backend/__init__.py 존재로 인한 import 경로 충돌 위험
+```
+@keyframes battle-winner{ ... translateX(calc(var(--battle-dir) * (50% + var(--battle-gap) / 2))) scale(1.06) }
+--battle-gap: calc(var(--spacing) * {3,4,6,8})   ← 반응형·라운드별 4종 전부
+.gap-\(--battle-gap\){ }   .overflow-x-clip{ }
+```
 
-**파일:** backend/__init__.py (존재 자체), backend/services/music_api.py L6,
-backend/routers/music.py L3~9, backend/main.py L8~11
-**심각도:** HIGH
+`pnpm dev` 로 띄워 `/`, `/topsters/{id}`, `/tournament/{id}` 모두 200.
 
-**문제:**
-backend/ 디렉토리에 __init__.py가 존재하므로 Python은 backend를 패키지로 인식한다.
-그러나 모든 파일의 import가 backend/ 기준 절대 경로 방식으로 작성되어 있다.
+## 4. 남은 이슈 — 눈으로만 판정되는 것
 
-    # music_api.py
-    from services.spotify_auth import SpotifyTokenManager
-    # main.py
-    from config import settings
-    from routers.music import router as music_router
+### 4-1. SSR HTML 로는 댓글 영역을 검증할 수 없다 (기존 구조)
 
-이 방식은 backend/ 내부에서 실행(cd backend && uvicorn main:app)할 때만 동작한다.
-루트에서 uvicorn backend.main:app 또는 pytest를 루트에서 실행하면
-ModuleNotFoundError: No module named services 가 발생한다.
-__init__.py 존재 의도가 불명확해 실행 환경에 따라 동작 여부가 바뀌는 구조다.
+`/topsters/{id}` 의 SSR HTML 에 `댓글` 문자열이 0건이다. 다만 **`좋아요`·`이미지 저장` 도
+똑같이 0건**이라 이번 변경 때문이 아니라 상세 본문 전체가 스트리밍 Suspense 슬롯 안에
+들어가는 구조 때문이다(응답 끝에 빈 `<div hidden id="S:0">` + `$RC` 스크립트).
+즉 **이 화면들은 원래부터 브라우저로만 확인할 수 있다.**
 
-**수정 방법 (택일):**
-1. backend/__init__.py를 삭제하고 항상 backend/를 실행 루트로 고정.
-   Dockerfile, Makefile, pytest.ini에 PYTHONPATH=backend 또는 cd backend를 명시.
-2. backend/__init__.py를 유지하고 모든 import를 패키지 상대 경로로 변경.
-   services/music_api.py: from .spotify_auth import SpotifyTokenManager
-   routers/music.py: from ..schemas.music import (...)
+### 4-2. 브라우저에서 봐야 하는 것
 
----
+- 튕겨내기: 진 카드가 실제로 날아가는지, **320px 에서 가로 스크롤이 안 생기는지**
+  (`overflow-x-clip` 이 의도대로 도는지 — BLOCK 사안), 이긴 카드가 정확히 가운데에 서는지
+  (`calc(50% + var(--battle-gap)/2)` 계산이 맞는지), 620ms 가 길지 않은지
+- 비로그인 댓글 폼이 로그인 상태에서는 닉네임 칸 없이 나오는지
+- 신고 드롭다운이 열리고, 신고 후 버튼이 잠기는지
+- 우승 화면 댓글이 월드컵 상세와 **같은 목록**을 보여 주는지
 
-### [HIGH-3] invalidate()에 asyncio.Lock이 없어 논리적 race condition 발생 가능
+### 4-3. 알려진 한계 (설계상 감수)
 
-**파일:** backend/services/spotify_auth.py L63~66
-**심각도:** HIGH
-
-**문제:**
-invalidate()는 동기 함수로 Lock 없이 _token과 _expires_at를 직접 수정한다.
-
-    def invalidate(self) -> None:
-        self._token = None
-        self._expires_at = 0.0
-
-_request()에서 401 수신 후 invalidate() 호출 전에 다른 코루틴이
-get_token() -> Lock 획득 -> _refresh_token() -> 새 토큰 저장 순서로 실행되면,
-이후 invalidate()가 방금 발급된 유효한 토큰을 None으로 덮어쓴다.
-CPython asyncio 단일 스레드 환경에서도 await 지점마다 코루틴 전환이 발생하므로 이 시나리오는 재현 가능하다.
-
-**수정 방법:**
-
-    async def invalidate(self) -> None:
-        async with self._lock:
-            self._token = None
-            self._expires_at = 0.0
-
-_request() 호출부도 await self._token_manager.invalidate()로 변경한다.
-
----
-### [MED-1] 두 번째 401 응답 시 502 HTTPException 대신 httpx 예외가 전파됨
-
-**파일:** backend/services/music_api.py L28~56
-**심각도:** MED
-
-**문제:**
-재시도 루프에서 attempt == 1일 때 401이 오면 "if ... and attempt == 0" 조건을 건너뛰고
-response.raise_for_status()에서 httpx.HTTPStatusError가 발생한다.
-루프 이후의 "raise HTTPException(status_code=502)" 코드에는 도달하지 못한다.
-FastAPI는 처리되지 않은 httpx.HTTPStatusError를 500으로 반환하면서 Spotify 엔드포인트 정보가 노출될 수 있다.
-
-**수정 방법:**
-
-    if response.status_code == 401:
-        if attempt == 0:
-            await self._token_manager.invalidate()
-            continue
-        raise HTTPException(status_code=502, detail="Spotify 인증 실패")
-
----
-
-### [MED-2] _refresh_token 실패 시 httpx 예외가 그대로 전파되어 내부 정보 노출
-
-**파일:** backend/services/spotify_auth.py L52
-**심각도:** MED
-
-**문제:**
-response.raise_for_status()가 httpx.HTTPStatusError를 발생시키면 이 예외가
-FastAPI 기본 핸들러까지 도달해 500을 반환하면서 예외 메시지에
-Spotify 토큰 엔드포인트 URL과 응답 상태 코드가 포함될 수 있다.
-
-**수정 방법:**
-
-    try:
-        response.raise_for_status()
-    except httpx.HTTPStatusError as e:
-        logger.error("Spotify 토큰 발급 실패: HTTP %d", e.response.status_code)
-        raise HTTPException(status_code=502, detail="Spotify 인증 서버 오류") from e
-
----
-
-### [MED-3] spotify credentials 미설정 시 앱 기동 시점에 오류가 감지되지 않음
-
-**파일:** backend/config.py L6~7, backend/main.py L18~31
-**심각도:** MED
-
-**문제:**
-spotify_client_id와 spotify_client_secret의 기본값이 빈 문자열이므로
-.env 없이도 앱이 정상 기동된다. 오류는 첫 API 요청 시점에서야 발견되며,
-운영 배포 후 무음 실패(silent failure)로 이어질 수 있다.
-
-**수정 방법:**
-lifespan 시작부에서 명시적으로 검증한다.
-
-    @asynccontextmanager
-    async def lifespan(app: FastAPI):
-        if not settings.spotify_client_id or not settings.spotify_client_secret:
-            raise RuntimeError("SPOTIFY_CLIENT_ID / SPOTIFY_CLIENT_SECRET 환경변수가 설정되지 않았습니다.")
-
----
-### [MED-4] config.py 기본 database_url에 평문 비밀번호 포함
-
-**파일:** backend/config.py L5
-**심각도:** MED
-
-**문제:**
-database_url에 postgresql://user:password@... 형태로 평문 비밀번호가 기본값으로 소스에 포함된다.
-.env 미설정 시 이 값이 실제로 사용되며, 코드베이스 역사에 영구 기록된다.
-
-**수정 방법:**
-기본값을 제거해 .env 미설정 시 pydantic-settings가 ValidationError를 발생시키도록 한다.
-
-    database_url: str  # 기본값 없음 — 환경변수 필수
-
----
-
-### [LOW-1] spotify_default_market 설정값이 라우터에 반영되지 않음
-
-**파일:** backend/config.py L8, backend/routers/music.py 전체
-**심각도:** LOW
-
-**문제:**
-config.py에 spotify_default_market: str = "KR"가 정의되어 있으나
-라우터의 Query 기본값은 "KR" 하드코딩이다. 설정값을 변경해도 동작에 반영되지 않는다.
-
-**수정 방법:**
-
-    # routers/music.py
-    from config import settings
-    market: str = Query(settings.spotify_default_market, description="마켓 코드"),
-
----
-
-### [LOW-2] CORS allow_origins이 localhost 하드코딩
-
-**파일:** backend/main.py L38~43
-**심각도:** LOW
-
-**문제:**
-allow_origins=["http://localhost:3000"]이 하드코딩되어 배포 환경에서
-프론트엔드 도메인 추가를 잊으면 모든 실제 요청이 CORS 오류로 차단된다.
-
-**수정 방법:**
-config.py에 cors_origins: list[str] = ["http://localhost:3000"]를 추가하고 환경변수로 관리한다.
-
----
-## 검증 항목별 요약
-
-### 1. Pydantic 모델과 서비스 반환값 shape 일치 여부
-
-| 엔드포인트 | 서비스 메서드 | 스키마 | 결과 |
-|-----------|-------------|--------|------|
-| GET /search/artists | search_artists | SearchArtistsResponse | 일치 |
-| GET /search/albums | search_albums | SearchAlbumsResponse | 일치 |
-| GET /artists/{id} | get_artist_detail | ArtistDetail | 일치 |
-| GET /artists/{id}/albums | get_artist_albums | list[AlbumSummary] | **불일치 — artist_name 누락 (HIGH-1)** |
-| GET /albums/{id}/tracks | get_album_tracks | AlbumWithTracks | 일치 |
-
-### 2. response_model과 서비스 반환값 일치 여부
-
-4개 엔드포인트 일치. GET /artists/{id}/albums만 artist_name 누락으로 불일치. (HIGH-1)
-
-### 3. import 경로 오류
-
-backend/__init__.py 존재 + 절대 경로 import 혼용으로 실행 환경에 따라 ModuleNotFoundError 가능. (HIGH-2)
-
-### 4. 토큰 관리 로직 버그
-
-- invalidate() Lock 부재로 논리적 race condition. (HIGH-3)
-- 두 번째 401 응답 시 의도한 502 대신 httpx 예외 전파. (MED-1)
-- 토큰 발급 실패 시 httpx 예외가 FastAPI까지 전파. (MED-2)
-
-### 5. 에러 핸들링 누락
-
-- _refresh_token의 raise_for_status() 래핑 없음. (MED-2)
-- credentials 미설정 시 기동 시점 검증 없음. (MED-3)
-
----
-
-## Review Summary
-
-| 심각도 | 건수 | 상태 |
-|--------|------|------|
-| HIGH | 3 | block |
-| MED | 4 | warn |
-| LOW | 2 | note |
-
-**판정: BLOCK — HIGH 이슈 3건이 머지 전 반드시 수정되어야 합니다.**
-
-- HIGH-1: artist_name 누락은 즉시 재현 가능한 API 응답 데이터 손실 버그
-- HIGH-2: __init__.py + 절대 import 혼용은 배포/테스트 환경에서 ModuleNotFoundError 유발
-- HIGH-3: invalidate() Lock 부재는 토큰 갱신 안전성을 보장하지 않는 설계 결함
+브라우저 데이터를 지우거나 다른 기기·시크릿 창에서 보면 자기 익명 댓글을 지울 수 없다.
+비밀번호 칸을 두지 않기로 한 결과다(요청의 입력란이 닉네임·내용 둘뿐이었다).
