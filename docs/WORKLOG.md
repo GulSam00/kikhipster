@@ -8,6 +8,45 @@
 
 ## 세션 기록
 
+### 2026-09-01 — Prettier 도입 (md 는 제외, pnpm 함정)
+
+포매터 설정이 없는 채로 에디터의 Prettier 가 기본값으로 돌아 `app/search/page.tsx` 한
+파일만 쌍따옴표·80자로 뒤집혀 있었다. **설정 없이 포매터를 쓰는 상태가 제일 나쁘다** —
+저장하는 파일마다 하나씩 스타일이 갈리고 diff 에 로직 변경이 묻힌다. 설정을 정본으로
+두고 한 번에 맞췄다(커밋 `6e1560d`, 109개 파일).
+
+**md 를 format 대상에서 뺀 이유는 실측으로 확인했다.** 문서 4개를 복사본에 돌려 보니
+Prettier 의 마크다운 파서가 **한국어 범위 표기를 GFM 취소선으로 오인**한다:
+
+| 원문 | 포맷 후 |
+|------|---------|
+| `상시 월 ~$48이지만 … **월 ~$2~4**` | `상시 월 ~~$48이지만 … **월 ~$2~~4**` |
+| `소유자면 버튼이 4~6개, 방문자면 2~3개` | `소유자면 버튼이 4~~6개, 방문자면 2~~3개` |
+
+렌더링하면 실제로 취소선이 그어진다 — **서식이 아니라 의미가 바뀐다.** CLAUDE.md·
+TASKS.md·WORKLOG.md 셋 다 걸렸다. 옵션으로 못 끄므로 대상에서 빼는 것이 유일한 회피다.
+테이블도 통째로 재정렬돼(WORKLOG 4617줄) 이후 문서 diff 를 못 읽게 된다.
+
+**`@ianvs` 포크는 `@trivago` 의 옵션을 안 받는다.** 처음 설정에 있던
+`importOrderSeparation`·`importOrderSortSpecifiers` 가 `Ignored unknown option` 경고와
+함께 버려지고 있었다 — **그룹 사이 빈 줄이 안 생기는데 설정만 보면 켠 것처럼 보인다.**
+@ianvs 는 빈 줄을 `importOrder` 배열 안의 `''` 로 표현하고 specifier 정렬은 기본이다.
+`^@/hooks/` 는 매칭 대상이 0개였고(이 프로젝트 훅은 `@/lib/hooks`) 41개 파일이 쓰는
+`^@/types/` 가 빠져 있어 같이 고쳤다. **먼저 매칭되는 규칙이 이기므로 `@/lib/hooks` 는
+`@/lib` 보다 위에 둬야 한다.**
+
+`arrowParens` 는 `always` 로 잡았다 — 단일 인자 괄호가 이미 163곳이고, `avoid` 로 두면
+타입 주석(7곳)·구조분해(65곳)는 문법상 괄호가 남아 한 파일에 두 스타일이 섞인다.
+`tailwindFunctions: ['cn']` 은 36개 파일이 쓰는 `cn()` 인자까지 정렬 대상에 넣는다.
+
+**pnpm 함정**: `npm install --save-dev prettier` 가
+`Cannot read properties of null (reading 'matches')` 로 죽었다. 이 프로젝트는
+`pnpm-lock.yaml` 만 있고 npm 이 pnpm 의 `node_modules/.pnpm` 링크 구조를 훑다 실패한다.
+`buildIdealTree` 단계라 파일은 안 건드렸다. CLAUDE.md 로컬 실행 절에 규약으로 남겼다.
+
+**확인**: `tsc` 0 · `pnpm build` 통과 · eslint 신규 0(기존 `set-state-in-effect` 2건은
+Navbar·search 페이지의 이전 코드).
+
 ### 2026-08-31 (계속) — 카드 안 여백만 넓혔다 (네 번 시도해서 하나 남김)
 
 "검색 앨범 탭이 답답하다"에서 출발해 네 가지를 시도했고 **한 가지만 남았다.**
@@ -2264,3 +2303,4 @@ Spotify 연동 백엔드, 프론트 기획(`_workspace/planning.md`), QA 리뷰(
 | 2026-08-31 | feat(play): 승리 카드가 상대를 튕겨 내고 중앙으로, 결과 화면에 댓글 | backup, frontend | 커밋 `63a9fb9` |
 | 2026-08-31 | docs: 세션 기록·과제 갱신 | _workspace, docs | 커밋 `c78a397` |
 | 2026-09-01 | feat(music): 앨범 제목 꼬리 제거·싱글 EP 필터 해제·종류 배지 | DESIGN.md, _workspace, backend, docs, frontend | 커밋 `a502067` |
+| 2026-09-01 | chore(frontend): prettier 도입하고 전체 포맷 적용 | CLAUDE.md, docs, frontend | 커밋 `6e1560d` |
