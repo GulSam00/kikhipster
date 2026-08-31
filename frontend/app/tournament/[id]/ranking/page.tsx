@@ -1,9 +1,9 @@
-import Link from 'next/link';
 import { ArrowLeft, Disc3, Minus, TrendingDown, TrendingUp } from 'lucide-react';
-import { getRanking } from '@/lib/api/tournaments';
-import CommentSection from '@/components/social/CommentSection';
+import Link from 'next/link';
+
 import CoverImage from '@/components/common/CoverImage';
 import ShareButton from '@/components/common/ShareButton';
+import CommentSection from '@/components/social/CommentSection';
 import PoolItemPlayButton from '@/components/tournament/PoolItemPlayButton';
 import { ItemFallbackIcon } from '@/components/tournament/PoolItemTile';
 import { Button } from '@/components/ui/button';
@@ -17,6 +17,8 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+
+import { getRanking } from '@/lib/api/tournaments';
 import { fetchPoolItems, ITEM_TYPE_LABEL } from '@/lib/domain/pool-item';
 
 function percent(value: number) {
@@ -26,11 +28,11 @@ function percent(value: number) {
 /** 순위 추이 셀. 신규(비교 시점에 표본 없음)는 대시가 아니라 'NEW'로 구분한다. */
 function TrendCell({ delta }: { delta: number | null }) {
   if (delta === null) {
-    return <span className="text-sm text-muted-foreground">NEW</span>;
+    return <span className="text-muted-foreground text-sm">NEW</span>;
   }
   if (delta === 0) {
     return (
-      <span className="flex items-center gap-0.5 text-sm text-muted-foreground">
+      <span className="text-muted-foreground flex items-center gap-0.5 text-sm">
         <Minus className="size-4" />
       </span>
     );
@@ -72,12 +74,12 @@ export default async function TournamentRankingPage({
         <h1 className="font-heading text-2xl font-bold">{ranking.title} 랭킹</h1>
         <ShareButton path={`/tournament/${id}/ranking`} />
       </div>
-      <p className="mb-6 text-sm text-muted-foreground tabular-nums">
+      <p className="text-muted-foreground mb-6 text-sm tabular-nums">
         누적 플레이 {ranking.total_plays}판 기준
       </p>
 
       {ranking.items.length === 0 ? (
-        <p className="py-10 text-center text-sm text-muted-foreground">집계할 후보가 없습니다.</p>
+        <p className="text-muted-foreground py-10 text-center text-sm">집계할 후보가 없습니다.</p>
       ) : (
         <Table className="mb-8">
           <TableHeader>
@@ -110,10 +112,8 @@ export default async function TournamentRankingPage({
                         sizes="64px"
                       />
                       <div className="min-w-0 flex-1">
-                        <p className="truncate text-lg font-medium">
-                          {item?.title ?? row.item_id}
-                        </p>
-                        <p className="truncate text-sm text-muted-foreground">{item?.subtitle}</p>
+                        <p className="truncate text-lg font-medium">{item?.title ?? row.item_id}</p>
+                        <p className="text-muted-foreground truncate text-sm">{item?.subtitle}</p>
                       </div>
                       {item && (
                         // 재생과 앨범으로 가기를 나란히 둔다 — 후보 그리드와 같은 짝이다.
@@ -122,10 +122,13 @@ export default async function TournamentRankingPage({
                             <Button
                               variant="ghost"
                               size="icon"
-                              className="rounded-full text-muted-foreground hover:text-foreground"
+                              className="text-muted-foreground hover:text-foreground rounded-full"
                               asChild
                             >
-                              <Link href={`/albums/${item.id}`} aria-label={`${item.title} 앨범 보기`}>
+                              <Link
+                                href={`/albums/${item.id}`}
+                                aria-label={`${item.title} 앨범 보기`}
+                              >
                                 <Disc3 />
                               </Link>
                             </Button>
@@ -133,7 +136,7 @@ export default async function TournamentRankingPage({
                           <PoolItemPlayButton
                             item={item}
                             itemType={ranking.item_type}
-                            className="rounded-full text-muted-foreground hover:text-foreground"
+                            className="text-muted-foreground hover:text-foreground rounded-full"
                           />
                         </div>
                       )}
@@ -146,14 +149,14 @@ export default async function TournamentRankingPage({
                   */}
                   <TableCell className="py-3 text-right tabular-nums">
                     <p className="text-lg">{percent(row.championship_rate)}</p>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-muted-foreground text-sm">
                       {row.championship_count}/{row.play_count}
                     </p>
                   </TableCell>
 
                   <TableCell className="py-3 text-right tabular-nums">
                     <p className="text-lg">{percent(row.match_win_rate)}</p>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-muted-foreground text-sm">
                       {row.match_win_count}/{row.match_count}
                     </p>
                   </TableCell>
@@ -169,8 +172,8 @@ export default async function TournamentRankingPage({
           </TableBody>
           <TableCaption>
             우승 비율 = 우승 횟수 / 뽑혀 나간 플레이 수, 승률 = 이긴 경기 / 치른 1:1 경기.
-            플레이마다 후보가 무작위로 뽑히므로 항목별 참가 수가 다릅니다.
-            추이는 {ranking.trend_days}일 전 기준 순위와의 차이입니다.
+            플레이마다 후보가 무작위로 뽑히므로 항목별 참가 수가 다릅니다. 추이는{' '}
+            {ranking.trend_days}일 전 기준 순위와의 차이입니다.
           </TableCaption>
         </Table>
       )}

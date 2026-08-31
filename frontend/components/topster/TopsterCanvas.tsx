@@ -1,12 +1,21 @@
 'use client';
 
-import Link from 'next/link';
-import Image from 'next/image';
 import { Music2 } from 'lucide-react';
+import Image from 'next/image';
+import Link from 'next/link';
+
 import TopsterAlbumList from '@/components/topster/TopsterAlbumList';
+
+import {
+  computeCell,
+  gridOffsetTop,
+  topsterGridStyle,
+  useBoxSize,
+} from '@/lib/hooks/use-topster-grid';
+
 import type { PoolItem } from '@/lib/domain/pool-item';
-import { computeCell, gridOffsetTop, topsterGridStyle, useBoxSize } from '@/lib/hooks/use-topster-grid';
 import { cn } from '@/lib/utils';
+
 import type { TopsterItem, TopsterOptions } from '@/types/topster';
 
 interface Props {
@@ -72,7 +81,7 @@ export default function TopsterCanvas({ options, title, items, albums, className
                   href={`/albums/${item.album_spotify_id}`}
                   aria-label={label}
                   title={label}
-                  className="relative flex items-center justify-center overflow-hidden bg-white/5 outline-none transition-opacity hover:opacity-80 focus-visible:ring-3 focus-visible:ring-ring/50"
+                  className="focus-visible:ring-ring/50 relative flex items-center justify-center overflow-hidden bg-white/5 transition-opacity outline-none hover:opacity-80 focus-visible:ring-3"
                 >
                   {album?.coverUrl ? (
                     <Image

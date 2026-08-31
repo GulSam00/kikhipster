@@ -2,8 +2,11 @@
 
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
-import { createTournament } from '@/lib/api/tournaments';
+
 import TournamentEditor from '@/components/tournament/TournamentEditor';
+
+import { createTournament } from '@/lib/api/tournaments';
+
 import type { TournamentCreateBody } from '@/types/tournament';
 
 export default function NewTournamentPage() {

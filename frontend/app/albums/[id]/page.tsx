@@ -1,14 +1,17 @@
+import { Disc3 } from 'lucide-react';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
-import { Disc3 } from 'lucide-react';
+
+import AlbumPlayButton from '@/components/music/AlbumPlayButton';
+import AlbumTypeBadge from '@/components/music/AlbumTypeBadge';
+import TrackRow from '@/components/music/TrackRow';
+import LikeButton from '@/components/social/LikeButton';
+import { Separator } from '@/components/ui/separator';
+
 import { ApiError } from '@/lib/api/client';
 import { getAlbumWithTracks } from '@/lib/api/music';
 import { albumTrackToQueue } from '@/lib/domain/playable';
-import AlbumPlayButton from '@/components/music/AlbumPlayButton';
-import AlbumTypeBadge from '@/components/music/AlbumTypeBadge';
-import LikeButton from '@/components/social/LikeButton';
-import TrackRow from '@/components/music/TrackRow';
-import { Separator } from '@/components/ui/separator';
+
 import type { AlbumWithTracks } from '@/types/music';
 import type { QueueTrack } from '@/types/player';
 
@@ -39,20 +42,20 @@ export default async function AlbumPage({ params }: { params: Promise<{ id: stri
   return (
     <div className="mx-auto w-full max-w-6xl px-4 py-8">
       <div className="mb-8 flex flex-col items-start gap-6 sm:flex-row sm:items-end">
-        <div className="relative size-36 shrink-0 overflow-hidden rounded-lg bg-muted">
+        <div className="bg-muted relative size-36 shrink-0 overflow-hidden rounded-lg">
           {album.cover_url ? (
             <Image src={album.cover_url} alt={album.title} fill className="object-cover" />
           ) : (
-            <div className="flex size-full items-center justify-center text-muted-foreground">
+            <div className="text-muted-foreground flex size-full items-center justify-center">
               <Disc3 className="size-10" />
             </div>
           )}
         </div>
         <div className="min-w-0">
           <AlbumTypeBadge type={album.album_type} className="mb-2" />
-          <h1 className="mb-1 font-heading text-3xl font-bold">{album.title}</h1>
-          <p className="mb-1 text-foreground/80">{album.artist_name}</p>
-          <p className="mb-3 text-sm text-muted-foreground">
+          <h1 className="font-heading mb-1 text-3xl font-bold">{album.title}</h1>
+          <p className="text-foreground/80 mb-1">{album.artist_name}</p>
+          <p className="text-muted-foreground mb-3 text-sm">
             {year} · {album.total_tracks}곡
           </p>
           <div className="flex items-center gap-2">

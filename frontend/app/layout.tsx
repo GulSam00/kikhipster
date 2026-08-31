@@ -1,15 +1,19 @@
-import type { Metadata } from "next";
-import { Geist } from "next/font/google";
-import Navbar from "@/components/layout/Navbar";
-import PlayerDock from "@/components/layout/PlayerDock";
-import { PlayerProvider } from "@/contexts/PlayerContext";
-import { Toaster } from "@/components/ui/sonner";
-import { SITE_NAME, siteUrl } from "@/lib/site";
-import "./globals.css";
+import type { Metadata } from 'next';
+import { Geist } from 'next/font/google';
+
+import Navbar from '@/components/layout/Navbar';
+import PlayerDock from '@/components/layout/PlayerDock';
+import { Toaster } from '@/components/ui/sonner';
+
+import { SITE_NAME, siteUrl } from '@/lib/site';
+
+import { PlayerProvider } from '@/contexts/PlayerContext';
+
+import './globals.css';
 
 const geistSans = Geist({
-  variable: "--font-sans",
-  subsets: ["latin"],
+  variable: '--font-sans',
+  subsets: ['latin'],
 });
 
 export const metadata: Metadata = {
@@ -21,11 +25,11 @@ export const metadata: Metadata = {
     // 상세 페이지들이 제목만 주면 여기 붙는다.
     template: `%s · ${SITE_NAME}`,
   },
-  description: "음악 탑스터, 토너먼트, 아티스트 탐색 서비스",
+  description: '음악 탑스터, 토너먼트, 아티스트 탐색 서비스',
   openGraph: {
     siteName: SITE_NAME,
-    type: "website",
-    locale: "ko_KR",
+    type: 'website',
+    locale: 'ko_KR',
   },
 };
 
@@ -53,9 +57,7 @@ export default function RootLayout({
             모바일 하단 탭바만큼의 여백은 `PlayerDock` 이 들고 있다 — 재생기가 흐름 안에
             있어서(fixed 아님) main 이 그 아래로 밀리지 않으려면 여백도 그쪽에 있어야 한다.
           */}
-          <main className="flex min-h-0 flex-1 flex-col overflow-y-auto">
-            {children}
-          </main>
+          <main className="flex min-h-0 flex-1 flex-col overflow-y-auto">{children}</main>
           <PlayerDock />
           <Toaster />
         </PlayerProvider>

@@ -1,12 +1,15 @@
 'use client';
 
+import { Home, LayoutGrid, LogOut, Search, Trophy, User } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { Home, Search, LayoutGrid, Trophy, User, LogOut } from 'lucide-react';
+
 import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
+
 import { clearMeCache } from '@/lib/hooks/use-me';
+
+import { cn } from '@/lib/utils';
 
 const navLinks = [
   { href: '/search', label: '검색', icon: Search },
@@ -36,11 +39,11 @@ export default function Navbar() {
   const mobileTabs = [{ href: '/', label: '홈', icon: Home }, ...navLinks];
 
   return (
-    <header className="sticky top-0 z-50 border-b bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/80">
+    <header className="bg-card/95 supports-[backdrop-filter]:bg-card/80 sticky top-0 z-50 border-b backdrop-blur">
       <nav className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4">
         <Link
           href="/"
-          className="text-lg font-bold tracking-tight text-primary transition-opacity hover:opacity-80"
+          className="text-primary text-lg font-bold tracking-tight transition-opacity hover:opacity-80"
         >
           kikhipster
         </Link>
@@ -84,7 +87,7 @@ export default function Navbar() {
       </nav>
 
       {/* 모바일 하단 탭 */}
-      <nav className="fixed inset-x-0 bottom-0 z-50 flex border-t bg-card sm:hidden">
+      <nav className="bg-card fixed inset-x-0 bottom-0 z-50 flex border-t sm:hidden">
         {mobileTabs.map(({ href, label, icon: Icon }) => {
           const active = pathname === href || (href !== '/' && pathname.startsWith(href));
           return (

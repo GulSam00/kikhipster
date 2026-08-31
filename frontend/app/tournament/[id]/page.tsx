@@ -1,19 +1,21 @@
-import type { Metadata } from "next";
-import Link from "next/link";
-import { BarChart3 } from "lucide-react";
-import { getTournament, tournamentPath } from "@/lib/api/tournaments";
-import CommentSection from "@/components/social/CommentSection";
-import DetailActionBar from "@/components/common/DetailActionBar";
-import DetailHeader from "@/components/common/DetailHeader";
-import LikeButton from "@/components/social/LikeButton";
-import OwnerMenu from "@/components/common/OwnerMenu";
-import PlayLauncher from "@/components/tournament/PlayLauncher";
-import PoolGrid from "@/components/tournament/PoolGrid";
-import ShareButton from "@/components/common/ShareButton";
-import ViewCounter from "@/components/common/ViewCounter";
-import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
-import { fetchPoolItems, ITEM_TYPE_LABEL } from "@/lib/domain/pool-item";
+import { BarChart3 } from 'lucide-react';
+import type { Metadata } from 'next';
+import Link from 'next/link';
+
+import DetailActionBar from '@/components/common/DetailActionBar';
+import DetailHeader from '@/components/common/DetailHeader';
+import OwnerMenu from '@/components/common/OwnerMenu';
+import ShareButton from '@/components/common/ShareButton';
+import ViewCounter from '@/components/common/ViewCounter';
+import CommentSection from '@/components/social/CommentSection';
+import LikeButton from '@/components/social/LikeButton';
+import PlayLauncher from '@/components/tournament/PlayLauncher';
+import PoolGrid from '@/components/tournament/PoolGrid';
+import { Button } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator';
+
+import { getTournament, tournamentPath } from '@/lib/api/tournaments';
+import { fetchPoolItems, ITEM_TYPE_LABEL } from '@/lib/domain/pool-item';
 
 /**
  * 첫 화면에서 서버가 미리 받아 두는 개수. 풀이 최대 512개라 전부 그리면
@@ -40,11 +42,11 @@ export async function generateMetadata({
     return {
       title: t.title,
       description: summary,
-      openGraph: { title: t.title, description: summary, type: "article" },
+      openGraph: { title: t.title, description: summary, type: 'article' },
     };
   } catch {
     // 없는 월드컵이면 페이지 렌더에서 어차피 에러 경계로 간다 — 메타에서 터뜨리지 않는다.
-    return { title: "월드컵" };
+    return { title: '월드컵' };
   }
 }
 
@@ -86,11 +88,9 @@ export default async function TournamentDetailPage({
         }
       />
 
-      <h2 className="mb-4 font-heading text-lg font-bold">
-        후보 {tournament.item_count}
-      </h2>
+      <h2 className="font-heading mb-4 text-lg font-bold">후보 {tournament.item_count}</h2>
       {items.length === 0 ? (
-        <p className="py-6 text-center text-sm text-muted-foreground">
+        <p className="text-muted-foreground py-6 text-center text-sm">
           후보 정보를 불러오지 못했습니다.
         </p>
       ) : (
@@ -126,10 +126,7 @@ export default async function TournamentDetailPage({
                 targetId={tournament.id}
                 name={tournament.title}
               />
-              <ShareButton
-                path={`/tournament/${tournament.id}`}
-                className="rounded-full"
-              />
+              <ShareButton path={`/tournament/${tournament.id}`} className="rounded-full" />
             </>
           }
         />

@@ -1,9 +1,11 @@
-import Link from 'next/link';
 import { Disc3 } from 'lucide-react';
+import Link from 'next/link';
+
+import CoverImage from '@/components/common/CoverImage';
 import AlbumPlayButton from '@/components/music/AlbumPlayButton';
 import AlbumTypeBadge from '@/components/music/AlbumTypeBadge';
-import CoverImage from '@/components/common/CoverImage';
 import { Card, CardContent } from '@/components/ui/card';
+
 import type { AlbumSummary } from '@/types/music';
 
 interface Props {
@@ -25,7 +27,7 @@ export default function AlbumCard({ album }: Props) {
       패딩과 세로 간격이 모두 `--card-spacing` 하나에서 나오므로 이 한 곳만 바꾸면
       카드 안이 고르게 넓어진다. 열 수를 줄여 카드 자체가 커진 것과 짝이다.
     */
-    <Card className="group relative h-full transition-colors hover:bg-accent">
+    <Card className="group hover:bg-accent relative h-full transition-colors">
       <CardContent className="flex flex-col gap-3">
         <CoverImage
           src={album.cover_url}
@@ -40,10 +42,10 @@ export default function AlbumCard({ album }: Props) {
             남짓)에서 제목이 배지에 밀려 두세 글자만 남는다 — 종류보다 제목이 먼저다.
           */}
           <p className="truncate text-sm font-medium">{album.title}</p>
-          <p className="mt-0.5 truncate text-xs text-muted-foreground">{album.artist_name}</p>
+          <p className="text-muted-foreground mt-0.5 truncate text-xs">{album.artist_name}</p>
           <div className="mt-2 flex items-center gap-1.5">
             <AlbumTypeBadge type={album.album_type} />
-            <p className="truncate text-xs text-muted-foreground">
+            <p className="text-muted-foreground truncate text-xs">
               {year} · {album.total_tracks}곡
             </p>
           </div>
@@ -53,7 +55,7 @@ export default function AlbumCard({ album }: Props) {
       <Link
         href={`/albums/${album.id}`}
         aria-label={album.title}
-        className="absolute inset-0 rounded-xl outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+        className="focus-visible:ring-ring/50 absolute inset-0 rounded-xl outline-none focus-visible:ring-3"
       />
 
       {/*
@@ -64,7 +66,7 @@ export default function AlbumCard({ album }: Props) {
         albumId={album.id}
         albumTitle={album.title}
         variant="secondary"
-        className="absolute top-4 right-4 z-10 bg-secondary/90 opacity-100 transition-opacity sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100"
+        className="bg-secondary/90 absolute top-4 right-4 z-10 opacity-100 transition-opacity sm:opacity-0 sm:group-focus-within:opacity-100 sm:group-hover:opacity-100"
       />
     </Card>
   );

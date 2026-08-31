@@ -1,7 +1,9 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+
 import { getMe } from '@/lib/api/auth';
+
 import type { Me } from '@/types/user';
 
 export type { Me };

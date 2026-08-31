@@ -1,17 +1,20 @@
-"use client";
+'use client';
 
-import { useEffect, useState, type ReactNode } from "react";
-import Link from "next/link";
-import Image from "next/image";
-import { BarChart3, Play } from "lucide-react";
-import ItemStats from "@/components/common/ItemStats";
-import ShareButton from "@/components/common/ShareButton";
-import { ItemFallbackIcon } from "@/components/tournament/PoolItemTile";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { fetchPoolItems, type PoolItem } from "@/lib/domain/pool-item";
-import { formatDate } from "@/lib/utils";
-import type { TournamentSummary } from "@/types/tournament";
+import { BarChart3, Play } from 'lucide-react';
+import Image from 'next/image';
+import Link from 'next/link';
+import { useEffect, useState, type ReactNode } from 'react';
+
+import ItemStats from '@/components/common/ItemStats';
+import ShareButton from '@/components/common/ShareButton';
+import { ItemFallbackIcon } from '@/components/tournament/PoolItemTile';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+
+import { fetchPoolItems, type PoolItem } from '@/lib/domain/pool-item';
+import { formatDate } from '@/lib/utils';
+
+import type { TournamentSummary } from '@/types/tournament';
 
 interface Props {
   tournament: TournamentSummary;
@@ -48,30 +51,19 @@ export default function TournamentCard({ tournament, actions }: Props) {
       <CardContent className="flex flex-col gap-3">
         <Link
           href={href}
-          className="flex items-start gap-3 rounded-lg outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+          className="focus-visible:ring-ring/50 flex items-start gap-3 rounded-lg outline-none focus-visible:ring-3"
         >
-          <div className="grid size-16 shrink-0 grid-cols-2 gap-0.5 overflow-hidden rounded-md bg-muted p-0.5">
+          <div className="bg-muted grid size-16 shrink-0 grid-cols-2 gap-0.5 overflow-hidden rounded-md p-0.5">
             {Array.from({ length: 4 }).map((_, i) => {
               const item = previews[i];
               return (
-                <div
-                  key={i}
-                  className="relative overflow-hidden rounded-[2px] bg-foreground/5"
-                >
+                <div key={i} className="bg-foreground/5 relative overflow-hidden rounded-[2px]">
                   {item?.coverUrl && (
-                    <Image
-                      src={item.coverUrl}
-                      alt=""
-                      fill
-                      className="object-cover"
-                    />
+                    <Image src={item.coverUrl} alt="" fill className="object-cover" />
                   )}
                   {!item?.coverUrl && (
-                    <div className="flex size-full items-center justify-center text-muted-foreground">
-                      <ItemFallbackIcon
-                        itemType={tournament.item_type}
-                        className="size-2.5"
-                      />
+                    <div className="text-muted-foreground flex size-full items-center justify-center">
+                      <ItemFallbackIcon itemType={tournament.item_type} className="size-2.5" />
                     </div>
                   )}
                 </div>
@@ -86,7 +78,7 @@ export default function TournamentCard({ tournament, actions }: Props) {
               두 벌의 숫자를 겹쳐 보여주게 된다.
             */}
             <p className="truncate text-sm font-medium">{tournament.title}</p>
-            <p className="truncate text-xs text-muted-foreground">
+            <p className="text-muted-foreground truncate text-xs">
               {tournament.user.nickname} · {formatDate(tournament.created_at)}
             </p>
             <ItemStats

@@ -2,12 +2,15 @@
 
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
+
+import { useRequireAuth } from '@/lib/hooks/use-require-auth';
+
 import { getAlbumWithTracks, searchAlbums, searchTracks } from '@/lib/api/music';
 import { TOURNAMENT_MAX_POOL, TOURNAMENT_MIN_POOL } from '@/lib/domain/limits';
 import type { PoolItem } from '@/lib/domain/pool-item';
-import { useRequireAuth } from '@/lib/hooks/use-require-auth';
+
 import type { AlbumSummary, TrackSearchItem } from '@/types/music';
-import type { TournamentItemType, TournamentCreateBody } from '@/types/tournament';
+import type { TournamentCreateBody, TournamentItemType } from '@/types/tournament';
 
 export type Step = 'type' | 'meta' | 'pool';
 /** 곡 월드컵에서는 곡으로도, 앨범을 펼쳐서도 담을 수 있다. */

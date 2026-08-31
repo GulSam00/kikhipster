@@ -2,6 +2,7 @@
 
 import { parentMatch } from '@/lib/domain/bracket';
 import type { PoolItem } from '@/lib/domain/pool-item';
+
 import type { Play, PlayRound } from '@/types/tournament';
 
 interface Props {
@@ -60,10 +61,7 @@ export default function BracketBackground({ play, match, items, justPicked }: Pr
         {/* 현재 경기의 두 자리 */}
         <div className="flex flex-1 flex-col gap-10">
           {[match.item_a_id, match.item_b_id].map((id) => (
-            <div
-              key={id}
-              className="truncate rounded-md border border-border px-3 py-2 text-xs"
-            >
+            <div key={id} className="border-border truncate rounded-md border px-3 py-2 text-xs">
               {label(id)}
             </div>
           ))}
@@ -71,8 +69,8 @@ export default function BracketBackground({ play, match, items, justPicked }: Pr
 
         {/* 두 자리를 다음 경기로 잇는 갈래 */}
         <div className="flex h-24 w-10 shrink-0 flex-col justify-between">
-          <div className="h-1/2 border-t border-r border-border" />
-          <div className="h-1/2 border-r border-b border-border" />
+          <div className="border-border h-1/2 border-t border-r" />
+          <div className="border-border h-1/2 border-r border-b" />
         </div>
 
         {/*
@@ -80,7 +78,7 @@ export default function BracketBackground({ play, match, items, justPicked }: Pr
           **여기에 이긴 항목의 제목을 채워 넣지 않는다** — 위 주석 참고.
         */}
         <div className="flex flex-1 justify-start">
-          <div className="w-full truncate rounded-md border border-dashed border-border px-3 py-2 text-xs opacity-60">
+          <div className="border-border w-full truncate rounded-md border border-dashed px-3 py-2 text-xs opacity-60">
             {parent ? '다음 경기' : '우승'}
           </div>
         </div>

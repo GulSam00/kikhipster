@@ -1,6 +1,5 @@
 'use client';
 
-import Image from 'next/image';
 import {
   ListMusic,
   Music2,
@@ -13,9 +12,12 @@ import {
   VolumeX,
   X,
 } from 'lucide-react';
+import Image from 'next/image';
+
 import PlayerQueue from '@/components/layout/PlayerQueue';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
+
 import { usePlayer } from '@/contexts/PlayerContext';
 
 /** 초를 `m:ss` 로. 미리듣기는 30초라 시(hour) 자리는 없다. */
@@ -61,7 +63,7 @@ export default function PlayerDock() {
   return (
     <div className="shrink-0 pb-16 sm:pb-0">
       {currentTrack && (
-        <div className="border-t bg-card">
+        <div className="bg-card border-t">
           {queueOpen && <PlayerQueue />}
 
           <div className="mx-auto flex max-w-6xl flex-col gap-2 px-4 py-3">
@@ -75,19 +77,19 @@ export default function PlayerDock() {
                   className="size-12 shrink-0 rounded-md object-cover"
                 />
               ) : (
-                <div className="flex size-12 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground">
+                <div className="bg-muted text-muted-foreground flex size-12 shrink-0 items-center justify-center rounded-md">
                   <Music2 className="size-5" />
                 </div>
               )}
 
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-medium">{currentTrack.name}</p>
-                <p className="truncate text-xs text-muted-foreground">{currentTrack.artist}</p>
+                <p className="text-muted-foreground truncate text-xs">{currentTrack.artist}</p>
               </div>
 
               <Button
                 variant="ghost"
-                className="size-10 shrink-0 rounded-full text-muted-foreground hover:text-foreground"
+                className="text-muted-foreground hover:text-foreground size-10 shrink-0 rounded-full"
                 onClick={() => setQueueOpen(!queueOpen)}
                 aria-expanded={queueOpen}
                 aria-label={queueOpen ? '재생목록 접기' : '재생목록 펼치기'}
@@ -107,7 +109,7 @@ export default function PlayerDock() {
               */}
               <Button
                 variant="ghost"
-                className="size-10 shrink-0 rounded-full text-muted-foreground hover:text-foreground"
+                className="text-muted-foreground hover:text-foreground size-10 shrink-0 rounded-full"
                 onClick={toggleMute}
                 aria-label={muted ? '음소거 해제' : '음소거'}
                 aria-pressed={muted}
@@ -124,13 +126,13 @@ export default function PlayerDock() {
                 step={0.01}
                 onValueChange={([v]) => setVolume(v)}
                 aria-label="볼륨"
-                className="hidden w-20 shrink-0 sm:flex [&_[data-slot=slider-range]]:bg-muted-foreground [&_[data-slot=slider-thumb]]:border-muted-foreground"
+                className="[&_[data-slot=slider-range]]:bg-muted-foreground [&_[data-slot=slider-thumb]]:border-muted-foreground hidden w-20 shrink-0 sm:flex"
               />
 
               {/* 모바일에서는 컨트롤에 자리를 몰아준다 — 비우기는 재생목록 안에도 있다. */}
               <Button
                 variant="ghost"
-                className="hidden size-10 shrink-0 rounded-full text-muted-foreground hover:text-foreground sm:flex"
+                className="text-muted-foreground hover:text-foreground hidden size-10 shrink-0 rounded-full sm:flex"
                 onClick={clear}
                 aria-label="재생기 닫기"
               >
@@ -168,7 +170,7 @@ export default function PlayerDock() {
                 <SkipForward />
               </Button>
 
-              <span className="w-9 shrink-0 text-right text-xs text-muted-foreground tabular-nums">
+              <span className="text-muted-foreground w-9 shrink-0 text-right text-xs tabular-nums">
                 {formatTime(position)}
               </span>
               {/*
@@ -183,10 +185,9 @@ export default function PlayerDock() {
                 aria-label="재생 위치"
                 className="min-w-16"
               />
-              <span className="hidden w-9 shrink-0 text-xs text-muted-foreground tabular-nums sm:block">
+              <span className="text-muted-foreground hidden w-9 shrink-0 text-xs tabular-nums sm:block">
                 {formatTime(duration)}
               </span>
-
             </div>
           </div>
         </div>

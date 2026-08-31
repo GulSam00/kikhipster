@@ -1,14 +1,8 @@
 'use client';
 
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-} from 'react';
+import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
+
 import type { QueueTrack } from '@/types/player';
 
 interface PlayerContextValue {

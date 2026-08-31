@@ -1,34 +1,34 @@
-"use client";
+'use client';
 
-import { useCallback, useEffect, useRef, useState } from "react";
-import { animate } from "motion/react";
-import { useParams, useRouter } from "next/navigation";
-import Link from "next/link";
-import Image from "next/image";
-import { BarChart3, GitBranch, Swords, Trophy } from "lucide-react";
-import { toast } from "sonner";
-import { getPlay, voteRound } from "@/lib/api/plays";
-import { getRanking } from "@/lib/api/tournaments";
-import CommentSection from "@/components/social/CommentSection";
-import BracketBackground from "@/components/tournament/BracketBackground";
-import FlapCounter from "@/components/tournament/FlapCounter";
-import FullBracket from "@/components/tournament/FullBracket";
-import PoolItemPlayButton from "@/components/tournament/PoolItemPlayButton";
-import CountUp from "@/components/reactbits/CountUp";
-import ShinyText from "@/components/reactbits/ShinyText";
-import StarBorder from "@/components/reactbits/StarBorder";
-import { ItemFallbackIcon } from "@/components/tournament/PoolItemTile";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
-import { nextMatch, roundLabel } from "@/lib/domain/bracket";
-import { useReducedMotion } from "@/lib/hooks/use-reduced-motion";
-import { fetchPoolItems, type PoolItem } from "@/lib/domain/pool-item";
-import type {
-  Play,
-  PlayRound,
-  TournamentRankingItem,
-} from "@/types/tournament";
+import { BarChart3, GitBranch, Swords, Trophy } from 'lucide-react';
+import { animate } from 'motion/react';
+import Image from 'next/image';
+import Link from 'next/link';
+import { useParams, useRouter } from 'next/navigation';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { toast } from 'sonner';
+
+import CountUp from '@/components/reactbits/CountUp';
+import ShinyText from '@/components/reactbits/ShinyText';
+import StarBorder from '@/components/reactbits/StarBorder';
+import CommentSection from '@/components/social/CommentSection';
+import BracketBackground from '@/components/tournament/BracketBackground';
+import FlapCounter from '@/components/tournament/FlapCounter';
+import FullBracket from '@/components/tournament/FullBracket';
+import PoolItemPlayButton from '@/components/tournament/PoolItemPlayButton';
+import { ItemFallbackIcon } from '@/components/tournament/PoolItemTile';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
+
+import { useReducedMotion } from '@/lib/hooks/use-reduced-motion';
+
+import { getPlay, voteRound } from '@/lib/api/plays';
+import { getRanking } from '@/lib/api/tournaments';
+import { nextMatch, roundLabel } from '@/lib/domain/bracket';
+import { fetchPoolItems, type PoolItem } from '@/lib/domain/pool-item';
+
+import type { Play, PlayRound, TournamentRankingItem } from '@/types/tournament';
 
 /**
  * 커버 정중앙에 얹는 재생 버튼. 대결 화면과 우승 화면이 같은 자리·같은 크기를 쓴다.
@@ -53,8 +53,8 @@ import type {
  * `inset-0 m-auto` 로 정렬하면 transform 은 비워 둘 수 있다.
  */
 const COVER_PLAY_BUTTON =
-  "absolute inset-0 m-auto size-14 rounded-full bg-secondary/80 shadow-lg backdrop-blur-sm transition-none active:not-aria-[haspopup]:translate-y-0 sm:size-16";
-const COVER_PLAY_ICON = "size-6 sm:size-7";
+  'absolute inset-0 m-auto size-14 rounded-full bg-secondary/80 shadow-lg backdrop-blur-sm transition-none active:not-aria-[haspopup]:translate-y-0 sm:size-16';
+const COVER_PLAY_ICON = 'size-6 sm:size-7';
 
 /**
  * 라운드 제목의 "희귀도".
@@ -76,10 +76,7 @@ const COVER_PLAY_ICON = "size-6 sm:size-7";
  * 표에 없는 라운드(64강·128강 = 6·7)는 광택이 아예 없다. 아직 귀할 단계가 아니고,
  * 128강에서부터 제목이 번쩍이면 결승까지 갈 곳이 없다.
  */
-const TITLE_RARITY: Record<
-  number,
-  { shine: number; speed: number; delay: number }
-> = {
+const TITLE_RARITY: Record<number, { shine: number; speed: number; delay: number }> = {
   5: { shine: 35, speed: 6, delay: 4 }, // 32강
   4: { shine: 55, speed: 5, delay: 3 }, // 16강
   3: { shine: 75, speed: 4, delay: 2.5 }, // 8강
@@ -99,22 +96,18 @@ export default function PlayPage() {
   // 방금 고른 항목. 배경 대진표에서 '다음 자리로 올라가는' 표시를 잠긐 보여주기 위해 둔다.
   const [justPicked, setJustPicked] = useState<string | null>(null);
   // 우승 화면에 붙일 이 항목의 누적 성적. 랭킹 응답에서 그 한 줄만 꺼낸다.
-  const [winnerStats, setWinnerStats] = useState<TournamentRankingItem | null>(
-    null,
-  );
+  const [winnerStats, setWinnerStats] = useState<TournamentRankingItem | null>(null);
   const reduced = useReducedMotion();
 
   const loadItems = useCallback(async (p: Play) => {
-    const ids = Array.from(
-      new Set(p.rounds.flatMap((r) => [r.item_a_id, r.item_b_id])),
-    );
+    const ids = Array.from(new Set(p.rounds.flatMap((r) => [r.item_a_id, r.item_b_id])));
     if (ids.length === 0) return;
     try {
       const fetched = await fetchPoolItems(p.item_type, ids);
       setItems(Object.fromEntries(fetched.map((i) => [i.id, i])));
     } catch {
       // 메타데이터는 부가 정보다. 실패해도 대진 진행 자체는 막지 않는다.
-      toast.error("후보 정보를 불러오지 못했습니다");
+      toast.error('후보 정보를 불러오지 못했습니다');
     }
   }, []);
 
@@ -125,8 +118,8 @@ export default function PlayPage() {
         setPlay(p);
         await loadItems(p);
       } catch {
-        toast.error("플레이를 불러오지 못했습니다");
-        router.push("/tournament");
+        toast.error('플레이를 불러오지 못했습니다');
+        router.push('/tournament');
       } finally {
         setLoading(false);
       }
@@ -148,9 +141,7 @@ export default function PlayPage() {
       try {
         const ranking = await getRanking(tournamentId);
         if (alive) {
-          setWinnerStats(
-            ranking.items.find((i) => i.item_id === winnerItemId) ?? null,
-          );
+          setWinnerStats(ranking.items.find((i) => i.item_id === winnerItemId) ?? null);
         }
       } catch {
         // 우승 화면의 부가 정보다 — 없으면 성적 칸만 빠진다.
@@ -180,7 +171,7 @@ export default function PlayPage() {
       await loadItems(updated);
     } catch {
       setJustPicked(null);
-      toast.error("투표를 반영하지 못했습니다");
+      toast.error('투표를 반영하지 못했습니다');
     } finally {
       setVoting(false);
     }
@@ -206,10 +197,10 @@ export default function PlayPage() {
     const winner = play.winner_item_id ? items[play.winner_item_id] : undefined;
     return (
       <div className="mx-auto w-full max-w-md px-4 py-12 text-center">
-        <Trophy className="mx-auto mb-4 size-15 text-primary" />
+        <Trophy className="text-primary mx-auto mb-4 size-15" />
 
         {/* 우승은 이 화면의 주인공이라 커버를 크게 놓는다 — 대결 카드보다 크다. */}
-        <div className="relative mx-auto mb-4 aspect-square w-full max-w-xs overflow-hidden rounded-xl bg-muted">
+        <div className="bg-muted relative mx-auto mb-4 aspect-square w-full max-w-xs overflow-hidden rounded-xl">
           {winner?.coverUrl ? (
             <Image
               src={winner.coverUrl}
@@ -219,7 +210,7 @@ export default function PlayPage() {
               className="object-cover"
             />
           ) : (
-            <div className="flex size-full items-center justify-center text-muted-foreground">
+            <div className="text-muted-foreground flex size-full items-center justify-center">
               <ItemFallbackIcon itemType={play.item_type} className="size-12" />
             </div>
           )}
@@ -241,10 +232,8 @@ export default function PlayPage() {
           )}
         </div>
 
-        <h2 className="mb-1 font-heading text-2xl font-bold">
-          {winner?.title ?? "알 수 없음"}
-        </h2>
-        <p className="mb-6 text-muted-foreground">{winner?.subtitle}</p>
+        <h2 className="font-heading mb-1 text-2xl font-bold">{winner?.title ?? '알 수 없음'}</h2>
+        <p className="text-muted-foreground mb-6">{winner?.subtitle}</p>
 
         {/*
           누적 성적. 이 판 한 번의 결과가 아니라 이 월드컵 전체에서의 성적이라 분수를 같이
@@ -254,38 +243,32 @@ export default function PlayPage() {
           <div className="mb-8 grid grid-cols-2 gap-3">
             <Card>
               <CardContent className="flex flex-col gap-0.5 py-1">
-                <p className="text-xs text-muted-foreground">우승 비율</p>
+                <p className="text-muted-foreground text-xs">우승 비율</p>
                 <p className="text-xl font-bold tabular-nums">
                   {reduced ? (
                     Math.round(winnerStats.championship_rate * 100)
                   ) : (
-                    <CountUp
-                      to={Math.round(winnerStats.championship_rate * 100)}
-                      duration={1.2}
-                    />
+                    <CountUp to={Math.round(winnerStats.championship_rate * 100)} duration={1.2} />
                   )}
                   %
                 </p>
-                <p className="text-xs text-muted-foreground tabular-nums">
+                <p className="text-muted-foreground text-xs tabular-nums">
                   {winnerStats.championship_count}/{winnerStats.play_count}판
                 </p>
               </CardContent>
             </Card>
             <Card>
               <CardContent className="flex flex-col gap-0.5 py-1">
-                <p className="text-xs text-muted-foreground">승률</p>
+                <p className="text-muted-foreground text-xs">승률</p>
                 <p className="text-xl font-bold tabular-nums">
                   {reduced ? (
                     Math.round(winnerStats.match_win_rate * 100)
                   ) : (
-                    <CountUp
-                      to={Math.round(winnerStats.match_win_rate * 100)}
-                      duration={1.2}
-                    />
+                    <CountUp to={Math.round(winnerStats.match_win_rate * 100)} duration={1.2} />
                   )}
                   %
                 </p>
-                <p className="text-xs text-muted-foreground tabular-nums">
+                <p className="text-muted-foreground text-xs tabular-nums">
                   {winnerStats.match_win_count}/{winnerStats.match_count}경기
                 </p>
               </CardContent>
@@ -295,23 +278,13 @@ export default function PlayPage() {
 
         <div className="flex flex-col gap-2">
           {/* Trophy + "최종 우승"이 이미 primary라 여기까지 primary면 색 예산을 넘긴다. */}
-          <Button
-            asChild
-            variant="secondary"
-            size="lg"
-            className="h-11 rounded-full"
-          >
+          <Button asChild variant="secondary" size="lg" className="h-11 rounded-full">
             <Link href={`/tournament/${play.tournament_id}/ranking`}>
               <BarChart3 />
               랭킹 보기
             </Link>
           </Button>
-          <Button
-            asChild
-            variant="outline"
-            size="lg"
-            className="h-11 rounded-full"
-          >
+          <Button asChild variant="outline" size="lg" className="h-11 rounded-full">
             <Link href={`/tournament/${play.tournament_id}`}>다시 하기</Link>
           </Button>
         </div>
@@ -324,10 +297,7 @@ export default function PlayPage() {
           쌓인다. `targetType` 만 맞추면 같은 컴포넌트가 그대로 돌아간다.
         */}
         <div className="mt-10 text-left">
-          <CommentSection
-            targetType="tournament"
-            targetId={play.tournament_id}
-          />
+          <CommentSection targetType="tournament" targetId={play.tournament_id} />
         </div>
       </div>
     );
@@ -349,9 +319,7 @@ export default function PlayPage() {
       {/* 우측 상단 전환 — 대결 화면 ↔ 전체 대진표 */}
       <div className="mb-2 flex items-start justify-between gap-2">
         {/* 라운드·진행은 화면 가운데에 크게 나오므로 여기서는 월드컵 이름만 남긴다. */}
-        <p className="min-w-0 truncate text-sm text-muted-foreground">
-          {play.tournament_title}
-        </p>
+        <p className="text-muted-foreground min-w-0 truncate text-sm">{play.tournament_title}</p>
         <Button
           variant="outline"
           size="sm"
@@ -360,7 +328,7 @@ export default function PlayPage() {
           className="shrink-0"
         >
           {showBracket ? <Swords /> : <GitBranch />}
-          {showBracket ? "대결로" : "대진표"}
+          {showBracket ? '대결로' : '대진표'}
         </Button>
       </div>
 
@@ -433,8 +401,7 @@ function PlayMatch({
     if (!justPicked || reduced) return;
 
     const winnerEl = cardRefs.current[justPicked];
-    const loserId =
-      justPicked === match.item_a_id ? match.item_b_id : match.item_a_id;
+    const loserId = justPicked === match.item_a_id ? match.item_b_id : match.item_a_id;
     const loserEl = cardRefs.current[loserId];
     if (!winnerEl || !loserEl) return;
 
@@ -465,15 +432,11 @@ function PlayMatch({
       {
         duration: 0.62,
         times: [0, 0.2, 1],
-        ease: ["easeOut", [0.22, 1.1, 0.36, 1]],
+        ease: ['easeOut', [0.22, 1.1, 0.36, 1]],
       },
     );
     // 커지는 것은 궤적과 무관하므로 스프링 그대로 둔다.
-    animate(
-      winnerEl,
-      { scale: 1.06 },
-      { type: "spring", duration: 0.5, bounce: 0.35 },
-    );
+    animate(winnerEl, { scale: 1.06 }, { type: 'spring', duration: 0.5, bounce: 0.35 });
 
     /*
       맞고 나가는 쪽은 튕기지 않는다(`bounce: 0`). **뒤로 뺐다가 되돌아온 이긴 카드가
@@ -483,14 +446,10 @@ function PlayMatch({
     animate(
       loserEl,
       { x: fly, rotate: dir * 18 },
-      { type: "spring", duration: 0.45, bounce: 0, delay: 0.2 },
+      { type: 'spring', duration: 0.45, bounce: 0, delay: 0.2 },
     );
     // 날아가는 내내 불투명해야 한다 — 반투명해지면 그 뒤로 이긴 카드가 비쳐 보인다.
-    animate(
-      loserEl,
-      { opacity: [1, 1, 0] },
-      { duration: 0.45, times: [0, 0.75, 1], delay: 0.2 },
-    );
+    animate(loserEl, { opacity: [1, 1, 0] }, { duration: 0.45, times: [0, 0.75, 1], delay: 0.2 });
   }, [justPicked, reduced, match.item_a_id, match.item_b_id]);
 
   /*
@@ -503,12 +462,7 @@ function PlayMatch({
 
   return (
     <div className="relative flex flex-1 flex-col justify-center">
-      <BracketBackground
-        play={play}
-        match={match}
-        items={items}
-        justPicked={justPicked}
-      />
+      <BracketBackground play={play} match={match} items={items} justPicked={justPicked} />
 
       <div className="relative">
         {/*
@@ -524,10 +478,10 @@ function PlayMatch({
         <div className="mb-6 flex flex-col items-center gap-2">
           <p
             className={[
-              "flex items-center justify-center gap-2 font-heading font-bold",
+              'font-heading flex items-center justify-center gap-2 font-bold',
               // h1급을 키우는 것은 이 화면에서 이 한 줄뿐이다(§ Typography 계층 규칙).
-              isFinal ? "text-3xl" : "text-2xl",
-            ].join(" ")}
+              isFinal ? 'text-3xl' : 'text-2xl',
+            ].join(' ')}
           >
             {/*
               트로피는 색을 입히지 않는다. 이 화면의 primary 는 선택 버튼 두 개로
@@ -564,9 +518,7 @@ function PlayMatch({
           {/*
             결승은 한 경기뿐이라 `1/1` 이 정보가 아니다 — 계기판 자체를 걸지 않는다.
           */}
-          {!isFinal && (
-            <FlapCounter index={progress.index} total={progress.total} />
-          )}
+          {!isFinal && <FlapCounter index={progress.index} total={progress.total} />}
         </div>
 
         {/*
@@ -598,10 +550,9 @@ function PlayMatch({
           이제 이동 거리를 **두 카드의 실제 화면 좌표를 재서** 구하므로 필요 없다.
         */}
           <div
-            className={[
-              "grid grid-cols-2",
-              isFinal ? "gap-4 sm:gap-8" : "gap-3 sm:gap-6",
-            ].join(" ")}
+            className={['grid grid-cols-2', isFinal ? 'gap-4 sm:gap-8' : 'gap-3 sm:gap-6'].join(
+              ' ',
+            )}
           >
             {pair.map((itemId) => {
               const item = items[itemId];
@@ -611,16 +562,16 @@ function PlayMatch({
                 <Card
                   key={itemId}
                   className={[
-                    "h-full transition-colors duration-300",
+                    'h-full transition-colors duration-300',
                     // 고른 쪽은 테두리로 표시한다. 움직임은 래퍼에 걸린 스프링이 맡는다.
-                    won ? "border-primary" : "",
+                    won ? 'border-primary' : '',
                     // 동작 줄이기를 켰으면 날리지 않고 물러나기만 한다.
-                    reduced && justPicked && !won ? "scale-95 opacity-40" : "",
-                  ].join(" ")}
+                    reduced && justPicked && !won ? 'scale-95 opacity-40' : '',
+                  ].join(' ')}
                 >
                   <CardContent className="flex flex-col items-center gap-3">
                     {/* 카드가 화면을 크게 쓰도록 커버를 정사각으로 꽉 채운다(예전엔 112px 고정). */}
-                    <div className="relative aspect-square w-full overflow-hidden rounded-lg bg-muted">
+                    <div className="bg-muted relative aspect-square w-full overflow-hidden rounded-lg">
                       {item?.coverUrl ? (
                         <Image
                           src={item.coverUrl}
@@ -630,11 +581,8 @@ function PlayMatch({
                           className="object-cover"
                         />
                       ) : (
-                        <div className="flex size-full items-center justify-center text-muted-foreground">
-                          <ItemFallbackIcon
-                            itemType={play.item_type}
-                            className="size-10"
-                          />
+                        <div className="text-muted-foreground flex size-full items-center justify-center">
+                          <ItemFallbackIcon itemType={play.item_type} className="size-10" />
                         </div>
                       )}
 
@@ -662,17 +610,13 @@ function PlayMatch({
                       {/* 카드 내부 제목은 `text-lg` 를 넘지 않는다(§ Typography 계층 규칙). */}
                       <p
                         className={[
-                          "truncate font-medium",
-                          isFinal
-                            ? "text-base sm:text-lg"
-                            : "text-sm sm:text-base",
-                        ].join(" ")}
+                          'truncate font-medium',
+                          isFinal ? 'text-base sm:text-lg' : 'text-sm sm:text-base',
+                        ].join(' ')}
                       >
-                        {item?.title ?? "알 수 없음"}
+                        {item?.title ?? '알 수 없음'}
                       </p>
-                      <p className="truncate text-xs text-muted-foreground">
-                        {item?.subtitle}
-                      </p>
+                      <p className="text-muted-foreground truncate text-xs">{item?.subtitle}</p>
                     </div>
 
                     {/*
@@ -725,11 +669,11 @@ function PlayMatch({
                     cardRefs.current[itemId] = el;
                   }}
                   className={[
-                    "h-full",
+                    'h-full',
                     // 밀려나는 카드가 위에 그려져야 한다. 겹치는 구간에서 이긴 카드가
                     // 진 카드를 뚫고 나오면 안 된다.
-                    justPicked ? (won ? "relative z-10" : "relative z-20") : "",
-                  ].join(" ")}
+                    justPicked ? (won ? 'relative z-10' : 'relative z-20') : '',
+                  ].join(' ')}
                 >
                   {inner}
                 </div>

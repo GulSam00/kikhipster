@@ -2,9 +2,13 @@
 
 import { Heart } from 'lucide-react';
 import { toast } from 'sonner';
+
 import { Button } from '@/components/ui/button';
+
 import { useLikeStatus } from '@/lib/hooks/use-like-status';
+
 import { cn } from '@/lib/utils';
+
 import type { LikeTargetType } from '@/types/social';
 
 interface Props {
@@ -55,7 +59,7 @@ export default function LikeButton({
         aria-pressed={liked}
         aria-label={label}
         className={cn(
-          'shrink-0 text-muted-foreground hover:text-foreground',
+          'text-muted-foreground hover:text-foreground shrink-0',
           liked && 'text-foreground',
           className,
         )}

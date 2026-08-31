@@ -1,24 +1,28 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
 import { Download } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
-import { ApiError } from '@/lib/api/client';
-import { getTopster, topsterPath } from '@/lib/api/topsters';
-import CommentSection from '@/components/social/CommentSection';
+
 import DetailActionBar from '@/components/common/DetailActionBar';
 import DetailHeader from '@/components/common/DetailHeader';
-import LikeButton from '@/components/social/LikeButton';
 import OwnerMenu from '@/components/common/OwnerMenu';
 import ShareButton from '@/components/common/ShareButton';
-import TopsterCanvas from '@/components/topster/TopsterCanvas';
 import ViewCounter from '@/components/common/ViewCounter';
+import CommentSection from '@/components/social/CommentSection';
+import LikeButton from '@/components/social/LikeButton';
+import TopsterCanvas from '@/components/topster/TopsterCanvas';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Spinner } from '@/components/ui/spinner';
+
 import { useAlbumItems } from '@/lib/hooks/use-album-covers';
+
+import { ApiError } from '@/lib/api/client';
+import { getTopster, topsterPath } from '@/lib/api/topsters';
 import { downloadTopsterImage } from '@/lib/render/topster-image';
+
 import type { Topster } from '@/types/topster';
 
 /**
@@ -32,10 +36,7 @@ export default function TopsterDetail({ id }: { id: string }) {
   const [topster, setTopster] = useState<Topster | null>(null);
   const [loading, setLoading] = useState(true);
   const [downloading, setDownloading] = useState(false);
-  const albumIds = useMemo(
-    () => topster?.items.map((it) => it.album_spotify_id) ?? [],
-    [topster],
-  );
+  const albumIds = useMemo(() => topster?.items.map((it) => it.album_spotify_id) ?? [], [topster]);
   const albums = useAlbumItems(albumIds);
 
   useEffect(() => {
@@ -70,7 +71,7 @@ export default function TopsterDetail({ id }: { id: string }) {
 
   if (loading) {
     return (
-      <div className="flex flex-1 items-center justify-center gap-2 text-muted-foreground">
+      <div className="text-muted-foreground flex flex-1 items-center justify-center gap-2">
         <Spinner />
         불러오는 중...
       </div>

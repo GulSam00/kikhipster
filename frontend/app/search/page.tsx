@@ -1,34 +1,33 @@
-"use client";
+'use client';
 
-import { useCallback, useEffect, useState } from "react";
-import { SearchIcon } from "lucide-react";
-import { toast } from "sonner";
-import { searchAlbums, searchArtists, searchTracks } from "@/lib/api/music";
-import ArtistCard from "@/components/music/ArtistCard";
-import AlbumCard from "@/components/music/AlbumCard";
-import TrackRow from "@/components/music/TrackRow";
-import { Input } from "@/components/ui/input";
-import { Spinner } from "@/components/ui/spinner";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { SearchIcon } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
+import { toast } from 'sonner';
+
+import AlbumCard from '@/components/music/AlbumCard';
+import ArtistCard from '@/components/music/ArtistCard';
+import TrackRow from '@/components/music/TrackRow';
 import {
   Empty,
   EmptyDescription,
   EmptyHeader,
   EmptyMedia,
   EmptyTitle,
-} from "@/components/ui/empty";
-import type {
-  ArtistSummary,
-  AlbumSummary,
-  TrackSearchItem,
-} from "@/types/music";
+} from '@/components/ui/empty';
+import { Input } from '@/components/ui/input';
+import { Spinner } from '@/components/ui/spinner';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
-type Tab = "artists" | "albums" | "tracks";
+import { searchAlbums, searchArtists, searchTracks } from '@/lib/api/music';
+
+import type { AlbumSummary, ArtistSummary, TrackSearchItem } from '@/types/music';
+
+type Tab = 'artists' | 'albums' | 'tracks';
 
 const tabs: { key: Tab; label: string }[] = [
-  { key: "artists", label: "아티스트" },
-  { key: "albums", label: "앨범" },
-  { key: "tracks", label: "곡" },
+  { key: 'artists', label: '아티스트' },
+  { key: 'albums', label: '앨범' },
+  { key: 'tracks', label: '곡' },
 ];
 
 function useDebounce<T>(value: T, ms: number): T {
@@ -41,8 +40,8 @@ function useDebounce<T>(value: T, ms: number): T {
 }
 
 export default function SearchPage() {
-  const [query, setQuery] = useState("");
-  const [tab, setTab] = useState<Tab>("artists");
+  const [query, setQuery] = useState('');
+  const [tab, setTab] = useState<Tab>('artists');
   const [artists, setArtists] = useState<ArtistSummary[]>([]);
   const [albums, setAlbums] = useState<AlbumSummary[]>([]);
   const [tracks, setTracks] = useState<TrackSearchItem[]>([]);
@@ -59,10 +58,10 @@ export default function SearchPage() {
     }
     setLoading(true);
     try {
-      if (t === "artists") {
+      if (t === 'artists') {
         const res = { items: await searchArtists(q) };
         setArtists(res.items);
-      } else if (t === "albums") {
+      } else if (t === 'albums') {
         const res = { items: await searchAlbums(q) };
         setAlbums(res.items);
       } else {
@@ -70,7 +69,7 @@ export default function SearchPage() {
         setTracks(res.items);
       }
     } catch {
-      toast.error("검색에 실패했습니다");
+      toast.error('검색에 실패했습니다');
     } finally {
       setLoading(false);
     }
@@ -81,16 +80,12 @@ export default function SearchPage() {
   }, [debouncedQuery, tab, search]);
 
   const isEmpty =
-    !loading &&
-    !!query &&
-    artists.length === 0 &&
-    albums.length === 0 &&
-    tracks.length === 0;
+    !loading && !!query && artists.length === 0 && albums.length === 0 && tracks.length === 0;
 
   return (
     <div className="mx-auto w-full max-w-6xl px-4 py-8">
       <div className="relative mb-4">
-        <SearchIcon className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
+        <SearchIcon className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2" />
         <Input
           value={query}
           onChange={(e) => setQuery(e.target.value)}
@@ -110,7 +105,7 @@ export default function SearchPage() {
         </TabsList>
 
         {loading && (
-          <div className="flex items-center gap-2 py-8 text-sm text-muted-foreground">
+          <div className="text-muted-foreground flex items-center gap-2 py-8 text-sm">
             <Spinner />
             검색 중...
           </div>
@@ -140,7 +135,7 @@ export default function SearchPage() {
                   <TrackRow
                     key={t.id}
                     track={{ ...t, explicit: t.explicit }}
-                    artist={t.artists.join(", ")}
+                    artist={t.artists.join(', ')}
                     albumCover={t.album.cover_url}
                   />
                 ))}

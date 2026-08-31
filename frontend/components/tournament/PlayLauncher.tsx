@@ -1,18 +1,20 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { toast } from "sonner";
-import { createPlay } from "@/lib/api/tournaments";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
+import { toast } from 'sonner';
+
+import { Button, buttonVariants } from '@/components/ui/button';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { cn } from "@/lib/utils";
+} from '@/components/ui/select';
+
+import { createPlay } from '@/lib/api/tournaments';
+import { cn } from '@/lib/utils';
 
 interface Props {
   tournamentId: string;
@@ -38,17 +40,11 @@ interface Props {
 export default function PlayLauncher({ tournamentId, availableSizes }: Props) {
   const router = useRouter();
   // 가장 큰 강수를 기본값으로 — 풀을 많이 담았으면 그만큼 크게 돌리고 싶을 것이다.
-  const [size, setSize] = useState<number>(
-    availableSizes[availableSizes.length - 1] ?? 4,
-  );
+  const [size, setSize] = useState<number>(availableSizes[availableSizes.length - 1] ?? 4);
   const [loading, setLoading] = useState(false);
 
   if (availableSizes.length === 0) {
-    return (
-      <p className="text-sm text-muted-foreground">
-        풀이 4개 미만이라 플레이할 수 없습니다.
-      </p>
-    );
+    return <p className="text-muted-foreground text-sm">풀이 4개 미만이라 플레이할 수 없습니다.</p>;
   }
 
   async function start() {
@@ -59,7 +55,7 @@ export default function PlayLauncher({ tournamentId, availableSizes }: Props) {
       const play = await createPlay(tournamentId, size);
       router.push(`/play/${play.id}`);
     } catch {
-      toast.error("플레이를 시작하지 못했습니다");
+      toast.error('플레이를 시작하지 못했습니다');
       setLoading(false);
     }
   }
@@ -91,8 +87,8 @@ export default function PlayLauncher({ tournamentId, availableSizes }: Props) {
         <SelectTrigger
           aria-label="강수"
           className={cn(
-            buttonVariants({ size: "lg" }),
-            "h-11 w-full justify-between rounded-r-none border-r-0 data-[size=default]:h-11 data-[state=open]:bg-primary/80 dark:bg-primary dark:hover:bg-primary/80 [&_svg]:text-primary-foreground/70",
+            buttonVariants({ size: 'lg' }),
+            'data-[state=open]:bg-primary/80 dark:bg-primary dark:hover:bg-primary/80 [&_svg]:text-primary-foreground/70 h-11 w-full justify-between rounded-r-none border-r-0 data-[size=default]:h-11',
           )}
         >
           {/*
@@ -127,11 +123,11 @@ export default function PlayLauncher({ tournamentId, availableSizes }: Props) {
       {/* 칸막이는 배경색이 아니라 글자색의 투명도로 낸다 — 같은 면 위의 분할선이라는 뜻. */}
       <Button
         size="lg"
-        className="h-11 w-full rounded-l-none border-l border-primary-foreground/25"
+        className="border-primary-foreground/25 h-11 w-full rounded-l-none border-l"
         onClick={start}
         disabled={loading}
       >
-        {loading ? "대진 뽑는 중..." : "시작하기"}
+        {loading ? '대진 뽑는 중...' : '시작하기'}
       </Button>
     </div>
   );

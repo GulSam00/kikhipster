@@ -1,5 +1,6 @@
 import { getAlbumWithTracks } from '@/lib/api/music';
 import type { PoolItem } from '@/lib/domain/pool-item';
+
 import type { AlbumSummary, TrackItem, TrackSearchItem } from '@/types/music';
 import type { QueueTrack } from '@/types/player';
 
@@ -56,7 +57,5 @@ export function poolItemToQueue(item: PoolItem): QueueTrack | null {
  */
 export async function albumQueueTracks(albumId: string): Promise<QueueTrack[]> {
   const { album, tracks } = await getAlbumWithTracks(albumId);
-  return tracks
-    .map((t) => albumTrackToQueue(t, album))
-    .filter((t): t is QueueTrack => t !== null);
+  return tracks.map((t) => albumTrackToQueue(t, album)).filter((t): t is QueueTrack => t !== null);
 }

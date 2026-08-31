@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import SplitFlapText from "@/components/reactbits/SplitFlapText";
+import SplitFlapText from '@/components/reactbits/SplitFlapText';
 
 interface Props {
   /** 이 라운드에서 몇 번째 경기인지. 이 값만 바뀌므로 앞자리만 넘어간다. */

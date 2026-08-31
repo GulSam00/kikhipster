@@ -1,9 +1,12 @@
 'use client';
 
 import { Check } from 'lucide-react';
-import { toRounds } from '@/lib/domain/bracket';
+
 import { useBoxSize } from '@/lib/hooks/use-box-size';
+
+import { toRounds } from '@/lib/domain/bracket';
 import type { PoolItem } from '@/lib/domain/pool-item';
+
 import type { Play, PlayRound } from '@/types/tournament';
 
 interface Props {
@@ -57,7 +60,7 @@ export default function FullBracket({ play, items, currentMatchId }: Props) {
           {rounds.map((round) => (
             <p
               key={round.roundNum}
-              className="sticky top-0 w-44 shrink-0 bg-background text-center text-xs font-medium text-muted-foreground"
+              className="bg-background text-muted-foreground sticky top-0 w-44 shrink-0 text-center text-xs font-medium"
             >
               {round.label}
             </p>
@@ -69,7 +72,7 @@ export default function FullBracket({ play, items, currentMatchId }: Props) {
           {area.height > 0 && (
             <svg
               aria-hidden
-              className="pointer-events-none absolute inset-0 stroke-border"
+              className="stroke-border pointer-events-none absolute inset-0"
               width={totalWidth}
               height={area.height}
               fill="none"
@@ -145,10 +148,9 @@ function MatchCell({
 }) {
   return (
     <div
-      className={[
-        'rounded-md border text-xs',
-        isCurrent ? 'border-primary' : 'border-border',
-      ].join(' ')}
+      className={['rounded-md border text-xs', isCurrent ? 'border-primary' : 'border-border'].join(
+        ' ',
+      )}
     >
       {[match.item_a_id, match.item_b_id].map((id, i) => {
         const won = match.winner_id === id;
@@ -158,13 +160,13 @@ function MatchCell({
             key={id}
             className={[
               'flex items-center gap-1 px-2 py-1.5',
-              i === 0 ? 'border-b border-border' : '',
-              won ? 'font-medium text-foreground' : '',
+              i === 0 ? 'border-border border-b' : '',
+              won ? 'text-foreground font-medium' : '',
               lost ? 'text-muted-foreground line-through' : '',
             ].join(' ')}
           >
             <span className="truncate">{label(id)}</span>
-            {won && <Check className="size-3 shrink-0 text-primary" />}
+            {won && <Check className="text-primary size-3 shrink-0" />}
           </div>
         );
       })}

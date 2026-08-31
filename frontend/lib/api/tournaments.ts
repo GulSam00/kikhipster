@@ -1,4 +1,6 @@
 import { apiFetch } from '@/lib/api/client';
+import type { PageParams } from '@/lib/api/topsters';
+
 import type {
   Play,
   TournamentCreateBody,
@@ -11,8 +13,6 @@ import type {
 
 /** 월드컵 엔드포인트. `/api/tournaments` 문자열은 이 파일에만 있다. */
 const BASE = '/api/tournaments';
-
-import type { PageParams } from '@/lib/api/topsters';
 
 export const tournamentListPath = (
   { limit, offset }: PageParams,

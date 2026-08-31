@@ -1,4 +1,5 @@
 import { apiFetch } from '@/lib/api/client';
+
 import type { LikeStatus, LikeTargetType } from '@/types/social';
 
 /** 좋아요 엔드포인트. `/api/likes` 문자열은 이 파일에만 있다. */

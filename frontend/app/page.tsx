@@ -1,11 +1,20 @@
-import Link from 'next/link';
 import { LayoutGrid, Trophy } from 'lucide-react';
-import { listTopsters } from '@/lib/api/topsters';
-import { listTournaments } from '@/lib/api/tournaments';
+import Link from 'next/link';
+
 import TopsterCard from '@/components/topster/TopsterCard';
 import TournamentCard from '@/components/tournament/TournamentCard';
 import { Button } from '@/components/ui/button';
-import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty';
+import {
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from '@/components/ui/empty';
+
+import { listTopsters } from '@/lib/api/topsters';
+import { listTournaments } from '@/lib/api/tournaments';
 
 /** 홈에 깔 개수. 탑스터는 6열 그리드 두 줄, 월드컵은 3열 두 줄이다. */
 const TOPSTER_COUNT = 12;

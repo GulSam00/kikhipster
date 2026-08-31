@@ -37,6 +37,7 @@ cd backend  && ./venv/Scripts/python.exe -m uvicorn main:app --reload --port 800
 cd frontend && npm run dev                                      # :3300
 ```
 
+- **`frontend/` 의 패키지는 pnpm 으로 관리한다.** `pnpm-lock.yaml` 만 있고 `package-lock.json` 은 없다. `npm install` 을 쓰면 pnpm 의 `node_modules/.pnpm` 링크 구조를 훑다가 `Cannot read properties of null (reading 'matches')` 로 죽는다(2026-08-31 실제로 겪음). 패키지 추가는 `cd frontend && pnpm add -D <pkg>`. 스크립트 실행(`npm run dev` 등)은 어느 쪽이든 된다.
 - **`.env` 를 고치면 백엔드를 반드시 재기동한다.** uvicorn `--reload` 는 `.py` 만 감시해서 `.env` 변경은 반영되지 않는다.
 - OAuth Redirect URI는 **백엔드 8000** 이다 — 프론트 3300이 아니다. `http://localhost:8000/api/auth/callback/{google,kakao}`
 - Kakao는 `KAKAO_CLIENT_ID` 에 **REST API 키**를 넣고, 사이트 도메인(`http://localhost:8000`)을 먼저 등록해야 Redirect URI 등록이 된다.

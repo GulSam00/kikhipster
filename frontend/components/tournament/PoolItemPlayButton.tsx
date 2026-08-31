@@ -1,10 +1,14 @@
 'use client';
 
 import { Pause, Play } from 'lucide-react';
+
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
+
 import { usePoolPlayer } from '@/lib/hooks/use-pool-player';
+
 import type { PoolItem } from '@/lib/domain/pool-item';
+
 import type { TournamentItemType } from '@/types/tournament';
 
 interface Props {

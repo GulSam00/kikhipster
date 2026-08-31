@@ -1,6 +1,8 @@
-import type { ReactNode } from 'react';
 import Link from 'next/link';
+import type { ReactNode } from 'react';
+
 import ItemStats from '@/components/common/ItemStats';
+
 import { formatDate } from '@/lib/utils';
 
 interface Props {
@@ -46,10 +48,10 @@ export default function DetailHeader({
         <div className="min-w-0 flex-1">
           {badges && <div className="mb-2 flex flex-wrap items-center gap-1.5">{badges}</div>}
           <h1 className="font-heading text-2xl font-bold">{title}</h1>
-          <p className="mt-1 text-xs text-muted-foreground">
+          <p className="text-muted-foreground mt-1 text-xs">
             <Link
               href={`/profile/${authorId}`}
-              className="outline-none transition-colors hover:text-primary focus-visible:ring-3 focus-visible:ring-ring/50"
+              className="hover:text-primary focus-visible:ring-ring/50 transition-colors outline-none focus-visible:ring-3"
             >
               {authorNickname}
             </Link>

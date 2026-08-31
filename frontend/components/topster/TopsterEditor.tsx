@@ -1,10 +1,10 @@
 'use client';
 
-import { type ReactNode } from 'react';
-import Image from 'next/image';
-import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
+import { DragDropContext, Draggable, Droppable } from '@hello-pangea/dnd';
 import { Download, Plus, X } from 'lucide-react';
-import { clampTopsterSide, TOPSTER_MAX_CELLS, TOPSTER_MAX_SIDE, TOPSTER_MIN_SIDE } from '@/lib/domain/limits';
+import Image from 'next/image';
+import { type ReactNode } from 'react';
+
 import TopsterAlbumList from '@/components/topster/TopsterAlbumList';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -13,9 +13,23 @@ import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
-import { computeCell, gridOffsetTop, topsterGridStyle, useBoxSize } from '@/lib/hooks/use-topster-grid';
+
 import { useTopsterDraft, type TopsterDraftInitial } from '@/lib/hooks/use-topster-draft';
+import {
+  computeCell,
+  gridOffsetTop,
+  topsterGridStyle,
+  useBoxSize,
+} from '@/lib/hooks/use-topster-grid';
+
+import {
+  clampTopsterSide,
+  TOPSTER_MAX_CELLS,
+  TOPSTER_MAX_SIDE,
+  TOPSTER_MIN_SIDE,
+} from '@/lib/domain/limits';
 import { cn } from '@/lib/utils';
+
 import type { TopsterCreateBody } from '@/types/topster';
 
 export type { TopsterDraftInitial as TopsterEditorInitial };
@@ -81,7 +95,7 @@ export default function TopsterEditor({
     // 페이지 자체는 스크롤하지 않고 사이드바/미리보기 안에서만 스크롤한다.
     <div className="mx-auto flex h-full w-full max-w-6xl flex-col overflow-hidden px-4 py-6">
       {/* 페이지 제목과 본문을 구분선으로 가른다. */}
-      <h1 className="mb-4 shrink-0 border-b pb-3 font-heading text-2xl font-bold">{heading}</h1>
+      <h1 className="font-heading mb-4 shrink-0 border-b pb-3 text-2xl font-bold">{heading}</h1>
 
       <div className="grid min-h-0 flex-1 gap-8 lg:grid-cols-[320px_minmax(0,1fr)]">
         {/*
@@ -100,7 +114,10 @@ export default function TopsterEditor({
               </TabsTrigger>
             </TabsList>
 
-            <TabsContent value="add" className="mt-4 flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto">
+            <TabsContent
+              value="add"
+              className="mt-4 flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto"
+            >
               <Label htmlFor="album-search">앨범 검색</Label>
               <Input
                 id="album-search"
@@ -117,7 +134,7 @@ export default function TopsterEditor({
                         key={a.id}
                         type="button"
                         onClick={() => placeAlbum(a)}
-                        className="flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-left outline-none transition-colors hover:bg-accent focus-visible:ring-3 focus-visible:ring-ring/50"
+                        className="hover:bg-accent focus-visible:ring-ring/50 flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-left transition-colors outline-none focus-visible:ring-3"
                       >
                         {a.cover_url ? (
                           <Image
@@ -128,25 +145,28 @@ export default function TopsterEditor({
                             className="size-8 rounded object-cover"
                           />
                         ) : (
-                          <div className="size-8 shrink-0 rounded bg-muted" />
+                          <div className="bg-muted size-8 shrink-0 rounded" />
                         )}
                         <div className="min-w-0">
                           <p className="truncate text-sm">{a.title}</p>
-                          <p className="truncate text-xs text-muted-foreground">{a.artist_name}</p>
+                          <p className="text-muted-foreground truncate text-xs">{a.artist_name}</p>
                         </div>
                       </button>
                     ))}
                   </div>
                 </ScrollArea>
               ) : (
-                <p className="text-xs text-muted-foreground">
+                <p className="text-muted-foreground text-xs">
                   검색해서 고른 앨범이 격자의 빈 칸에 차례로 들어갑니다. 칸을 드래그해 순서를
                   바꾸고, 클릭하면 비웁니다.
                 </p>
               )}
             </TabsContent>
 
-            <TabsContent value="options" className="mt-4 flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto pr-1">
+            <TabsContent
+              value="options"
+              className="mt-4 flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto pr-1"
+            >
               <div className="grid gap-2">
                 <Label htmlFor="topster-title">제목</Label>
                 <Input
@@ -180,7 +200,9 @@ export default function TopsterEditor({
                     min={TOPSTER_MIN_SIDE}
                     max={TOPSTER_MAX_SIDE}
                     value={options.width}
-                    onChange={(e) => setOption('width', clampTopsterSide(e.target.value, options.height))}
+                    onChange={(e) =>
+                      setOption('width', clampTopsterSide(e.target.value, options.height))
+                    }
                     className="h-10"
                   />
                 </div>
@@ -192,12 +214,14 @@ export default function TopsterEditor({
                     min={TOPSTER_MIN_SIDE}
                     max={TOPSTER_MAX_SIDE}
                     value={options.height}
-                    onChange={(e) => setOption('height', clampTopsterSide(e.target.value, options.width))}
+                    onChange={(e) =>
+                      setOption('height', clampTopsterSide(e.target.value, options.width))
+                    }
                     className="h-10"
                   />
                 </div>
               </div>
-              <p className="-mt-2 text-xs text-muted-foreground">
+              <p className="text-muted-foreground -mt-2 text-xs">
                 {options.width}×{options.height} = {cellCount}칸 (최대 {TOPSTER_MAX_CELLS}칸)
               </p>
 
@@ -253,7 +277,7 @@ export default function TopsterEditor({
             </TabsContent>
           </Tabs>
 
-          {error && <p className="text-sm text-destructive">{error}</p>}
+          {error && <p className="text-destructive text-sm">{error}</p>}
 
           <div className="flex gap-2">
             <Button onClick={handleSave} disabled={saving} size="lg" className="h-11 flex-1">
@@ -295,11 +319,19 @@ export default function TopsterEditor({
             <DragDropContext onDragEnd={onDragEnd}>
               <Droppable droppableId="grid" direction="horizontal">
                 {(provided) => (
-                  <div ref={gridBoxRef} className="flex min-h-0 min-w-0 flex-1 items-center justify-center">
+                  <div
+                    ref={gridBoxRef}
+                    className="flex min-h-0 min-w-0 flex-1 items-center justify-center"
+                  >
                     <div
                       ref={provided.innerRef}
                       {...provided.droppableProps}
-                      style={topsterGridStyle(options.width, options.height, options.cell_gap, cellPx)}
+                      style={topsterGridStyle(
+                        options.width,
+                        options.height,
+                        options.cell_gap,
+                        cellPx,
+                      )}
                     >
                       {grid.map((cell, idx) => (
                         <Draggable key={`cell-${idx}`} draggableId={`cell-${idx}`} index={idx}>
@@ -388,7 +420,7 @@ function OptionToggle({
     // 다른 옵션 컨트롤이 h-10 이라 체크박스만 작아 보였다 — 크기와 히트 영역을 맞춘다.
     <Label
       htmlFor={id}
-      className="flex h-9 cursor-pointer items-center gap-2.5 rounded-lg text-sm font-normal text-muted-foreground transition-colors hover:text-foreground"
+      className="text-muted-foreground hover:text-foreground flex h-9 cursor-pointer items-center gap-2.5 rounded-lg text-sm font-normal transition-colors"
     >
       <Checkbox
         id={id}

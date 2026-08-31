@@ -1,17 +1,28 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
-import Link from 'next/link';
 import { LayoutGrid, Plus, Search } from 'lucide-react';
-import { topsterListPath } from '@/lib/api/topsters';
-import { useInfiniteList } from '@/lib/hooks/use-infinite-list';
+import Link from 'next/link';
+import { useCallback, useEffect, useState } from 'react';
+
 import InfiniteListFooter from '@/components/common/InfiniteListFooter';
 import TopsterCard from '@/components/topster/TopsterCard';
 import { Button } from '@/components/ui/button';
-import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty';
+import {
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from '@/components/ui/empty';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
+
+import { useInfiniteList } from '@/lib/hooks/use-infinite-list';
+
+import { topsterListPath } from '@/lib/api/topsters';
+
 import type { Topster, TopsterSort } from '@/types/topster';
 
 // 월드컵 대시보드와 같은 축이되 인기 지표는 '플레이 횟수'가 아니라 '좋아요 수'이고,
@@ -32,8 +43,7 @@ export default function TopstersPage() {
   }, [q]);
 
   const buildUrl = useCallback(
-    (page: { limit: number; offset: number }) =>
-      topsterListPath(page, { sort, q: debouncedQ }),
+    (page: { limit: number; offset: number }) => topsterListPath(page, { sort, q: debouncedQ }),
     [sort, debouncedQ],
   );
 
@@ -50,14 +60,13 @@ export default function TopstersPage() {
         <h1 className="font-heading text-2xl font-bold">탑스터</h1>
         <Button asChild size="lg">
           <Link href="/topsters/new">
-            <Plus />
-            새 탑스터
+            <Plus />새 탑스터
           </Link>
         </Button>
       </div>
 
-      <div className="mb-3 relative">
-        <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
+      <div className="relative mb-3">
+        <Search className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2" />
         <Input
           value={q}
           onChange={(e) => setQ(e.target.value)}
@@ -92,7 +101,9 @@ export default function TopstersPage() {
             <EmptyMedia variant="icon">
               <LayoutGrid />
             </EmptyMedia>
-            <EmptyTitle>{debouncedQ ? '검색 결과가 없습니다' : '아직 탑스터가 없습니다'}</EmptyTitle>
+            <EmptyTitle>
+              {debouncedQ ? '검색 결과가 없습니다' : '아직 탑스터가 없습니다'}
+            </EmptyTitle>
             <EmptyDescription>
               {debouncedQ
                 ? '다른 검색어로 찾아보세요.'

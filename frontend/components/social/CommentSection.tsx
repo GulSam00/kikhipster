@@ -1,16 +1,9 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import { Check, Flag, Pencil, Send, Trash2, X } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
-import {
-  REPORT_REASONS,
-  createComment,
-  deleteComment,
-  listComments,
-  reportComment,
-  updateComment,
-} from '@/lib/api/comments';
+
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -22,7 +15,18 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
+
 import { useMe } from '@/lib/hooks/use-me';
+
+import {
+  createComment,
+  deleteComment,
+  listComments,
+  REPORT_REASONS,
+  reportComment,
+  updateComment,
+} from '@/lib/api/comments';
+
 import type { Comment, CommentTargetType } from '@/types/social';
 
 interface Props {
@@ -115,9 +119,7 @@ export default function CommentSection({ targetType, targetId }: Props) {
       // 서버를 다시 부르지 않고 그 줄만 바꾼다 — 신고는 목록의 다른 값을 건드리지 않는다.
       setComments((prev) =>
         prev.map((c) =>
-          c.id === commentId
-            ? { ...c, reported_by_me: true, report_count: c.report_count + 1 }
-            : c,
+          c.id === commentId ? { ...c, reported_by_me: true, report_count: c.report_count + 1 } : c,
         ),
       );
       toast.success('신고를 접수했습니다');
@@ -128,7 +130,7 @@ export default function CommentSection({ targetType, targetId }: Props) {
 
   return (
     <section>
-      <h2 className="mb-4 font-heading text-lg font-bold">댓글 {comments.length}</h2>
+      <h2 className="font-heading mb-4 text-lg font-bold">댓글 {comments.length}</h2>
 
       {/*
         예전엔 로그인해야만 이 폼이 나왔다. 이제 비로그인도 쓸 수 있고, 대신 닉네임 칸이
@@ -160,7 +162,7 @@ export default function CommentSection({ targetType, targetId }: Props) {
       </form>
 
       {comments.length === 0 ? (
-        <p className="py-6 text-center text-sm text-muted-foreground">첫 댓글을 남겨보세요.</p>
+        <p className="text-muted-foreground py-6 text-center text-sm">첫 댓글을 남겨보세요.</p>
       ) : (
         <div className="flex flex-col gap-2">
           {comments.map((c) => (
@@ -170,7 +172,7 @@ export default function CommentSection({ targetType, targetId }: Props) {
                   <AvatarFallback>{c.author_nickname[0]?.toUpperCase()}</AvatarFallback>
                 </Avatar>
                 <div className="min-w-0 flex-1">
-                  <p className="mb-0.5 flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+                  <p className="text-muted-foreground mb-0.5 flex items-center gap-1.5 text-xs font-medium">
                     {c.author_nickname}
                     {c.edited_at && <span>(수정됨)</span>}
                   </p>
@@ -187,7 +189,12 @@ export default function CommentSection({ targetType, targetId }: Props) {
                           if (e.key === 'Escape') cancelEdit();
                         }}
                       />
-                      <Button type="submit" size="icon-sm" disabled={!editText.trim()} aria-label="수정 저장">
+                      <Button
+                        type="submit"
+                        size="icon-sm"
+                        disabled={!editText.trim()}
+                        aria-label="수정 저장"
+                      >
                         <Check />
                       </Button>
                       <Button
@@ -240,7 +247,7 @@ export default function CommentSection({ targetType, targetId }: Props) {
                       <Button
                         size="icon-xs"
                         variant="ghost"
-                        className="shrink-0 text-muted-foreground hover:text-foreground"
+                        className="text-muted-foreground hover:text-foreground shrink-0"
                         disabled={c.reported_by_me}
                         aria-label={c.reported_by_me ? '신고한 댓글' : '댓글 신고'}
                       >

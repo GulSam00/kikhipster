@@ -1,5 +1,6 @@
 import { apiFetch } from '@/lib/api/client';
 import { getGuestToken } from '@/lib/guest-token';
+
 import type { Comment, CommentTargetType } from '@/types/social';
 
 /**
@@ -17,9 +18,7 @@ const base = (type: CommentTargetType, id: string) => `/api/comments/${type}/${i
 const guestHeader = () => ({ 'X-Guest-Token': getGuestToken() });
 
 export const listComments = (type: CommentTargetType, id: string) =>
-  apiFetch<Comment[]>(
-    `${base(type, id)}/?guest_token=${encodeURIComponent(getGuestToken())}`,
-  );
+  apiFetch<Comment[]>(`${base(type, id)}/?guest_token=${encodeURIComponent(getGuestToken())}`);
 
 export const createComment = (
   type: CommentTargetType,

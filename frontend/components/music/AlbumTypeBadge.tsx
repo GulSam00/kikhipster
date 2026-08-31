@@ -1,4 +1,5 @@
 import { Badge } from '@/components/ui/badge';
+
 import { albumTypeLabel } from '@/lib/domain/album-title';
 import { cn } from '@/lib/utils';
 

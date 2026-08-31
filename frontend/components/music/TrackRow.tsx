@@ -1,11 +1,14 @@
 'use client';
 
 import { Pause, Play } from 'lucide-react';
-import { usePlayer } from '@/contexts/PlayerContext';
+
 import LikeButton from '@/components/social/LikeButton';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+
 import { cn } from '@/lib/utils';
+
+import { usePlayer } from '@/contexts/PlayerContext';
 
 interface Props {
   track: {
@@ -50,11 +53,11 @@ export default function TrackRow({ track, artist, albumCover }: Props) {
   return (
     <div
       className={cn(
-        'flex items-center gap-3 rounded-lg px-3 py-2 transition-colors hover:bg-accent',
+        'hover:bg-accent flex items-center gap-3 rounded-lg px-3 py-2 transition-colors',
         isActive && 'bg-accent',
       )}
     >
-      <span className="w-6 shrink-0 text-right text-xs text-muted-foreground">
+      <span className="text-muted-foreground w-6 shrink-0 text-right text-xs">
         {track.track_number ?? ''}
       </span>
 
@@ -67,10 +70,10 @@ export default function TrackRow({ track, artist, albumCover }: Props) {
             </Badge>
           )}
         </p>
-        <p className="truncate text-xs text-muted-foreground">{artist}</p>
+        <p className="text-muted-foreground truncate text-xs">{artist}</p>
       </div>
 
-      <span className="shrink-0 text-xs text-muted-foreground tabular-nums">
+      <span className="text-muted-foreground shrink-0 text-xs tabular-nums">
         {formatMs(track.duration_ms)}
       </span>
 
@@ -91,7 +94,7 @@ export default function TrackRow({ track, artist, albumCover }: Props) {
           size="icon-xs"
           variant="ghost"
           className={cn(
-            'shrink-0 rounded-full text-muted-foreground hover:text-foreground',
+            'text-muted-foreground hover:text-foreground shrink-0 rounded-full',
             isActive && 'text-foreground',
           )}
           onClick={handlePlay}

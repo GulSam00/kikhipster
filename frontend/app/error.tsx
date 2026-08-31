@@ -1,11 +1,25 @@
 'use client';
 
-import { useEffect } from 'react';
 import { TriangleAlert } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty';
+import { useEffect } from 'react';
 
-export default function Error({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
+import { Button } from '@/components/ui/button';
+import {
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from '@/components/ui/empty';
+
+export default function Error({
+  error,
+  reset,
+}: {
+  error: Error & { digest?: string };
+  reset: () => void;
+}) {
   useEffect(() => {
     console.error(error);
   }, [error]);

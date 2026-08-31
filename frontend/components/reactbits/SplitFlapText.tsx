@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 /**
  * React Bits `SplitFlapText` (https://reactbits.dev/r/SplitFlapText-TS-TW.json) 를 고쳐 씀.
@@ -22,15 +22,7 @@
  * **손대지 않은 것**: 타일의 베벨·이음매·그림자에 쓰인 흰색/검정 알파값. 이건 브랜드 색이
  * 아니라 재질 음영이라 `--border`(`oklch(1 0 0 / 10%)`)와 같은 성격으로 본다.
  */
-
-import {
-  CSSProperties,
-  HTMLAttributes,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { CSSProperties, HTMLAttributes, useEffect, useMemo, useRef, useState } from 'react';
 
 type TileState = {
   current: string;
@@ -62,7 +54,7 @@ export interface SplitFlapTextProps extends HTMLAttributes<HTMLDivElement> {
   flipDuration?: number;
   stagger?: number;
   cycleDelay?: number;
-  charset?: "alpha" | "alphanumeric" | "numeric" | (string & {});
+  charset?: 'alpha' | 'alphanumeric' | 'numeric' | (string & {});
   flipsPerChar?: number;
   tileColor?: string;
   textColor?: string;
@@ -73,12 +65,12 @@ export interface SplitFlapTextProps extends HTMLAttributes<HTMLDivElement> {
   padTo?: number;
 }
 
-const DEFAULT_WORDS = ["LAUNCH READY", "SYNC ONLINE", "SIGNAL LIVE"];
+const DEFAULT_WORDS = ['LAUNCH READY', 'SYNC ONLINE', 'SIGNAL LIVE'];
 
 const CHARSETS: Record<string, string> = {
-  alpha: "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
-  alphanumeric: "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789",
-  numeric: "0123456789",
+  alpha: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
+  alphanumeric: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789',
+  numeric: '0123456789',
 };
 
 const styles = `
@@ -100,23 +92,20 @@ const styles = `
 @media (prefers-reduced-motion:reduce){.split-flap-text__flap{animation:none!important}}
 `;
 
-const toCssUnit = (value: number | string) =>
-  typeof value === "number" ? `${value}px` : value;
+const toCssUnit = (value: number | string) => (typeof value === 'number' ? `${value}px` : value);
 
-const resolveCharset = (charset: SplitFlapTextProps["charset"]) => {
+const resolveCharset = (charset: SplitFlapTextProps['charset']) => {
   if (charset && CHARSETS[charset]) return CHARSETS[charset];
-  return typeof charset === "string" && charset.length > 0
-    ? charset
-    : CHARSETS.alphanumeric;
+  return typeof charset === 'string' && charset.length > 0 ? charset : CHARSETS.alphanumeric;
 };
 
 const normalizePhrase = (phrase: string, width: number) => {
-  const safe = String(phrase ?? "");
-  return safe.padEnd(width, " ").slice(0, width);
+  const safe = String(phrase ?? '');
+  return safe.padEnd(width, ' ').slice(0, width);
 };
 
 const createTiles = (phrase: string): TileState[] =>
-  phrase.split("").map((char) => ({
+  phrase.split('').map((char) => ({
     current: char,
     next: char,
     flipping: false,
@@ -124,7 +113,7 @@ const createTiles = (phrase: string): TileState[] =>
   }));
 
 const sampleChar = (charset: string) =>
-  charset.charAt(Math.floor(Math.random() * charset.length)) || " ";
+  charset.charAt(Math.floor(Math.random() * charset.length)) || ' ';
 
 const buildSequence = (target: string, flips: number, charset: string) => {
   const steps: string[] = [];
@@ -139,57 +128,51 @@ const usePrefersReducedMotion = () => {
   const [prefersReduced, setPrefersReduced] = useState(false);
 
   useEffect(() => {
-    if (typeof window === "undefined" || !window.matchMedia) return;
+    if (typeof window === 'undefined' || !window.matchMedia) return;
 
-    const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
     const handleChange = () => setPrefersReduced(mediaQuery.matches);
 
     handleChange();
-    mediaQuery.addEventListener("change", handleChange);
+    mediaQuery.addEventListener('change', handleChange);
 
-    return () => mediaQuery.removeEventListener("change", handleChange);
+    return () => mediaQuery.removeEventListener('change', handleChange);
   }, []);
 
   return prefersReduced;
 };
 
 const SplitFlapText = ({
-  words = ["LAUNCH READY", "SYNC ONLINE", "SIGNAL LIVE"],
+  words = ['LAUNCH READY', 'SYNC ONLINE', 'SIGNAL LIVE'],
   text,
   flipDuration = 0.12,
   stagger = 0.06,
   cycleDelay = 2400,
-  charset = "alphanumeric",
+  charset = 'alphanumeric',
   flipsPerChar = 8,
-  tileColor = "var(--secondary)",
-  textColor = "var(--foreground)",
+  tileColor = 'var(--secondary)',
+  textColor = 'var(--foreground)',
   tileRadius = 8,
   gap = 6,
   fontSize = 52,
   loop = true,
   padTo = 12,
-  className = "",
+  className = '',
   style = {},
   ...props
 }: SplitFlapTextProps) => {
   const prefersReducedMotion = usePrefersReducedMotion();
   const rafRef = useRef<number | null>(null);
   const cycleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const currentTextRef = useRef("");
+  const currentTextRef = useRef('');
 
-  const sourceWords =
-    Array.isArray(words) && words.length > 0 ? words : DEFAULT_WORDS;
+  const sourceWords = Array.isArray(words) && words.length > 0 ? words : DEFAULT_WORDS;
   const phrasesKey =
-    typeof text === "string"
-      ? text
-      : sourceWords.map((word) => String(word ?? "")).join("\u001f");
-  const phrases = useMemo(() => phrasesKey.split("\u001f"), [phrasesKey]);
+    typeof text === 'string' ? text : sourceWords.map((word) => String(word ?? '')).join('\u001f');
+  const phrases = useMemo(() => phrasesKey.split('\u001f'), [phrasesKey]);
 
   const width = useMemo(() => {
-    const longest = phrases.reduce(
-      (max, phrase) => Math.max(max, phrase.length),
-      1,
-    );
+    const longest = phrases.reduce((max, phrase) => Math.max(max, phrase.length), 1);
     return Math.max(1, Math.ceil(Number(padTo) || 0), longest);
   }, [padTo, phrases]);
 
@@ -198,9 +181,7 @@ const SplitFlapText = ({
     [phrases, width],
   );
 
-  const [tiles, setTiles] = useState<TileState[]>(() =>
-    createTiles(normalizedPhrases[0] || ""),
-  );
+  const [tiles, setTiles] = useState<TileState[]>(() => createTiles(normalizedPhrases[0] || ''));
 
   useEffect(() => {
     const clearAnimation = () => {
@@ -217,7 +198,7 @@ const SplitFlapText = ({
 
     clearAnimation();
 
-    if (typeof window === "undefined") {
+    if (typeof window === 'undefined') {
       return clearAnimation;
     }
 
@@ -253,11 +234,11 @@ const SplitFlapText = ({
       }
 
       const fromPhrase = normalizePhrase(currentTextRef.current, width);
-      const targetChars = targetPhrase.split("");
+      const targetChars = targetPhrase.split('');
 
       const plans = targetChars
         .map<AnimationPlan | null>((targetChar, index) => {
-          const fromChar = fromPhrase[index] || " ";
+          const fromChar = fromPhrase[index] || ' ';
           if (fromChar === targetChar) return null;
 
           return {
@@ -278,8 +259,7 @@ const SplitFlapText = ({
       }
 
       const totalDuration = plans.reduce(
-        (max, plan) =>
-          Math.max(max, plan.start + plan.sequence.length * safeFlipMs),
+        (max, plan) => Math.max(max, plan.start + plan.sequence.length * safeFlipMs),
         0,
       );
       const startedAt = performance.now();
@@ -390,7 +370,7 @@ const SplitFlapText = ({
       분모는 걸린 채로 있는다 — 판 전체가 같은 타일이면서 바뀌는 건 하나뿐이다.
     */
     if (normalizedPhrases.length <= 1) {
-      animateTo(normalizedPhrases[0] || "");
+      animateTo(normalizedPhrases[0] || '');
       return () => {
         cancelled = true;
         clearAnimation();
@@ -417,16 +397,15 @@ const SplitFlapText = ({
 
   const settledText = tiles
     .map((tile) => tile.current)
-    .join("")
+    .join('')
     .trimEnd();
-  const componentStyle: CSSProperties &
-    Record<string, string | number | undefined> = {
-    "--split-flap-tile-color": tileColor,
-    "--split-flap-text-color": textColor,
-    "--split-flap-radius": toCssUnit(tileRadius),
-    "--split-flap-gap": toCssUnit(gap),
-    "--split-flap-font-size": toCssUnit(fontSize),
-    "--split-flap-flip-duration": `${Math.max(0.04, Number(flipDuration) || 0.12)}s`,
+  const componentStyle: CSSProperties & Record<string, string | number | undefined> = {
+    '--split-flap-tile-color': tileColor,
+    '--split-flap-text-color': textColor,
+    '--split-flap-radius': toCssUnit(tileRadius),
+    '--split-flap-gap': toCssUnit(gap),
+    '--split-flap-font-size': toCssUnit(fontSize),
+    '--split-flap-flip-duration': `${Math.max(0.04, Number(flipDuration) || 0.12)}s`,
     ...style,
   };
 
@@ -448,7 +427,7 @@ const SplitFlapText = ({
           >
             <span className="split-flap-text__half split-flap-text__half--top">
               <span className="split-flap-text__char">
-                {tile.current === " " ? "\u00A0" : tile.current}
+                {tile.current === ' ' ? '\u00A0' : tile.current}
               </span>
             </span>
             <span className="split-flap-text__half split-flap-text__half--bottom">
@@ -464,7 +443,7 @@ const SplitFlapText = ({
                   key={`front-${index}-${tile.tick}`}
                 >
                   <span className="split-flap-text__char">
-                    {tile.current === " " ? "\u00A0" : tile.current}
+                    {tile.current === ' ' ? '\u00A0' : tile.current}
                   </span>
                 </span>
                 <span
@@ -472,7 +451,7 @@ const SplitFlapText = ({
                   key={`back-${index}-${tile.tick}`}
                 >
                   <span className="split-flap-text__char">
-                    {tile.next === " " ? "\u00A0" : tile.next}
+                    {tile.next === ' ' ? '\u00A0' : tile.next}
                   </span>
                 </span>
               </>
