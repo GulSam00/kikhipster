@@ -25,14 +25,33 @@ def _upscale_artwork(url: str | None, size: int = 600) -> str | None:
 # 실제 데이터에는 반각 하이픈만 나왔지만 en/em dash 와 대소문자 변형까지 받아둔다.
 _SINGLE_EP_SUFFIX = re.compile(r"\s[-–—]\s*(single|ep)\s*$", re.IGNORECASE)
 
+# 제목 **중간**의 EP 표기. 2026-08-31 추가.
+#
+# 꼬리 규칙만으로는 `NewJeans 2nd EP 'Get Up'` 처럼 표기가 가운데 오는 미니앨범을 놓친다.
+# 고유 앨범 4206건 실측에서 이 패턴이 추가로 잡는 것은 3건이고 **전부 정탐**이었다
+# (`NewJeans 1st EP 'New Jeans'`, `NewJeans 2nd EP 'Get Up'`,
+#  `NewJeans Karaoke Piano EP (Piano Karaoke)`). 오탐 0건.
+#
+# **대소문자를 구분한다.** 같은 표본에서 소문자 " ep " 는 0건이라 무시로 완화해 봐야
+# 얻는 게 없고 `Deep`/`Sleep` 쪽 위험만 커진다. 양쪽 공백도 같은 이유로 필수다.
+_ALBUM_EP_MID = re.compile(r"\sEP\s")
+
 
 def is_single_or_ep(title: str) -> bool:
-    """컬렉션 이름이 iTunes의 싱글·EP 표기로 끝나는가."""
+    """컬렉션 이름이 iTunes의 싱글·EP 표기로 **끝나는가**.
+
+    **일부러 꼬리만 본다** — `_album_type` 과 규칙이 다르다. 이 함수는 필터용이고,
+    필터를 켠 쪽이 기대하는 것은 "iTunes가 꼬리로 표기한 싱글·EP"다. 중간 EP까지 거르면
+    `include_singles=false` 를 켠 화면이 정규 미니앨범을 잃는다.
+    """
     return bool(_SINGLE_EP_SUFFIX.search(title or ""))
 
 
 def _album_type(title: str, track_count: int) -> str:
     """iTunes엔 single/album 구분 필드가 없다. 제목 표기를 먼저 믿고 없으면 트랙 수로 추정.
+
+    응답의 `collectionType` 은 실측에서 전건 `"Album"` 이라 쓸모가 없다 — 종류를 담을
+    필드는 있는데 iTunes가 채우지 않는다. 구분 정보는 제목 문자열에만 있다.
 
     트랙 수만으로는 어긋난다 — 실측에서 " - Single" 표기인데 트랙이 2개 이상인 게 89건,
     " - EP" 인데 10곡짜리도 있었다. 반대로 트랙이 1~2개인 진짜 앨범도 있다
@@ -41,6 +60,8 @@ def _album_type(title: str, track_count: int) -> str:
     m = _SINGLE_EP_SUFFIX.search(title or "")
     if m:
         return m.group(1).lower()
+    if _ALBUM_EP_MID.search(title or ""):
+        return "ep"
     return "single" if track_count <= 1 else "album"
 
 
@@ -127,16 +148,25 @@ class ITunesMusicService:
 
     # 싱글·EP를 걸러내면 결과가 60% 넘게 사라진다(실측 61%). 요청한 개수를 채우려면
     # iTunes에서 넉넉히 받아와야 한다. iTunes /search 의 limit 상한은 200이다.
+    # 필터가 기본으로 꺼진 뒤로는 `include_singles=False` 를 명시한 호출에서만 쓰인다.
     SEARCH_OVERFETCH = 3
     SEARCH_MAX_LIMIT = 200
 
     async def search_albums(
-        self, query: str, market: str = "KR", limit: int = 20, include_singles: bool = False
+        self, query: str, market: str = "KR", limit: int = 20, include_singles: bool = True
     ) -> dict:
         """앨범명 또는 아티스트명으로 앨범 검색.
 
         `include_singles=False` 면 iTunes가 " - Single" / " - EP" 로 표기한 항목을 뺀다.
-        탑스터·월드컵에 담을 '앨범'을 고르는 자리라 기본값을 제외로 뒀다.
+        **기본값은 포함이다 (2026-08-31 에 제외 → 포함으로 뒤집었다.)**
+
+        원래 요청은 "제목 뒤의 ` - Single` 꼬리가 거추장스럽다" 였는데 2026-08-23 에 그걸
+        **항목을 빼는 것**으로 구현했다. 꼬리는 프론트가 표시할 때 떼는 것으로 옮겼고
+        (`lib/domain/album-title.ts`), 항목을 빼는 쪽은 대가가 컸다 — iTunes 는 K-POP
+        미니앨범을 `- EP` 로 표기해서 `NewJeans 2nd EP 'Get Up'` 같은 정규 발매작이
+        통째로 사라졌다(newjeans 검색이 8건만 나오던 이유).
+
+        파라미터는 남겨 둔다. 나중에 "싱글 숨기기" 토글을 붙일 자리다.
         """
         want = min(limit, 50)
         fetch = min(want * self.SEARCH_OVERFETCH, self.SEARCH_MAX_LIMIT) if not include_singles else want
@@ -188,16 +218,15 @@ class ITunesMusicService:
 
     async def get_artist_albums(
         self, artist_id: str, market: str = "KR", limit: int = 50,
-        include_singles: bool = False,
+        include_singles: bool = True,
     ) -> list[dict]:
         """아티스트의 앨범 목록 조회.
 
-        `search_albums` 와 같은 기준으로 싱글·EP를 기본 제외한다. 아티스트 상세의
-        디스코그래피도 '앨범을 고르는 자리'라 검색만 필터를 걸어두면 같은 아티스트가
-        화면마다 다른 목록을 보여준다(2026-08-27).
+        `search_albums` 와 기본값을 맞춘다 — 한쪽만 걸어 두면 같은 아티스트가 화면마다
+        다른 목록을 보여준다(2026-08-27에 그래서 맞췄고, 2026-08-31에 함께 포함으로 뒤집었다).
         """
         want = min(limit, 50)
-        # 필터를 켜면 결과의 절반 이상이 사라지므로 넉넉히 받아온다 — search_albums 와 같은 이유.
+        # 필터를 켠 호출에서만 넉넉히 받아온다 — search_albums 와 같은 이유.
         fetch = min(want * self.SEARCH_OVERFETCH, self.SEARCH_MAX_LIMIT) if not include_singles else want
 
         data = await self._request(

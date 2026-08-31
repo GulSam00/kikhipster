@@ -1,146 +1,116 @@
-# 설계: 대결 승리 애니메이션 · 결과 화면 댓글 · 비로그인 댓글
+# 앨범 제목 접미사 정리 + 싱글·EP 필터 해제
 
-작성 2026-08-30. 요청 3건을 한 벌로 설계한다.
+> 2026-08-31. 요청: ① 표시되는 앨범 제목에서 `- Single` / `- EP` 꼬리를 떼고
+> ② 앨범 검색·아티스트 앨범 목록의 싱글·EP 제외 필터를 해제하며
+> ③ `album_type` 판정에 제목 중간의 ` EP ` 규칙을 더한다. 배지는 유지한다.
 
----
+## 배경 — 2026-08-23 의 해석 오류
 
-## 1. 대결 승리 애니메이션
+당시 요청은 **"제목 뒤에 붙은 `- Single` / `- EP` 가 거추장스럽다"** 였는데, 구현은
+**"그런 앨범을 결과에서 빼자"** 로 갔다. 제목을 가공하는 코드는 코드베이스에 없다
+(`_map_album` 은 `collectionName` 을 원문 그대로 넘긴다).
 
-**요구**: 이긴 카드가 진 카드를 튕겨 화면 밖으로 보내고, 자기는 가운데로 와서 강조.
+그 결과 두 가지가 남았다:
 
-**지금**: `justPicked` 이 서면 이긴 쪽에 `border-primary`, 진 쪽에 `scale-95 opacity-40`.
-450ms 뒤 다음 경기로 넘어간다.
+- 필터가 걸린 두 경로(`/search/albums`, `/artists/{id}/albums`)에서는 항목 자체가 없어서
+  표기도 안 보인다 — 증상은 가려졌지만 원인은 그대로다
+- 필터가 없는 경로(`/albums?ids=`, `/albums/{id}/tracks`)에서는 **표기가 그대로 보인다** —
+  탑스터 격자 옆 목록, 탑스터 PNG, 월드컵 후보·대결·랭킹, 앨범 상세
 
-**설계**: 새 의존성 없이 CSS keyframes 로 한다(`motion` 은 이미 있지만 레이아웃 밖으로
-날리는 단순 트윈에 라이브러리를 쓸 이유가 없다).
+그리고 필터는 **`NewJeans 2nd EP 'Get Up'` 같은 정규 발매작을 통째로 지운다.** K-POP 은
+미니앨범이 주력인데 iTunes 가 그걸 `- EP` 로 표기하기 때문이다(newjeans 검색이 8건만
+나오던 이유).
 
-- 방향을 **CSS 변수 `--battle-dir`** 로 넘긴다(이긴 쪽이 왼쪽이면 `1`, 오른쪽이면 `-1`).
-  좌/우 keyframes 를 4벌 만들지 않고 2벌로 끝낸다.
-- 가운데로 보내는 거리는 `calc(50% + var(--battle-gap) / 2)`. `translateX` 의 `%` 는
-  자기 폭 기준이라 **자기 폭 절반 + 칸 사이 간격 절반**이 정확히 컨테이너 중앙이다.
-  간격이 반응형(`gap-4 sm:gap-8`)이자 라운드별(결승은 더 넓다)로 달라지므로 **간격을
-  유틸리티가 아니라 변수로 들고** `gap-(--battle-gap)` 으로 쓴다.
-- 부딪히는 맛: 이긴 카드가 18% 지점에서 상대 쪽으로 살짝 밀고 들어갔다가 중앙으로 간다.
-  진 카드는 그 18%까지 버티다가 그때부터 날아간다 — 맞아서 밀려나는 것처럼 보인다.
-- **가로 스크롤 방지(§ Mobile, BLOCK 사안)**: 날아가는 카드가 페이지를 늘리지 않도록
-  격자를 감싼 상자에 `overflow-x-clip`. `overflow-x: clip` 은 `overflow-y: visible` 을
-  `auto` 로 강등시키지 않아(하나가 `clip` 이면 다른 축의 `visible` 이 유지된다) 세로로
-  커지는 `scale` 은 안 잘린다.
-- `prefers-reduced-motion` 이면 애니메이션 클래스를 붙이지 않는다(기존 훅 재사용).
-- 대기 시간 450ms → 650ms.
+## 실측 근거
 
-**바꾸는 파일**: `app/globals.css`(keyframes 2), `app/play/[playId]/page.tsx`.
+**표본: 고유 앨범 4206개** (K-POP·해외 25개 질의, iTunes `entity=album&country=KR`)
 
----
+| 규칙 | 매칭 | 오탐 |
+|------|------|------|
+| 현행 접미사 `\s[-–—]\s*(single\|ep)\s*$` | 2705건 | — |
+| 추가 ` EP ` (대문자, 양쪽 공백) | **3건** | **0건** |
+| 위를 대소문자 무시로 완화 | 0건 더 | — |
 
-## 2. 월드컵 결과 화면에 댓글
+` EP ` 로 추가로 잡히는 3건은 전부 정탐이다:
+`NewJeans 1st EP 'New Jeans'`(4곡), `NewJeans 2nd EP 'Get Up'`(6곡),
+`NewJeans Karaoke Piano EP (Piano Karaoke)`(4곡).
 
-**설계**: 우승 화면 아래에 기존 `CommentSection` 을 그대로 붙인다.
-`targetType="tournament"`, `targetId={play.tournament_id}`.
+소문자 ` ep ` 는 4206건 중 0건이라 **대소문자 무시는 하지 않는다** — 이득이 없으면서
+`Deep`/`Sleep` 류 위험만 늘린다(양쪽 공백 요구로 이미 막히지만 굳이 넓힐 이유가 없다).
 
-**월드컵 상세와 같은 실**을 쓴다 — 판(play)마다 따로 두지 않는다. 판은 사람마다 매번
-새로 생기므로 판별 댓글은 아무도 다시 안 본다. 대화는 월드컵 단위여야 쌓인다.
+## 설계
 
-**바꾸는 파일**: `app/play/[playId]/page.tsx`.
+### ① 제목 접미사 제거 — **프론트에서 한다**
 
----
+**백엔드에서 하지 않는 이유는 캐시다.** `music_cache` 는 `_map_album` 을 거친 **매핑 후**
+값을 저장한다(`_warm_item_cache`). 백엔드에서 떼면 이미 저장된 행이 최대 30일간 옛 제목을
+계속 내보내서, 같은 화면 안에서 정리된 제목과 안 된 제목이 섞인다.
 
-## 3. 비로그인 댓글 (월드컵 · 탑스터 공통)
+**적용 지점은 `lib/api/music.ts` 한 곳.** 이 파일이 앨범 데이터가 프론트로 들어오는 유일한
+문이고 `/api/music` 문자열도 여기에만 있다. 여기서 정규화하면 아래가 전부 자동으로 따라온다:
 
-**요구**: 닉네임(기본 "익명") + 내용으로 작성. 본인 것 삭제. 남의 것 신고.
+| 경로 | 소비처 |
+|------|--------|
+| `searchAlbums` | 검색 페이지 앨범 탭, 탑스터 편집기, 월드컵 편집기 |
+| `getArtistAlbums` | 아티스트 상세 |
+| `getAlbumWithTracks` | 앨범 상세 |
+| `getAlbumsByIds` | 탑스터 격자·목록·**PNG 렌더**, 월드컵 후보·대결·우승·랭킹(`fetchPoolItems`) |
+| `searchTracks` / `getTracksByIds` | 트랙의 `album.name` |
 
-### 3-1. 본인 확인 방법 — 판단이 필요했던 지점
+`lib/domain/album-title.ts` 에 `stripAlbumSuffix()` 를 두고 `lib/api/music.ts` 가 부른다.
+`domain` 에 두는 이유는 이게 표시 규칙이지 엔드포인트 지식이 아니기 때문이다.
 
-비로그인 사용자가 "자신이 쓴 댓글"임을 증명할 방법이 필요한데 요청에 명시된 입력란은
-**닉네임과 내용 둘뿐**이다. 그래서 한국 게시판의 관행인 **비밀번호 칸은 두지 않는다**.
+**중간 ` EP ` 는 떼지 않는다.** 접미사는 문장 끝이라 떼도 자연스럽지만 중간의 EP 는 제목의
+일부다 — 떼면 `NewJeans 2nd 'Get Up'` 이 되어 망가진다. 중간 규칙은 **타입 판정 전용**이다.
 
-대신 브라우저가 최초 1회 만들어 `localStorage` 에 보관하는 **작성자 토큰**을 쓴다.
-서버는 그 토큰의 **SHA-256 해시만** 저장하고, 삭제 요청의 토큰 해시가 일치하면 본인으로
-본다. 입력란이 늘지 않고 사용자가 외울 것도 없다.
+### ② 싱글·EP 필터 해제 — 백엔드 기본값을 뒤집는다
 
-**한계(명시해 둔다)**: 브라우저 데이터를 지우거나 다른 기기·시크릿 창에서 보면 자기 댓글을
-지울 수 없다. 비밀번호가 없는 이상 이건 피할 수 없고, 익명 댓글의 무게에 비해 감수할 만하다.
+`include_singles` 파라미터는 **남긴다.** 지우면 나중에 "싱글 숨기기" 토글을 붙일 때 다시
+만들어야 한다. 기본값만 `False` → `True` 로 바꾼다.
 
-### 3-2. 스키마
+- `services/music_api.py`: `search_albums`, `get_artist_albums` 시그니처 기본값
+- `routers/music.py`: 두 엔드포인트의 `Query(...)` 기본값과 설명
 
-`comments` 변경:
-| 컬럼 | 변경 |
-|---|---|
-| `user_id` | `nullable=False` → **`nullable=True`** (비로그인 댓글) |
-| `guest_nickname` | 추가. `String(20)`, nullable. 로그인 댓글이면 NULL |
-| `guest_token_hash` | 추가. `String(64)`, nullable, index. SHA-256 hex |
+오버페치(`limit*3`)는 **코드를 안 고쳐도 된다** — `fetch = ... if not include_singles else want`
+라 기본값이 뒤집히면 자동으로 꺼진다. 필터를 켠 호출에서는 그대로 동작한다.
 
-체크 제약 `comments_author_present`: `user_id IS NOT NULL OR (guest_nickname IS NOT NULL
-AND guest_token_hash IS NOT NULL)` — 주인 없는 댓글이 생기지 않게 DB에서 막는다.
+`get_artist_albums` 라우터는 캐시 키에 `include_singles` 를 넣으므로 기존 캐시와 섞이지 않는다.
 
-새 테이블 `comment_reports`:
-| 컬럼 | 비고 |
-|---|---|
-| `id` | UUID PK |
-| `comment_id` | FK `comments.id` **ON DELETE CASCADE** |
-| `reporter_user_id` | FK `users.id` ON DELETE CASCADE, nullable |
-| `reporter_token_hash` | `String(64)`, nullable |
-| `reason` | `String(20)`, nullable |
-| `created_at` | |
+### ③ `album_type` 에 중간 ` EP ` 규칙 추가
 
-중복 신고 방지: 부분 유니크 인덱스 2개
-- `(comment_id, reporter_user_id)` where `reporter_user_id IS NOT NULL`
-- `(comment_id, reporter_token_hash)` where `reporter_token_hash IS NOT NULL`
+`_album_type` 판정 순서를 이렇게 둔다:
 
-### 3-3. API
+1. 접미사 `\s[-–—]\s*(single|ep)\s*$` → `single` / `ep`
+2. **(신규)** 중간 `\sEP\s` (대소문자 구분) → `ep`
+3. 그 외 `track_count <= 1` → `single`
+4. 나머지 → `album`
 
-경로는 그대로. **인증만 `get_current_user` → `get_optional_user` 로 바꾼다.**
+`is_single_or_ep`(필터용)는 **접미사 규칙 그대로 둔다.** 필터는 기본으로 꺼지지만,
+켰을 때의 의미는 "iTunes 가 꼬리로 표기한 것"이어야 한다 — 중간 EP까지 거르면
+`include_singles=false` 를 켠 쪽이 정규 미니앨범을 잃는다. **판정과 필터의 규칙을
+의도적으로 분리한다.**
 
-| 메서드 | 경로 | 변경 |
-|---|---|---|
-| GET | `/api/comments/{type}/{id}/` | `guest_token` **쿼리 파라미터** 추가 |
-| POST | `/api/comments/{type}/{id}/` | 본문에 `nickname?` 추가, `X-Guest-Token` 헤더 |
-| PUT | `.../{comment_id}` | `X-Guest-Token` 헤더 |
-| DELETE | `.../{comment_id}` | `X-Guest-Token` 헤더 |
-| POST | `.../{comment_id}/report` | **신규**. 본문 `{ reason？ }` |
+### 배지
 
-**GET 만 헤더가 아니라 쿼리 파라미터인 이유**: `apiFetch` 는 GET 에 `Content-Type` 조차
-일부러 안 붙인다 — 단순 요청 조건이 깨져 URL 마다 CORS 프리플라이트가 한 번씩 더 나가기
-때문이다(`lib/api/client.ts` 주석, 2026-08-27). 커스텀 헤더도 똑같이 프리플라이트를
-부르므로 목록 조회에는 쓸 수 없다. POST/PUT/DELETE 는 어차피 프리플라이트가 나가므로 헤더로 둔다.
+`app/albums/[id]/page.tsx` 의 `<Badge>{album.album_type}</Badge>` 는 **그대로 둔다.**
+제목에서 꼬리를 떼면 종류 정보를 담는 자리가 배지뿐이라, 오히려 지금부터 필수가 된다.
 
-### 3-4. 응답 shape
+## 변경 파일
 
-`is_mine` 을 **서버가 판정해서 내려준다.** 게스트 소유 판정은 토큰 해시 비교라 프론트가
-할 수 없다(프론트에는 평문 토큰만 있고 서버에는 해시만 있다). 지금처럼 프론트에서
-`c.user.id === me?.id` 로 비교하는 방식은 게스트에 못 쓴다.
+| 파일 | 변경 |
+|------|------|
+| `backend/services/music_api.py` | `_ALBUM_EP_MID` 추가, `_album_type` 2단계 판정, 기본값 2곳 |
+| `backend/routers/music.py` | `include_singles` Query 기본값·설명 2곳 |
+| `frontend/lib/domain/album-title.ts` | **신규** `stripAlbumSuffix()` |
+| `frontend/lib/api/music.ts` | 앨범·트랙 응답에 정규화 적용 |
 
-```
-CommentResponse {
-  id, target_type, target_id, content, created_at, updated_at, edited_at
-  user: { id, nickname } | null      # 비로그인 댓글이면 null
-  author_nickname: str               # 항상 채워진다 (로그인이면 user.nickname, 아니면 guest_nickname)
-  is_mine: bool                      # 로그인 id 일치 또는 게스트 토큰 해시 일치
-  reported_by_me: bool
-  report_count: int
-}
-```
+DB 스키마 변경 없음(제목은 저장하지 않는다 — `topster_items.album_spotify_id`,
+`tournament_items.item_id` 둘 다 id 만 들고 매번 API 로 이름을 받는다). 마이그레이션 없음.
+응답 필드 추가·삭제 없으므로 프론트 타입도 그대로다.
 
-`from_attributes` 로는 `is_mine` 을 못 만드므로 **`_to_response()` 헬퍼에서 명시적으로 조립**한다.
+## 검증 계획
 
-### 3-5. 프론트
-
-- `lib/guest-token.ts` — `crypto.randomUUID()` 로 1회 생성 후 `localStorage('guest_token')`.
-- `CommentSection` — 비로그인이면 **닉네임 칸 + 내용 칸**. 닉네임 비우면 "익명".
-- 삭제 버튼 판정을 `c.user.id === me?.id` → **`c.is_mine`** 으로 교체(로그인·게스트 공통).
-- 신고 버튼은 `!c.is_mine` 일 때. `useDeleteItem` 과 같은 결의 **토스트 확인**을 거친다
-  (`Dialog` 프리미티브가 `components/ui` 에 없다 — 새로 들이지 않는다).
-- 이미 신고한 댓글은 버튼 비활성 + "신고됨".
-
-### 3-6. 수정(PUT)도 게스트에게 연다
-
-요청에는 삭제·신고만 있었다. 그런데 소유 판정 헬퍼가 삭제와 수정에서 **같은 함수**라,
-수정만 로그인 전용으로 남기려면 오히려 분기를 더 넣어야 한다. 코드가 줄어드는 쪽으로
-같이 열되, 이 결정은 보고에 남긴다.
-
----
-
-## 영향 없는 것
-
-`comment_counts()` · `purge_comments()` 는 그대로 — `user_id` 를 안 본다.
-좋아요(`target_type='comment'`)도 그대로.
+- `_album_type` 4단 판정을 실제 iTunes 응답으로 재측정 — `ep` 가 3건 늘고 오탐 0인지
+- 필터 해제 후 `search/albums` 가 싱글·EP를 돌려주는지, `total` 이 맞는지 (curl)
+- `stripAlbumSuffix` 가 오탐 없이 도는지 — `(Single Version)`, `Sleep`, 중간 EP 보존
+- `tsc` · `next build` · eslint

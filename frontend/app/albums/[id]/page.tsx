@@ -5,9 +5,9 @@ import { ApiError } from '@/lib/api/client';
 import { getAlbumWithTracks } from '@/lib/api/music';
 import { albumTrackToQueue } from '@/lib/domain/playable';
 import AlbumPlayButton from '@/components/music/AlbumPlayButton';
+import AlbumTypeBadge from '@/components/music/AlbumTypeBadge';
 import LikeButton from '@/components/social/LikeButton';
 import TrackRow from '@/components/music/TrackRow';
-import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import type { AlbumWithTracks } from '@/types/music';
 import type { QueueTrack } from '@/types/player';
@@ -49,7 +49,7 @@ export default async function AlbumPage({ params }: { params: Promise<{ id: stri
           )}
         </div>
         <div className="min-w-0">
-          <Badge variant="outline" className="mb-2 capitalize">{album.album_type}</Badge>
+          <AlbumTypeBadge type={album.album_type} className="mb-2" />
           <h1 className="mb-1 font-heading text-3xl font-bold">{album.title}</h1>
           <p className="mb-1 text-foreground/80">{album.artist_name}</p>
           <p className="mb-3 text-sm text-muted-foreground">

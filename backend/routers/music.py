@@ -163,14 +163,19 @@ async def search_albums(
     market: str = Query("KR", description="마켓 코드 (예: KR, JP, US)"),
     limit: int = Query(20, ge=1, le=50, description="최대 결과 수"),
     include_singles: bool = Query(
-        False, description='iTunes가 " - Single" / " - EP" 로 표기한 항목을 포함할지'
+        True, description='iTunes가 " - Single" / " - EP" 로 표기한 항목을 포함할지'
     ),
     db: Session = Depends(get_db),
 ):
-    """앨범 검색. 기본적으로 싱글·EP는 제외한다 — 탑스터·월드컵에 담을 '앨범'을 고르는 자리다.
+    """앨범 검색. **싱글·EP를 포함해서 준다** (2026-08-31에 제외 → 포함으로 뒤집었다).
 
-    ID 배치 조회(`/albums?ids=`)에는 이 필터를 걸지 않는다. 이미 저장된 탑스터가 싱글을
-    담고 있으면 그 커버가 안 나와 화면이 깨진다.
+    꼬리 표기(` - Single` / ` - EP`)가 거추장스럽다는 것이 원래 요청이었고, 그건 프론트가
+    표시할 때 떼는 것으로 옮겼다(`lib/domain/album-title.ts`). 항목을 빼는 쪽은
+    K-POP 미니앨범까지 지워서 대가가 컸다 — 자세한 경위는 `services/music_api.py`.
+
+    `include_singles=false` 로 예전 동작을 여전히 부를 수 있다.
+    ID 배치 조회(`/albums?ids=`)에는 어느 쪽이든 필터를 걸지 않는다 — 이미 저장된 탑스터가
+    싱글을 담고 있으면 그 커버가 안 나와 화면이 깨진다.
 
     검색 자체는 캐시하지 않는다(질의어마다 키가 갈려 적중률이 낮다). 대신 결과로 받은
     개별 앨범을 배치 캐시에 적어 둔다 — 사용자가 곧 그중 몇 개를 골라 저장하기 때문이다.
@@ -203,11 +208,11 @@ async def get_artist_albums(
     market: str = Query("KR", description="마켓 코드"),
     limit: int = Query(50, ge=1, le=50, description="최대 결과 수"),
     include_singles: bool = Query(
-        False, description='iTunes가 " - Single" / " - EP" 로 표기한 항목을 포함할지'
+        True, description='iTunes가 " - Single" / " - EP" 로 표기한 항목을 포함할지'
     ),
     db: Session = Depends(get_db),
 ):
-    """아티스트의 앨범 목록. 앨범 검색과 같은 기준으로 싱글·EP를 기본 제외한다.
+    """아티스트의 앨범 목록. 앨범 검색과 기본값을 맞춘다 — 싱글·EP를 포함해서 준다.
 
     **응답을 가르는 파라미터를 전부 캐시 키에 넣는다.** market·limit·include_singles 중
     하나라도 빠지면 필터를 끈 요청이 켠 결과를 받는 식으로 섞인다.

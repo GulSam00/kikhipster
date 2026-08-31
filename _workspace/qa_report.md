@@ -1,87 +1,58 @@
-# QA 보고 — 2026-08-30
+# QA — 앨범 제목 정리 + 싱글·EP 필터 해제 (2026-08-31)
 
-## 1. 프론트–백 경계면 교차 검증
+## 경계면 정합성
 
-**실행 중인 서버의 `/openapi.json` 과 `frontend/types/social.ts` 를 직접 비교했다**(소스를
-눈으로 맞춘 것이 아니다).
+**응답 필드는 하나도 바뀌지 않았다.** 이번 변경은 (a) 기존 필드의 *값* 판정 규칙
+(`album_type`), (b) 쿼리 파라미터 *기본값*(`include_singles`), (c) 프론트의 *표시* 가공뿐이다.
 
-| 필드 | 백엔드 | 프론트 |
-|---|---|---|
-| `author_nickname` | required | `string` |
-| `content` / `created_at` / `updated_at` / `id` / `target_id` | required | `string` |
-| `target_type` | required | `CommentTargetType` |
-| `edited_at` | nullable | `string \| null` |
-| `user` | **nullable** | `CommentUser \| null` |
-| `is_mine` / `reported_by_me` | 기본값 있음 | `boolean` |
-| `report_count` | 기본값 있음 | `number` |
+| 스키마 | 백엔드 `schemas/music.py` | 프론트 `types/music.ts` | 판정 |
+|--------|--------------------------|------------------------|------|
+| `AlbumSummary` | id · title · cover_url · artist_name · release_date · total_tracks · album_type | 동일 7개 | 일치 |
+| `AlbumWithTracks` | album · tracks | 동일 | 일치 |
+| `TrackSearchItem.album` | id · name · cover_url | 동일 | 일치 |
 
-**결과: PASS** — 필드 누락·nullable 불일치 0건.
+프론트 `cleanAlbum` 은 제네릭 `<T extends { title: string }>` 이라 필드를 더하거나 빼지 않고
+`title` 만 바꾼다. `cleanTrack` 도 `album.name` 만 바꾼다. 따라서 **타입 변경이 필요 없다** —
+실제로 `tsc --noEmit` 0.
 
-`is_mine`·`reported_by_me`·`report_count` 는 OpenAPI 상 기본값이 있어 `required` 가 아니지만
-`_to_response()` 가 **항상** 채워 보내므로 프론트에서 옵셔널로 둘 필요가 없다.
+DB 스키마 변경 없음 · 마이그레이션 없음. 제목은 저장하지 않는다
+(`topster_items.album_spotify_id`, `tournament_items.item_id` 둘 다 id 만 든다).
 
-## 2. 백엔드 실제 호출 검증 (curl)
+## 규칙 두 벌이 어긋나지 않는지
 
-Docker DB + uvicorn 을 띄우고 실제로 호출했다. 화면이 아니라 응답으로 확인한 것이다.
+제목 정리(프론트)와 종류 판정(백엔드)이 **서로 다른 파일의 같은 정규식**을 쓴다.
+어긋나면 "제목은 정리됐는데 배지는 `album`" 또는 그 반대가 된다.
 
-| 시나리오 | 기대 | 실제 |
-|---|---|---|
-| 비로그인 작성, 닉네임 생략 | `author_nickname="익명"`, `user=null`, `is_mine=true` | ✅ |
-| 비로그인 작성, 닉네임 지정 | 지정한 닉네임 | ✅ |
-| 작성자 토큰 없이 작성 | 400 | ✅ `작성자 토큰이 필요합니다` |
-| 내용이 공백만 | 400 | ✅ `내용을 입력해 주세요` |
-| 남의 댓글 신고 | 204 | ✅ |
-| 같은 사람이 재신고 | 409 | ✅ `이미 신고한 댓글입니다` (부분 유니크 인덱스) |
-| 자기 댓글 신고 | 400 | ✅ `자신의 댓글은 신고할 수 없습니다` |
-| 남의 댓글 삭제 | 403 | ✅ |
-| 토큰 없이 삭제 | 403 | ✅ |
-| 본인 댓글 삭제 | 204 + 목록에서 사라짐 | ✅ |
-| `report_count` 가 보는 사람과 무관한지 | 토큰 유무와 무관하게 같은 값 | ✅ |
-| `reported_by_me` 가 신고자에게만 true 인지 | 신고자만 true | ✅ |
-| 댓글 삭제 시 신고 행 CASCADE | 같이 사라짐 | ✅ (2→1, 남은 신고는 살아있는 댓글을 가리킴) |
-| 레거시 `/api/topsters/{id}/comments` 경로 | 위와 동일하게 동작 | ✅ 전 과정 재현 |
+| | 패턴 | 위치 |
+|---|------|------|
+| 백엔드 꼬리 | `\s[-–—]\s*(single\|ep)\s*$` (IGNORECASE) | `music_api.py` `_SINGLE_EP_SUFFIX` |
+| 프론트 꼬리 | `/\s[-–—]\s*(?:single\|ep)\s*$/i` | `album-title.ts` `SINGLE_EP_SUFFIX` |
+| 백엔드 중간 | `\sEP\s` (대소문자 구분) | `music_api.py` `_ALBUM_EP_MID` |
 
-마이그레이션도 실제 DB 에 적용해 `information_schema` 로 확인했다 —
-`comments.user_id` nullable, `guest_nickname`/`guest_token_hash` 추가,
-`comment_reports` 부분 유니크 인덱스 2개, `comments_author_present` 체크 제약.
+꼬리 패턴은 동일(프론트는 캡처만 비캡처로). 중간 EP 는 **판정 전용**이라 프론트에 대응물이
+없는 것이 맞다. 양쪽 주석에 "한쪽을 고치면 다른 쪽도 본다"를 남겼다.
 
-**테스트로 만든 댓글·신고는 전부 지웠다**(`guest_token_hash IS NOT NULL` 기준 0건 확인).
+실제 렌더로 교차 확인: `Zero (J.I.D Remix) - Single` → 제목 `Zero (J.I.D Remix)` + 배지 `Single`
+(제목에서 뗀 정보가 배지에 그대로 살아 있음).
 
-## 3. 프론트 정적 검증
+## 발견해서 고친 것
 
-`tsc --noEmit` · `pnpm build` · `pnpm lint` 통과.
-eslint error 2건은 **이번에 건드리지 않은** `app/search/page.tsx`·`components/layout/Navbar.tsx`
-의 기존 것이다(`react-hooks/set-state-in-effect`).
+**`capitalize` 가 `ep` 를 `Ep` 로 렌더** — 앨범 상세 배지. 필터 때문에 `Album` 외의 값이
+화면에 거의 안 떠서 그동안 드러나지 않았고, 필터를 푸는 이번 변경으로 처음 보이게 됐다.
+`albumTypeLabel()` 로 교체해 `EP` 확인.
 
-빌드 CSS 에 새 애니메이션이 실제로 생성된 것까지 확인:
+## 미해결 — 이번 범위 밖
 
-```
-@keyframes battle-winner{ ... translateX(calc(var(--battle-dir) * (50% + var(--battle-gap) / 2))) scale(1.06) }
---battle-gap: calc(var(--spacing) * {3,4,6,8})   ← 반응형·라운드별 4종 전부
-.gap-\(--battle-gap\){ }   .overflow-x-clip{ }
-```
+**아티스트 앨범 목록에 `NJWMX` 중복.** collectionId 가 실제로 다르다(`1719675892`,
+`1719868691`, 발매일 동일). iTunes 가 같은 앨범을 두 발매본으로 들고 있는 것이고
+필터와 무관하다(필터를 켜도 둘 다 남는다). 접으려면 `(artistName, collectionName)` 으로
+중복을 제거해야 하는데 리마스터·디럭스처럼 **구분해야 하는 재발매**까지 접히므로
+판단이 필요하다. TASKS 에 남긴다.
 
-`pnpm dev` 로 띄워 `/`, `/topsters/{id}`, `/tournament/{id}` 모두 200.
+## 눈으로 확인하지 못한 것
 
-## 4. 남은 이슈 — 눈으로만 판정되는 것
+- `/search` 앨범 탭 — 정적 페이지 + 클라이언트 fetch 라 SSR HTML 에 결과가 없다
+- 탑스터 PNG 다운로드의 앨범 목록 — 캔버스 렌더
+- 월드컵 후보·대결·랭킹 — 로컬 DB 에 앨범 월드컵 데이터가 있어야 확인 가능
 
-### 4-1. SSR HTML 로는 댓글 영역을 검증할 수 없다 (기존 구조)
-
-`/topsters/{id}` 의 SSR HTML 에 `댓글` 문자열이 0건이다. 다만 **`좋아요`·`이미지 저장` 도
-똑같이 0건**이라 이번 변경 때문이 아니라 상세 본문 전체가 스트리밍 Suspense 슬롯 안에
-들어가는 구조 때문이다(응답 끝에 빈 `<div hidden id="S:0">` + `$RC` 스크립트).
-즉 **이 화면들은 원래부터 브라우저로만 확인할 수 있다.**
-
-### 4-2. 브라우저에서 봐야 하는 것
-
-- 튕겨내기: 진 카드가 실제로 날아가는지, **320px 에서 가로 스크롤이 안 생기는지**
-  (`overflow-x-clip` 이 의도대로 도는지 — BLOCK 사안), 이긴 카드가 정확히 가운데에 서는지
-  (`calc(50% + var(--battle-gap)/2)` 계산이 맞는지), 620ms 가 길지 않은지
-- 비로그인 댓글 폼이 로그인 상태에서는 닉네임 칸 없이 나오는지
-- 신고 드롭다운이 열리고, 신고 후 버튼이 잠기는지
-- 우승 화면 댓글이 월드컵 상세와 **같은 목록**을 보여 주는지
-
-### 4-3. 알려진 한계 (설계상 감수)
-
-브라우저 데이터를 지우거나 다른 기기·시크릿 창에서 보면 자기 익명 댓글을 지울 수 없다.
-비밀번호 칸을 두지 않기로 한 결과다(요청의 입력란이 닉네임·내용 둘뿐이었다).
+셋 다 `lib/api/music.ts` 를 타므로 같은 결과일 것이나, **본 것은 아니다.**

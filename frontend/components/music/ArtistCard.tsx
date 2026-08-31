@@ -11,8 +11,9 @@ interface Props {
 export default function ArtistCard({ artist }: Props) {
   return (
     <Link href={`/artists/${artist.id}`} className="group block">
-      <Card size="sm" className="h-full gap-2 transition-colors group-hover:bg-accent">
-        <CardContent className="flex flex-col items-center gap-2">
+      {/* 여백 기준은 AlbumCard 와 같다 — 검색에서 두 카드가 같은 자리에 교체 렌더된다. */}
+      <Card className="h-full transition-colors group-hover:bg-accent">
+        <CardContent className="flex flex-col items-center gap-3">
           <CoverImage
             src={artist.image_url}
             alt={artist.name}
@@ -22,7 +23,7 @@ export default function ArtistCard({ artist }: Props) {
           <div className="w-full min-w-0 text-center">
             <p className="truncate text-sm font-medium">{artist.name}</p>
             {artist.genres[0] && (
-              <p className="truncate text-xs text-muted-foreground">{artist.genres[0]}</p>
+              <p className="mt-0.5 truncate text-xs text-muted-foreground">{artist.genres[0]}</p>
             )}
           </div>
         </CardContent>

@@ -1,24 +1,34 @@
-'use client';
+"use client";
 
-import { useCallback, useEffect, useState } from 'react';
-import { SearchIcon } from 'lucide-react';
-import { toast } from 'sonner';
-import { searchAlbums, searchArtists, searchTracks } from '@/lib/api/music';
-import ArtistCard from '@/components/music/ArtistCard';
-import AlbumCard from '@/components/music/AlbumCard';
-import TrackRow from '@/components/music/TrackRow';
-import { Input } from '@/components/ui/input';
-import { Spinner } from '@/components/ui/spinner';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty';
-import type { ArtistSummary, AlbumSummary, TrackSearchItem } from '@/types/music';
+import { useCallback, useEffect, useState } from "react";
+import { SearchIcon } from "lucide-react";
+import { toast } from "sonner";
+import { searchAlbums, searchArtists, searchTracks } from "@/lib/api/music";
+import ArtistCard from "@/components/music/ArtistCard";
+import AlbumCard from "@/components/music/AlbumCard";
+import TrackRow from "@/components/music/TrackRow";
+import { Input } from "@/components/ui/input";
+import { Spinner } from "@/components/ui/spinner";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/components/ui/empty";
+import type {
+  ArtistSummary,
+  AlbumSummary,
+  TrackSearchItem,
+} from "@/types/music";
 
-type Tab = 'artists' | 'albums' | 'tracks';
+type Tab = "artists" | "albums" | "tracks";
 
 const tabs: { key: Tab; label: string }[] = [
-  { key: 'artists', label: '아티스트' },
-  { key: 'albums', label: '앨범' },
-  { key: 'tracks', label: '곡' },
+  { key: "artists", label: "아티스트" },
+  { key: "albums", label: "앨범" },
+  { key: "tracks", label: "곡" },
 ];
 
 function useDebounce<T>(value: T, ms: number): T {
@@ -31,8 +41,8 @@ function useDebounce<T>(value: T, ms: number): T {
 }
 
 export default function SearchPage() {
-  const [query, setQuery] = useState('');
-  const [tab, setTab] = useState<Tab>('artists');
+  const [query, setQuery] = useState("");
+  const [tab, setTab] = useState<Tab>("artists");
   const [artists, setArtists] = useState<ArtistSummary[]>([]);
   const [albums, setAlbums] = useState<AlbumSummary[]>([]);
   const [tracks, setTracks] = useState<TrackSearchItem[]>([]);
@@ -42,15 +52,17 @@ export default function SearchPage() {
 
   const search = useCallback(async (q: string, t: Tab) => {
     if (!q.trim()) {
-      setArtists([]); setAlbums([]); setTracks([]);
+      setArtists([]);
+      setAlbums([]);
+      setTracks([]);
       return;
     }
     setLoading(true);
     try {
-      if (t === 'artists') {
+      if (t === "artists") {
         const res = { items: await searchArtists(q) };
         setArtists(res.items);
-      } else if (t === 'albums') {
+      } else if (t === "albums") {
         const res = { items: await searchAlbums(q) };
         setAlbums(res.items);
       } else {
@@ -58,7 +70,7 @@ export default function SearchPage() {
         setTracks(res.items);
       }
     } catch {
-      toast.error('검색에 실패했습니다');
+      toast.error("검색에 실패했습니다");
     } finally {
       setLoading(false);
     }
@@ -69,7 +81,11 @@ export default function SearchPage() {
   }, [debouncedQuery, tab, search]);
 
   const isEmpty =
-    !loading && !!query && artists.length === 0 && albums.length === 0 && tracks.length === 0;
+    !loading &&
+    !!query &&
+    artists.length === 0 &&
+    albums.length === 0 &&
+    tracks.length === 0;
 
   return (
     <div className="mx-auto w-full max-w-6xl px-4 py-8">
@@ -104,13 +120,17 @@ export default function SearchPage() {
           <>
             <TabsContent value="artists">
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 md:grid-cols-5">
-                {artists.map((a) => <ArtistCard key={a.id} artist={a} />)}
+                {artists.map((a) => (
+                  <ArtistCard key={a.id} artist={a} />
+                ))}
               </div>
             </TabsContent>
 
             <TabsContent value="albums">
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 md:grid-cols-5">
-                {albums.map((a) => <AlbumCard key={a.id} album={a} />)}
+                {albums.map((a) => (
+                  <AlbumCard key={a.id} album={a} />
+                ))}
               </div>
             </TabsContent>
 
@@ -120,7 +140,7 @@ export default function SearchPage() {
                   <TrackRow
                     key={t.id}
                     track={{ ...t, explicit: t.explicit }}
-                    artist={t.artists.join(', ')}
+                    artist={t.artists.join(", ")}
                     albumCover={t.album.cover_url}
                   />
                 ))}
