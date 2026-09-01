@@ -2385,3 +2385,4 @@ Spotify 연동 백엔드, 프론트 기획(`_workspace/planning.md`), QA 리뷰(
 | 2026-09-01 | feat(music): 앨범 제목 꼬리 제거·싱글 EP 필터 해제·종류 배지 | DESIGN.md, _workspace, backend, docs, frontend | 커밋 `a502067` |
 | 2026-09-01 | chore(frontend): prettier 도입하고 전체 포맷 적용 | CLAUDE.md, docs, frontend | 커밋 `6e1560d` |
 | 2026-09-01 | feat(frontend): 상세 액션 줄·볼륨 위치·곡 행 재생·곡 커버·월드컵 종류 배지 | _workspace, frontend | 커밋 `5e7f6a2` |
+| 2026-09-01 | docs: 미결 결정 4건 정리, 다른 PC 이어받기 안내 | docs | 커밋 `e1d478a` |
