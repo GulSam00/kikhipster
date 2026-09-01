@@ -137,6 +137,8 @@ export default function SearchPage() {
                     track={{ ...t, explicit: t.explicit }}
                     artist={t.artists.join(', ')}
                     albumCover={t.album.cover_url}
+                    /* 곡마다 앨범이 다르므로 켠다. 앨범 상세는 전곡이 같은 커버라 끈다. */
+                    showCover
                   />
                 ))}
               </div>

@@ -132,7 +132,8 @@ export default function TopsterDetail({ id }: { id: string }) {
             onClick={handleDownload}
             disabled={downloading || topster.items.length === 0}
             size="lg"
-            className="h-11"
+            /* 주요 동작이라 기본 lg(h-11)보다 한 단계 키운다. 좁은 화면에서는 폭을 채운다. */
+            className="h-12 w-full px-6 sm:w-auto"
           >
             <Download />
             {downloading ? '만드는 중...' : '이미지 저장'}

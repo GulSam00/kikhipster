@@ -99,35 +99,20 @@ export default function PlayerDock() {
               </Button>
 
               {/*
-                볼륨은 **아래 컨트롤 줄이 아니라 이 줄에** 뒀다. 아래 줄은 320px 기준으로
-                재생 위치 슬라이더의 최소 폭(`min-w-16`)까지 이미 꽉 차 있어서, 거기에
-                하나를 더 끼우면 가로 스크롤이 난다(§ Mobile — BLOCK). 이 줄은 제목이
-                `flex-1` 이라 줄어들 자리가 있다.
-
-                **음소거 버튼은 항상, 슬라이더는 `sm` 이상에서만.** 모바일에는 하드웨어
-                볼륨이 있어서 정밀 조절보다 즉시 끄기가 쓸모 있다.
+                **모바일 전용 음소거.** 볼륨 조절 묶음은 아래 컨트롤 줄 오른쪽 끝으로
+                옮겼는데(2026-09-01), 그 줄은 320px 에서 이미 꽉 차 있어 슬라이더를
+                `sm` 이상에서만 보인다. 그러면 좁은 화면에 음소거 수단이 아예 없어지므로
+                버튼 하나만 여기 남긴다 — 이 줄은 제목이 `flex-1` 이라 줄어들 자리가 있다.
               */}
               <Button
                 variant="ghost"
-                className="text-muted-foreground hover:text-foreground size-10 shrink-0 rounded-full"
+                className="text-muted-foreground hover:text-foreground size-10 shrink-0 rounded-full sm:hidden"
                 onClick={toggleMute}
                 aria-label={muted ? '음소거 해제' : '음소거'}
                 aria-pressed={muted}
               >
                 <VolumeIcon />
               </Button>
-              {/*
-                Range·Thumb 를 중립색으로 내린다. 재생 버튼과 재생 위치 슬라이더가 이미
-                primary 라, 여기까지 primary 면 § Color budget 의 WARN 선(2개)을 넘는다.
-              */}
-              <Slider
-                value={[muted ? 0 : volume]}
-                max={1}
-                step={0.01}
-                onValueChange={([v]) => setVolume(v)}
-                aria-label="볼륨"
-                className="[&_[data-slot=slider-range]]:bg-muted-foreground [&_[data-slot=slider-thumb]]:border-muted-foreground hidden w-20 shrink-0 sm:flex"
-              />
 
               {/* 모바일에서는 컨트롤에 자리를 몰아준다 — 비우기는 재생목록 안에도 있다. */}
               <Button
@@ -188,6 +173,34 @@ export default function PlayerDock() {
               <span className="text-muted-foreground hidden w-9 shrink-0 text-xs tabular-nums sm:block">
                 {formatTime(duration)}
               </span>
+
+              {/*
+                볼륨은 이 줄 **오른쪽 끝**이다. 재생 위치 슬라이더의 최소 폭(`min-w-16`)
+                때문에 320px 에서는 자리가 없으므로 **묶음 전체를 `sm` 이상에서만** 보인다
+                — 좁은 화면의 음소거는 위 줄이 맡는다(`sm:hidden`).
+
+                Range·Thumb 를 중립색으로 내린다. 재생 버튼과 재생 위치 슬라이더가 이미
+                primary 라, 여기까지 primary 면 § Color budget 의 WARN 선(2개)을 넘는다.
+              */}
+              <div className="hidden shrink-0 items-center gap-1 sm:flex">
+                <Button
+                  variant="ghost"
+                  className="text-muted-foreground hover:text-foreground size-10 shrink-0 rounded-full"
+                  onClick={toggleMute}
+                  aria-label={muted ? '음소거 해제' : '음소거'}
+                  aria-pressed={muted}
+                >
+                  <VolumeIcon />
+                </Button>
+                <Slider
+                  value={[muted ? 0 : volume]}
+                  max={1}
+                  step={0.01}
+                  onValueChange={([v]) => setVolume(v)}
+                  aria-label="볼륨"
+                  className="[&_[data-slot=slider-range]]:bg-muted-foreground [&_[data-slot=slider-thumb]]:border-muted-foreground w-20 shrink-0"
+                />
+              </div>
             </div>
           </div>
         </div>

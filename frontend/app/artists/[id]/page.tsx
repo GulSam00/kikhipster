@@ -90,7 +90,14 @@ export default async function ArtistPage({ params }: { params: Promise<{ id: str
                 key={t.id}
                 track={{ ...t, track_number: i + 1 }}
                 artist={artist.name}
-                albumCover={artist.image_url}
+                /*
+                  예전에는 `artist.image_url` 을 넘겼는데 그건 **항상 null 이다** —
+                  iTunes 아티스트 엔티티에 이미지 필드가 없다. 그래서 여기서 재생을
+                  시작하면 하단 재생기의 커버 자리가 늘 비어 있었다. 곡이 실린 앨범의
+                  커버를 넘긴다(2026-09-01).
+                */
+                albumCover={t.album.cover_url}
+                showCover
               />
             ))}
           </div>

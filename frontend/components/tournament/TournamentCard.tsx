@@ -8,10 +8,11 @@ import { useEffect, useState, type ReactNode } from 'react';
 import ItemStats from '@/components/common/ItemStats';
 import ShareButton from '@/components/common/ShareButton';
 import { ItemFallbackIcon } from '@/components/tournament/PoolItemTile';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 
-import { fetchPoolItems, type PoolItem } from '@/lib/domain/pool-item';
+import { fetchPoolItems, ITEM_TYPE_LABEL, type PoolItem } from '@/lib/domain/pool-item';
 import { formatDate } from '@/lib/utils';
 
 import type { TournamentSummary } from '@/types/tournament';
@@ -74,10 +75,20 @@ export default function TournamentCard({ tournament, actions }: Props) {
           <div className="min-w-0 flex-1">
             {/*
               예전에는 여기에 '앨범 N' · '플레이 N' 배지 두 개가 있었다. 조회·좋아요·댓글로
-              바꾸면서 뺐다 — 종류와 후보 수는 상세에 그대로 있고, 카드에서는 같은 자리에
-              두 벌의 숫자를 겹쳐 보여주게 된다.
+              바꾸면서 뺐다 — 카드에서는 같은 자리에 두 벌의 숫자를 겹쳐 보여주게 된다.
+
+              **종류 배지는 2026-09-01에 다시 넣었다.** 그때 뺀 것은 *수량*(앨범 N)이고
+              이것은 *종류*다. 수량은 `ItemStats` 와 겹쳤지만 종류는 겹치는 정보가 없다 —
+              썸네일만으로는 곡 월드컵인지 앨범 월드컵인지 알 수 없다(둘 다 앨범 아트를
+              쓴다). 대시보드는 카드가 여러 장 깔리는 화면이라 § Color budget 을 지켜
+              무채색으로 둔다.
             */}
-            <p className="truncate text-sm font-medium">{tournament.title}</p>
+            <div className="flex items-center gap-1.5">
+              <Badge variant="outline" className="text-muted-foreground shrink-0">
+                {ITEM_TYPE_LABEL[tournament.item_type]}
+              </Badge>
+              <p className="truncate text-sm font-medium">{tournament.title}</p>
+            </div>
             <p className="text-muted-foreground truncate text-xs">
               {tournament.user.nickname} · {formatDate(tournament.created_at)}
             </p>

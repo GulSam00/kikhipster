@@ -11,6 +11,7 @@ import CommentSection from '@/components/social/CommentSection';
 import LikeButton from '@/components/social/LikeButton';
 import PlayLauncher from '@/components/tournament/PlayLauncher';
 import PoolGrid from '@/components/tournament/PoolGrid';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 
@@ -67,6 +68,16 @@ export default async function TournamentDetailPage({
       <ViewCounter target="tournament" id={tournament.id} />
 
       <DetailHeader
+        /*
+          곡 월드컵인지 앨범 월드컵인지 화면에 없었다 — `ITEM_TYPE_LABEL` 은 OG 설명에만
+          쓰이고 있었다(2026-09-01). 썸네일과 후보 그리드는 둘 다 앨범 아트라 그림만으로는
+          구분되지 않는다. 탑스터가 격자 크기를 넣는 자리를 월드컵은 비워 두고 있었다.
+        */
+        badges={
+          <Badge variant="outline" className="text-muted-foreground">
+            {ITEM_TYPE_LABEL[tournament.item_type]} 월드컵
+          </Badge>
+        }
         title={tournament.title}
         authorId={tournament.user.id}
         authorNickname={tournament.user.nickname}
@@ -111,7 +122,7 @@ export default async function TournamentDetailPage({
                 tournamentId={tournament.id}
                 availableSizes={tournament.available_sizes}
               />
-              <Button asChild variant="outline" size="lg" className="h-11">
+              <Button asChild variant="outline" size="lg" className="h-12 px-6">
                 <Link href={`/tournament/${tournament.id}/ranking`}>
                   <BarChart3 />
                   랭킹보기

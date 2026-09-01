@@ -63,7 +63,7 @@ export default function PlayLauncher({ tournamentId, availableSizes }: Props) {
   return (
     // 두 칸을 정확히 같은 너비로 두려고 `flex` 가 아니라 2열 그리드다. flex 에서는 각자
     // 콘텐츠만큼만 차지해서 "8강"과 "시작하기"의 폭이 그대로 벌어진다.
-    <div className="grid w-50 grid-cols-2 items-center">
+    <div className="grid w-56 grid-cols-2 items-center">
       <Select
         value={String(size)}
         onValueChange={(v) => v && setSize(Number(v))}
@@ -88,7 +88,7 @@ export default function PlayLauncher({ tournamentId, availableSizes }: Props) {
           aria-label="강수"
           className={cn(
             buttonVariants({ size: 'lg' }),
-            'data-[state=open]:bg-primary/80 dark:bg-primary dark:hover:bg-primary/80 [&_svg]:text-primary-foreground/70 h-11 w-full justify-between rounded-r-none border-r-0 data-[size=default]:h-11',
+            'data-[state=open]:bg-primary/80 dark:bg-primary dark:hover:bg-primary/80 [&_svg]:text-primary-foreground/70 h-12 w-full justify-between rounded-r-none border-r-0 data-[size=default]:h-12',
           )}
         >
           {/*
@@ -123,7 +123,7 @@ export default function PlayLauncher({ tournamentId, availableSizes }: Props) {
       {/* 칸막이는 배경색이 아니라 글자색의 투명도로 낸다 — 같은 면 위의 분할선이라는 뜻. */}
       <Button
         size="lg"
-        className="border-primary-foreground/25 h-11 w-full rounded-l-none border-l"
+        className="border-primary-foreground/25 h-12 w-full rounded-l-none border-l"
         onClick={start}
         disabled={loading}
       >
