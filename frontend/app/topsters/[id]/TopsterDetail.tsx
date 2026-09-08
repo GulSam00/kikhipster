@@ -12,7 +12,6 @@ import ViewCounter from '@/components/common/ViewCounter';
 import CommentSection from '@/components/social/CommentSection';
 import LikeButton from '@/components/social/LikeButton';
 import TopsterCanvas from '@/components/topster/TopsterCanvas';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Spinner } from '@/components/ui/spinner';
@@ -100,11 +99,7 @@ export default function TopsterDetail({ id }: { id: string }) {
         likeCount={topster.like_count}
         commentCount={topster.comment_count}
         description={topster.description}
-        badges={
-          <Badge variant="secondary" className="px-1.5 text-[10px]">
-            {topster.width}×{topster.height}
-          </Badge>
-        }
+        likeTarget={{ type: 'topster', id: topster.id }}
         ownerMenu={
           /* 격자·배경색·넘버링은 수정 화면에서 고친다. */
           <OwnerMenu
@@ -141,8 +136,13 @@ export default function TopsterDetail({ id }: { id: string }) {
         }
         engage={
           <>
-            <LikeButton targetType="topster" targetId={topster.id} name={topster.title} />
-            <ShareButton path={`/topsters/${topster.id}`} className="rounded-full" />
+            <LikeButton
+              targetType="topster"
+              targetId={topster.id}
+              name={topster.title}
+              tone="icon"
+            />
+            <ShareButton path={`/topsters/${topster.id}`} iconOnly />
           </>
         }
       />

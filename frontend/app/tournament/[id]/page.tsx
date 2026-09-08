@@ -11,7 +11,6 @@ import CommentSection from '@/components/social/CommentSection';
 import LikeButton from '@/components/social/LikeButton';
 import PlayLauncher from '@/components/tournament/PlayLauncher';
 import PoolGrid from '@/components/tournament/PoolGrid';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 
@@ -68,16 +67,6 @@ export default async function TournamentDetailPage({
       <ViewCounter target="tournament" id={tournament.id} />
 
       <DetailHeader
-        /*
-          곡 월드컵인지 앨범 월드컵인지 화면에 없었다 — `ITEM_TYPE_LABEL` 은 OG 설명에만
-          쓰이고 있었다(2026-09-01). 썸네일과 후보 그리드는 둘 다 앨범 아트라 그림만으로는
-          구분되지 않는다. 탑스터가 격자 크기를 넣는 자리를 월드컵은 비워 두고 있었다.
-        */
-        badges={
-          <Badge variant="outline" className="text-muted-foreground">
-            {ITEM_TYPE_LABEL[tournament.item_type]} 월드컵
-          </Badge>
-        }
         title={tournament.title}
         authorId={tournament.user.id}
         authorNickname={tournament.user.nickname}
@@ -86,6 +75,7 @@ export default async function TournamentDetailPage({
         likeCount={tournament.like_count}
         commentCount={tournament.comment_count}
         description={tournament.description}
+        likeTarget={{ type: 'tournament', id: tournament.id }}
         ownerMenu={
           /* 이 페이지는 Server Component라 로그인 사용자를 모른다 — 메뉴만 클라이언트다. */
           <OwnerMenu
@@ -99,7 +89,15 @@ export default async function TournamentDetailPage({
         }
       />
 
-      <h2 className="font-heading mb-4 text-lg font-bold">후보 {tournament.item_count}</h2>
+      {/*
+        곡 월드컵인지 앨범 월드컵인지 알리는 자리. 제목 위 배지로 두었다가 2026-09-08에
+        여기로 옮겼다 — 종류는 후보 그리드를 볼 때 필요한 정보지 제목보다 먼저 읽을
+        정보가 아니고, 이미 있던 '후보 N' 제목이 같은 대상을 가리키고 있었다.
+        썸네일과 후보 그리드는 둘 다 앨범 아트라 그림만으로는 구분되지 않는다.
+      */}
+      <h2 className="font-heading mb-4 text-lg font-bold">
+        {ITEM_TYPE_LABEL[tournament.item_type]} 후보 {tournament.item_count}
+      </h2>
       {items.length === 0 ? (
         <p className="text-muted-foreground py-6 text-center text-sm">
           후보 정보를 불러오지 못했습니다.
@@ -136,8 +134,9 @@ export default async function TournamentDetailPage({
                 targetType="tournament"
                 targetId={tournament.id}
                 name={tournament.title}
+                tone="icon"
               />
-              <ShareButton path={`/tournament/${tournament.id}`} className="rounded-full" />
+              <ShareButton path={`/tournament/${tournament.id}`} iconOnly />
             </>
           }
         />
