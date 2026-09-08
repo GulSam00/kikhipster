@@ -2436,3 +2436,4 @@ Spotify 연동 백엔드, 프론트 기획(`_workspace/planning.md`), QA 리뷰(
 | 2026-09-01 | feat(frontend): 상세 액션 줄·볼륨 위치·곡 행 재생·곡 커버·월드컵 종류 배지 | _workspace, frontend | 커밋 `5e7f6a2` |
 | 2026-09-01 | docs: 미결 결정 4건 정리, 다른 PC 이어받기 안내 | docs | 커밋 `e1d478a` |
 | 2026-09-08 | feat(frontend): 상세 상단 배지 제거, 액션 줄을 위계로 정리 | frontend | 커밋 `c02ee55` |
+| 2026-09-08 | docs: 9/08 세션 기록, 구현 범위·브라우저 검증 과제 갱신 | docs | 커밋 `f264121` |
