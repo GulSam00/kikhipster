@@ -54,54 +54,60 @@ export default function Navbar() {
   ];
 
   return (
-    <header className="bg-card/95 supports-[backdrop-filter]:bg-card/80 sticky top-0 z-50 border-b backdrop-blur">
-      <nav className="mx-auto flex h-14 max-w-6xl items-center gap-3 px-4">
-        <Link
-          href="/"
-          className="text-primary text-lg font-bold tracking-tight transition-opacity hover:opacity-80"
-        >
-          kikhipster
-        </Link>
+    <>
+      <header className="bg-card/95 supports-[backdrop-filter]:bg-card/80 sticky top-0 z-50 border-b backdrop-blur">
+        <nav className="mx-auto flex h-14 max-w-6xl items-center gap-3 px-4">
+          <Link
+            href="/"
+            className="text-primary text-lg font-bold tracking-tight transition-opacity hover:opacity-80"
+          >
+            kikhipster
+          </Link>
 
-        <ul className="hidden items-center gap-1 sm:flex">
-          {navLinks.map(({ href, label }) => (
-            <li key={href}>
-              <Button
-                asChild
-                variant="ghost"
-                size="sm"
-                className={cn(pathname.startsWith(href) && 'bg-muted text-foreground')}
-              >
-                <Link href={href}>{label}</Link>
-              </Button>
-            </li>
-          ))}
-        </ul>
+          <ul className="hidden items-center gap-1 sm:flex">
+            {navLinks.map(({ href, label }) => (
+              <li key={href}>
+                <Button
+                  asChild
+                  variant="ghost"
+                  size="sm"
+                  className={cn(pathname.startsWith(href) && 'bg-muted text-foreground')}
+                >
+                  <Link href={href}>{label}</Link>
+                </Button>
+              </li>
+            ))}
+          </ul>
 
-        <div className="ml-auto flex items-center gap-1">
-          {isLoggedIn ? (
-            <>
-              <Button
-                asChild
-                variant="ghost"
-                size="sm"
-                className={cn(pathname.startsWith('/profile') && 'bg-muted text-foreground')}
-              >
-                <Link href="/profile">프로필</Link>
+          <div className="ml-auto flex items-center gap-1">
+            {isLoggedIn ? (
+              <>
+                <Button
+                  asChild
+                  variant="ghost"
+                  size="sm"
+                  className={cn(pathname.startsWith('/profile') && 'bg-muted text-foreground')}
+                >
+                  <Link href="/profile">프로필</Link>
+                </Button>
+                <Button variant="ghost" size="icon-sm" onClick={handleLogout} aria-label="로그아웃">
+                  <LogOut />
+                </Button>
+              </>
+            ) : (
+              <Button asChild size="sm">
+                <Link href="/login">로그인</Link>
               </Button>
-              <Button variant="ghost" size="icon-sm" onClick={handleLogout} aria-label="로그아웃">
-                <LogOut />
-              </Button>
-            </>
-          ) : (
-            <Button asChild size="sm">
-              <Link href="/login">로그인</Link>
-            </Button>
-          )}
-        </div>
-      </nav>
+            )}
+          </div>
+        </nav>
+      </header>
 
-      {/* 모바일 하단 탭 */}
+      {/*
+        모바일 하단 탭. `<header>` 밖에 둔다 — 헤더의 `backdrop-blur` 가 `fixed` 자손의
+        기준 박스를 뷰포트에서 헤더로 바꿔서, 안에 두면 탭이 화면 아래가 아니라 헤더(56px)
+        안에 갇혀 맨 위에 붙는다.
+      */}
       <nav className="bg-card fixed inset-x-0 bottom-0 z-50 flex border-t sm:hidden">
         {mobileTabs.map(({ href, label, icon: Icon }) => {
           const active = pathname === href || (href !== '/' && pathname.startsWith(href));
@@ -132,6 +138,6 @@ export default function Navbar() {
           {isLoggedIn ? '프로필' : '로그인'}
         </Link>
       </nav>
-    </header>
+    </>
   );
 }
