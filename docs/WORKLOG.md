@@ -23,6 +23,7 @@
 - **남긴 것**은 `docs/TASKS.md` 에 3건으로 합쳤다 — 로그인 필요 / 눈으로만 판정 / 표본 부족.
 - **320px 2열 앨범 카드 메타 잘림 수정.** 배지 옆 `2026 · 2곡` 이 20개 중 17개 말줄임이었다(메타에 46px 만 남음). 모바일에서 배지를 윗줄·메타를 아랫줄로 나눴다(`sm` 이상은 한 줄). 수정 후 50개 카드 잘림 0, 가로 스크롤 없음.
 - **`Navbar` 의 eslint 오류(`set-state-in-effect`) 해소.** 로그인 여부를 `useState`+`useEffect` 대신 `useSyncExternalStore`(`storage` 이벤트 + 같은 탭 로그아웃용 커스텀 이벤트)로 읽는다 — `use-reduced-motion.ts` 와 같은 패턴. 토큰 있는 새로고침에서 hydration 오류 없음, 로그인·로그아웃 반영 확인.
+- **`/search` 의 eslint 오류 해소 — 이제 `eslint .` 오류 0건**(경고 1건은 `.prettierrc.js`). 로딩을 상태가 아니라 파생값(`현재 탭 결과의 query !== 검색어`)으로 바꾸고 탭별로 결과를 들고 있게 했다. 부수 효과: ① 탭을 오가도 이미 받은 검색어는 다시 묻지 않는다 ② 예전엔 다른 탭의 묵은 결과가 있으면 `검색 결과가 없습니다` 가 안 떴는데 현재 탭만 본다. 빠른 연속 입력은 `cancelled` 플래그로 늦은 응답이 덮지 못하게 했다.
 - **로컬 DB 에 테스트 플레이가 쌓였다.** 에이전트가 만든 `plays` 가 수 건 있다 — 랭킹 수치가 시드와 달라진다.
 
 ### 2026-09-08 — 상세 상단 배지 제거, 하단 액션 줄을 위계로 정리
@@ -2460,3 +2461,4 @@ Spotify 연동 백엔드, 프론트 기획(`_workspace/planning.md`), QA 리뷰(
 | 2026-10-05 | docs: 브라우저 검증 결과 반영, TASKS.md 남은 확인 4건으로 정리 | docs | 커밋 `af220cc` |
 | 2026-10-05 | fix(frontend): 모바일 앨범 카드 메타를 두 줄로 — 곡 수 말줄임 해소 | docs, frontend | 커밋 `6f77f76` |
 | 2026-10-05 | fix(frontend): Navbar 로그인 상태를 useSyncExternalStore 로 — set-state-in-effect 해소 | docs, frontend | 커밋 `a5799e4` |
+| 2026-10-05 | fix(frontend): 검색 페이지 effect 안 setState 제거 — 로딩을 파생값으로 | docs, frontend | 커밋 `b7ee89e` |
