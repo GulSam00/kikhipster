@@ -55,6 +55,25 @@ cd frontend && npm run dev                                      # :3300
 - **응답 스키마에서 UUID PK를 `id: str` 로 선언하지 않는다.** Pydantic v2가 `UUID` → `str` 변환을 거부해 행이 생기는 순간 전수 500이 된다. `schemas/common.py` 의 `UUIDStr` 을 쓸 것.
 - **모든 관계에 `cascade="all, delete-orphan", passive_deletes=True` 를 건다.** 빠뜨리면 부모 삭제 시 자식 FK를 NULL로 UPDATE하려다 `IntegrityError`.
 - **iTunes `/lookup`에 앨범 ID + `entity=song`으로 트랙을 조회할 때 `country` 파라미터를 같이 넘기지 않는다.** 실제로 트랙이 0개로 잘리는 걸 확인함(`limit`도 생략하면 마찬가지). `collectionId`는 전역 고유값이라 country 없이도 정확히 찾힌다. `backend/services/music_api.py`의 `get_album_tracks` 참조.
+- **iTunes `/search` 에 `country=KR` 을 넘기면 앨범·곡이 0건으로 온다.** 위 함정과 같은 뿌리다 —
+  한국에는 iTunes 뮤직 스토어가 없어(Apple Music 은 별개) **KR 스토어프론트의 음악 카탈로그가 비어 있다.**
+  2026-09-10 실측: `entity=album|song` + `country=KR` 은 검색어가 한글이든(`아이유`) 영문이든(`IU`)
+  전부 0건이고, 같은 검색어가 `US`·`JP`·country 생략에서는 정상이다. `entity=musicArtist` 만
+  스토어프론트에 매이지 않아 KR 로도 살아남는다 — **그래서 아티스트 검색만 되고 앨범·곡 검색이
+  조용히 빈 목록이 되는 모양으로 터진다**(200 OK + `items: []` 라 에러도 안 난다).
+  `music_api.py` 의 `_search_country()` 가 `/search` 에 한해 KR→US 로 바꿔 준다. **`/lookup` 에는
+  적용하지 않는다** — lookup 은 KR 로도 정상이다. ID 는 스토어프론트를 타지 않아(US·JP 의
+  `collectionId` 동일) 검색만 US 로 돌려도 저장된 데이터와 어긋나지 않는다.
+- **`/lookup` 의 `country=KR` 은 반대로 *필요하다* — 이름을 한국어로 주는 유일한 경로다.**
+  `Spring Day`→`봄날`, `BTS`→`방탄소년단`, `IU`→`아이유`(`lang=ko_kr` 은 효과 없음).
+  그래서 검색은 US, 이름은 KR lookup 인 2단 구조다(`_localized_search_items`).
+  **단 KR 스토어에 없는 앨범은 통째로 안 온다** — 서양권을 섞은 30건 중 2건(비틀즈)이
+  KR 에서만 누락됐다. `_lookup_chunked` 는 **KR 먼저, 못 찾은 것만 country 없이 한 번 더**
+  부른다. **이 폴백을 지우면 저장된 탑스터의 커버가 조용히 사라진다.**
+  앨범 상세(`get_album_tracks`)만은 `entity=song` 때문에 KR 을 못 써서, 이름만 따로
+  물어 갈아끼운다(`_localize_names` — `preview_url` 은 절대 덮지 않는다).
+  **이름 규칙을 바꾸면 `music_cache` 의 `album`·`track` 행을 지워야 한다** — 30일 TTL 이라
+  안 지우면 예전 표기가 그대로 산다.
 
 - **shadcn 프리미티브의 색·크기를 덮을 때는 variant 까지 똑같이 써야 한다.** `cn()` 은
   `twMerge` 라 **variant 가 다르면 다른 그룹**으로 보고 둘 다 남긴다. 그러면 속성 선택자가

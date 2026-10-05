@@ -9,6 +9,42 @@ from fastapi import HTTPException
 logger = logging.getLogger(__name__)
 
 
+# iTunes /search 는 **KR 스토어프론트에서 앨범·곡을 하나도 돌려주지 않는다.**
+#
+# 2026-09-10 실측 (https://itunes.apple.com/search):
+#
+# | term        | country | entity      | resultCount |
+# |-------------|---------|-------------|-------------|
+# | 아이유       | KR      | album       | **0**       |
+# | 아이유       | KR      | song        | **0**       |
+# | IU (영문)    | KR      | album       | **0**       |
+# | IU (영문)    | US      | album       | 3           |
+# | 아이유       | US / JP / 생략 | album | 3           |
+# | 아이유       | KR      | musicArtist | 2           |
+#
+# **검색어가 한글이라서가 아니다** — 영문 `IU` 도 KR 에선 0이고, 같은 한글 검색어도
+# US·JP 에선 정상이다. 한국에는 iTunes 뮤직 스토어가 없어서(Apple Music 은 별개다)
+# KR 스토어프론트의 음악 카탈로그 자체가 비어 있는 것이다. `musicArtist` 만 살아남는
+# 이유는 아티스트 엔티티가 스토어프론트에 매이지 않기 때문이다(응답의 `country` 가 None).
+#
+# 같은 함정을 이미 한 번 겪었다 — `get_album_tracks` 가 country 를 안 넘기는 이유가
+# 이것이다(CLAUDE.md 에 기록됨). 그때는 그 호출만 고쳤고, /search 는 그대로 남아 있었다.
+#
+# **ID 는 스토어프론트를 타지 않는다**(위 실측에서 US·JP 의 `collectionId` 가 동일).
+# 그래서 검색만 US 로 돌려도 저장된 탑스터·월드컵의 앨범 ID 와 어긋나지 않는다.
+_NO_MUSIC_SEARCH_STOREFRONTS = {"KR"}
+_SEARCH_FALLBACK_COUNTRY = "US"
+
+
+def _search_country(market: str) -> str:
+    """/search 에 실제로 넘길 스토어프론트.
+
+    음악 카탈로그가 비어 있는 스토어프론트는 US 로 대신한다. **`/lookup` 에는 쓰지
+    않는다** — lookup 은 KR 로도 정상 동작한다(아티스트 앨범 6건 실측).
+    """
+    return _SEARCH_FALLBACK_COUNTRY if market.upper() in _NO_MUSIC_SEARCH_STOREFRONTS else market
+
+
 def _upscale_artwork(url: str | None, size: int = 600) -> str | None:
     """iTunes artworkUrl100을 요청한 해상도로 치환 (공식적으로 지원되는 URL 패턴)."""
     if not url:
@@ -137,7 +173,7 @@ class ITunesMusicService:
             "/search",
             params={
                 "term": query,
-                "country": market,
+                "country": _search_country(market),
                 "media": "music",
                 "entity": "musicArtist",
                 "limit": min(limit, 50),
@@ -175,7 +211,7 @@ class ITunesMusicService:
             "/search",
             params={
                 "term": query,
-                "country": market,
+                "country": _search_country(market),
                 "media": "music",
                 "entity": "album",
                 "limit": fetch,
@@ -199,7 +235,7 @@ class ITunesMusicService:
             "/search",
             params={
                 "term": query,
-                "country": market,
+                "country": _search_country(market),
                 "media": "music",
                 "entity": "song",
                 "limit": min(limit, 50),
@@ -309,7 +345,55 @@ class ITunesMusicService:
             })
         tracks.sort(key=lambda t: t["track_number"] or 0)
 
+        await self._localize_names(album, tracks)
         return {"album": album, "tracks": tracks}
+
+    async def _localize_names(self, album: dict, tracks: list[dict]) -> None:
+        """앨범 상세의 **표시 이름만** KR 표기로 갈아끼운다 (제자리 수정).
+
+        이 경로는 `entity=song` 을 써야 트랙이 오는데, 거기에 `country=KR` 을 얹으면
+        트랙이 0개로 잘린다(위 표). 그래서 이름은 따로 물어본다 — `entity` 없는 lookup
+        하나로 collection 과 track 을 같이 받으므로 **요청은 1회 늘 뿐**이고, 결과는
+        `album_tracks` 캐시에 30일 남는다.
+
+        **바꾸는 것은 `title`/`name`/아티스트명뿐이다.** `preview_url`·`track_number`·
+        `duration_ms` 는 ①~③ 단계에서 이미 확인된 값이라 그대로 둔다 — KR 응답에 없거나
+        다를 수 있고, 미리듣기가 조용히 사라지면 재생기가 통째로 멈춘다.
+
+        실패해도 조용히 넘어간다. 이름이 영어로 남을 뿐 화면은 그대로 뜬다.
+        """
+        ids = [album["id"]] + [t["id"] for t in tracks if t.get("id")]
+        ids = [i for i in ids if i]
+        if not ids:
+            return
+
+        try:
+            data = await self._request(
+                "/lookup",
+                params={"id": ",".join(ids[: self.LOOKUP_CHUNK]), "country": self.LOOKUP_COUNTRY},
+            )
+        except Exception:
+            logger.warning("KR 이름 조회 실패, 영문 표기를 유지한다 (album=%s)", album["id"])
+            return
+
+        by_id = {}
+        for r in data.get("results", []):
+            key = "trackId" if r.get("wrapperType") == "track" else "collectionId"
+            if r.get(key):
+                by_id[str(r[key])] = r
+
+        localized = by_id.get(album["id"])
+        if localized:
+            album["title"] = localized.get("collectionName") or album["title"]
+            album["artist_name"] = localized.get("artistName") or album["artist_name"]
+
+        for t in tracks:
+            localized = by_id.get(t["id"])
+            if not localized:
+                continue
+            t["name"] = localized.get("trackName") or t["name"]
+            if localized.get("artistName"):
+                t["artists"] = [localized["artistName"]]
 
     async def _search_album_tracks(self, collection: dict, market: str) -> list[dict]:
         """lookup 이 트랙을 안 줄 때 검색으로 수록곡을 긁어 온다.
@@ -366,23 +450,55 @@ class ITunesMusicService:
     # 여기서 청크로 쪼개 부른다. 여유를 두고 150으로 잡았다.
     LOOKUP_CHUNK = 150
 
-    async def _lookup_chunked(self, ids: list[str], wrapper_type: str) -> dict[str, dict]:
-        """id 목록을 청크로 나눠 lookup하고 {id: 매핑결과} 를 돌려준다.
+    # 배치 lookup 이 먼저 물어보는 스토어프론트.
+    #
+    # **`/lookup` 은 `/search` 와 반대로 KR 에서 이름을 한국어로 준다.** 2026-09-10 실측:
+    # `Spring Day`→`봄날`, `For Lovers Who Hesitate`→`주저하는 연인들을 위해`,
+    # `BTS`→`방탄소년단`, `IU`→`아이유`, `Kim Kwang Seok`→`김광석`.
+    # 검색 결과 80건 대조에서 **아티스트명은 거의 전부, 곡 제목은 절반가량** 바뀌었고
+    # 앨범 제목은 안 바뀌었다(발매사가 등록한 표기라 스토어프론트와 무관).
+    #
+    # `lang=ko_kr` 은 효과가 없다 — 공식 지원이 `en_us`/`ja_jp` 뿐이고 실제로도 응답이 같다.
+    LOOKUP_COUNTRY = "KR"
 
-        `country`는 넘기지 않는다 — 앨범 lookup에서 트랙이 0개로 잘리는 것과 같은 계열의
-        문제를 피하기 위함이고, trackId/collectionId는 전역 고유값이라 필요도 없다.
-        """
+    async def _lookup_pass(
+        self, ids: list[str], wrapper_type: str, country: str | None = None
+    ) -> dict[str, dict]:
+        """청크로 쪼개 lookup 한 번 훑고 {id: 매핑결과} 를 돌려준다."""
         mapper = self._map_track if wrapper_type == "track" else self._map_album
+        key = "trackId" if wrapper_type == "track" else "collectionId"
         found: dict[str, dict] = {}
 
         for start in range(0, len(ids), self.LOOKUP_CHUNK):
             chunk = ids[start:start + self.LOOKUP_CHUNK]
-            data = await self._request("/lookup", params={"id": ",".join(chunk)})
+            params = {"id": ",".join(chunk)}
+            if country:
+                params["country"] = country
+            data = await self._request("/lookup", params=params)
             for r in data.get("results", []):
                 if r.get("wrapperType") != wrapper_type:
                     continue
-                key = "trackId" if wrapper_type == "track" else "collectionId"
                 found[str(r.get(key))] = mapper(r)
+
+        return found
+
+    async def _lookup_chunked(self, ids: list[str], wrapper_type: str) -> dict[str, dict]:
+        """id 목록을 lookup 해 {id: 매핑결과} 를 돌려준다. **KR 먼저, 못 찾은 것만 US 로 한 번 더.**
+
+        KR 을 먼저 부르는 이유는 이름이 한국어로 오기 때문이다(`LOOKUP_COUNTRY` 주석).
+        **그런데 KR 스토어에 없는 앨범은 통째로 안 온다** — 실측에서 서양권을 섞은 30건 중
+        2건(비틀즈)이 KR 에서만 누락됐다. 그래서 2단이다. 폴백이 없으면 저장된 탑스터의
+        커버가 조용히 사라진다.
+
+        폴백 호출에는 `country` 를 넘기지 않는다(= US). `entity` 도 안 넘긴다 —
+        앨범 lookup 에 `entity=song` 을 얹으면 트랙이 0개로 잘리는 함정이 따로 있다.
+        `trackId`/`collectionId` 는 전역 고유값이라 스토어프론트가 달라도 같은 값이다.
+        """
+        found = await self._lookup_pass(ids, wrapper_type, self.LOOKUP_COUNTRY)
+
+        missing = [i for i in ids if i not in found]
+        if missing:
+            found.update(await self._lookup_pass(missing, wrapper_type))
 
         return found
 

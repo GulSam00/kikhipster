@@ -144,6 +144,46 @@ async def _warm_item_cache(db: Session, item_type: str, items: list[dict]) -> No
     await run_in_threadpool(put_cached, db, item_type, items, [])
 
 
+async def _localized_search_items(
+    db: Session,
+    item_type: str,
+    items: list[dict],
+    fetch: Callable[[list[str]], Awaitable[list[dict]]],
+    model: type[BaseModel],
+) -> list[dict]:
+    """검색 결과의 이름을 한국어로 바꿔 돌려준다.
+
+    **iTunes 는 검색에서만 영어를 준다.** `/search` 는 KR 스토어프론트에서 앨범·곡을
+    0건으로 주기 때문에 US 로 검색할 수밖에 없는데(`music_api.py` 의 `_search_country`),
+    같은 항목을 `/lookup?country=KR` 로 다시 물으면 이름이 한국어로 온다. 그래서
+    **검색은 US, 이름은 KR lookup** 2단으로 간다.
+
+    왕복이 한 번 늘지만 `_lookup_with_cache` 를 그대로 타므로 **두 번째 검색부터는
+    DB 캐시가 받아 iTunes 요청이 0회**다. 캐시에 적히는 payload 도 한국어판이라
+    검색 화면과 저장된 탑스터·월드컵이 같은 이름을 쓴다 — 예전에는 검색이 `IU`,
+    배치 조회가 `IU` 로 우연히 같았을 뿐 근거가 없었다.
+
+    **lookup 으로 안 풀리는 항목은 버리지 않는다.** 검색은 돌려주는데 lookup 으로는
+    안 잡히는 앨범 ID 가 실제로 있다(1508421225, 754383858 등). 그런 항목은 검색이 준
+    원본을 그대로 쓰고, 캐시에도 그 payload 로 덮어 둔다 — `_lookup_with_cache` 가
+    직전에 tombstone 을 찍어 놨을 것이라 안 덮으면 배치 조회에서 하루 동안 '없음'이 된다.
+    """
+    ids = [str(i["id"]) for i in items if i.get("id")]
+    if not ids:
+        return items
+
+    resolved = {
+        str(r["id"]): r for r in await _lookup_with_cache(db, item_type, ids, fetch, model)
+    }
+
+    unresolved = [i for i in items if str(i.get("id")) not in resolved]
+    if unresolved:
+        await _warm_item_cache(db, item_type, unresolved)
+
+    # 검색이 준 순서(= 관련도 순)를 그대로 지킨다.
+    return [resolved.get(str(i.get("id")), i) for i in items]
+
+
 
 @router.get("/search/artists", response_model=SearchArtistsResponse)
 async def search_artists(
@@ -184,8 +224,10 @@ async def search_albums(
     result = await service.search_albums(
         q, market=market, limit=limit, include_singles=include_singles
     )
-    await _warm_item_cache(db, "album", result.get("items", []))
-    return result
+    items = await _localized_search_items(
+        db, "album", result.get("items", []), service.get_albums_by_ids, AlbumSummary
+    )
+    return {"items": items, "total": result.get("total", len(items))}
 
 
 @router.get("/artists/{artist_id}", response_model=ArtistDetail)
@@ -289,8 +331,10 @@ async def search_tracks(
     """곡 검색. 앨범 검색과 같은 이유로 결과 항목만 배치 캐시에 적어 둔다."""
     service = request.app.state.music_service
     result = await service.search_tracks(q, market=market, limit=limit)
-    await _warm_item_cache(db, "track", result.get("items", []))
-    return result
+    items = await _localized_search_items(
+        db, "track", result.get("items", []), service.get_tracks_by_ids, TrackSearchItem
+    )
+    return {"items": items, "total": result.get("total", len(items))}
 
 
 @router.get("/tracks", response_model=list[TrackSearchItem])
