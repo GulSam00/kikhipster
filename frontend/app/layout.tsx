@@ -25,7 +25,7 @@ export const metadata: Metadata = {
     // 상세 페이지들이 제목만 주면 여기 붙는다.
     template: `%s · ${SITE_NAME}`,
   },
-  description: '음악 탑스터, 토너먼트, 아티스트 탐색 서비스',
+  description: '음악 탑스터, 이상형 월드컵, 아티스트 탐색 서비스',
   openGraph: {
     siteName: SITE_NAME,
     type: 'website',

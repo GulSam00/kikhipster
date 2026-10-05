@@ -1,6 +1,6 @@
 'use client';
 
-import { Home, LayoutGrid, LogOut, Search, Trophy, User } from 'lucide-react';
+import { Home, LayoutGrid, LogOut, Search, Trophy, User, type LucideIcon } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -11,10 +11,18 @@ import { clearMeCache } from '@/lib/hooks/use-me';
 
 import { cn } from '@/lib/utils';
 
-const navLinks = [
+/**
+ * `shortLabel` 은 모바일 하단 탭에서만 쓰는 줄인 이름이다.
+ *
+ * 하단 탭은 `flex-1` 5분할이라 320px 에서 한 칸이 64px 인데, `text-xs`(12px) 기준
+ * '이상형 월드컵'은 약 78px 로 칸을 넘긴다. 넘치면 가로 스크롤이 생기고 그건
+ * DESIGN.md § Mobile responsiveness 의 BLOCK 사안이라, 좁은 화면에서만 '월드컵'으로 줄인다.
+ * 상단 바에는 자리가 넉넉하므로 전체 이름을 그대로 쓴다.
+ */
+const navLinks: { href: string; label: string; shortLabel?: string; icon: LucideIcon }[] = [
   { href: '/search', label: '검색', icon: Search },
   { href: '/topsters', label: '탑스터', icon: LayoutGrid },
-  { href: '/tournament', label: '토너먼트', icon: Trophy },
+  { href: '/tournament', label: '이상형 월드컵', shortLabel: '월드컵', icon: Trophy },
 ];
 
 export default function Navbar() {
@@ -36,11 +44,18 @@ export default function Navbar() {
     router.push('/');
   }
 
-  const mobileTabs = [{ href: '/', label: '홈', icon: Home }, ...navLinks];
+  const mobileTabs = [
+    { href: '/', label: '홈', icon: Home },
+    ...navLinks.map(({ href, label, shortLabel, icon }) => ({
+      href,
+      label: shortLabel ?? label,
+      icon,
+    })),
+  ];
 
   return (
     <header className="bg-card/95 supports-[backdrop-filter]:bg-card/80 sticky top-0 z-50 border-b backdrop-blur">
-      <nav className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4">
+      <nav className="mx-auto flex h-14 max-w-6xl items-center gap-3 px-4">
         <Link
           href="/"
           className="text-primary text-lg font-bold tracking-tight transition-opacity hover:opacity-80"
@@ -63,7 +78,7 @@ export default function Navbar() {
           ))}
         </ul>
 
-        <div className="flex items-center gap-1">
+        <div className="ml-auto flex items-center gap-1">
           {isLoggedIn ? (
             <>
               <Button

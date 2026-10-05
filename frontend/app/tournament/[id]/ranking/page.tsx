@@ -25,10 +25,10 @@ function percent(value: number) {
   return `${Math.round(value * 100)}%`;
 }
 
-/** 순위 추이 셀. 신규(비교 시점에 표본 없음)는 대시가 아니라 'NEW'로 구분한다. */
+/** 순위 추이 셀. 신규(비교 시점에 표본 없음)는 대시가 아니라 '신규'로 구분한다. */
 function TrendCell({ delta }: { delta: number | null }) {
   if (delta === null) {
-    return <span className="text-muted-foreground text-sm">NEW</span>;
+    return <span className="text-muted-foreground text-sm">신규</span>;
   }
   if (delta === 0) {
     return (
