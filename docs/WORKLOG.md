@@ -2459,3 +2459,4 @@ Spotify 연동 백엔드, 프론트 기획(`_workspace/planning.md`), QA 리뷰(
 | 2026-10-05 | docs: 브라우저 확인된 항목을 TASKS.md 에서 줄임 | docs | 커밋 `66dfe4b` |
 | 2026-10-05 | docs: 브라우저 검증 결과 반영, TASKS.md 남은 확인 4건으로 정리 | docs | 커밋 `af220cc` |
 | 2026-10-05 | fix(frontend): 모바일 앨범 카드 메타를 두 줄로 — 곡 수 말줄임 해소 | docs, frontend | 커밋 `6f77f76` |
+| 2026-10-05 | fix(frontend): Navbar 로그인 상태를 useSyncExternalStore 로 — set-state-in-effect 해소 | docs, frontend | 커밋 `a5799e4` |
