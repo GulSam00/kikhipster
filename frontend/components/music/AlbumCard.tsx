@@ -40,10 +40,13 @@ export default function AlbumCard({ album }: Props) {
           {/*
             배지를 제목 **아래** 메타 줄에 둔다. 제목 옆에 붙이면 모바일 2열(카드 폭 150px
             남짓)에서 제목이 배지에 밀려 두세 글자만 남는다 — 종류보다 제목이 먼저다.
+
+            메타 줄은 모바일에서 **두 줄**로 나눈다(배지 위, `연도 · 곡 수` 아래). 한 줄에 두면 배지
+            폭 때문에 메타에 46px 남짓만 남아 `2026 · …` 으로 잘렸다(320px, 2026-10-05 실측).
           */}
           <p className="truncate text-sm font-medium">{album.title}</p>
           <p className="text-muted-foreground mt-0.5 truncate text-xs">{album.artist_name}</p>
-          <div className="mt-2 flex items-center gap-1.5">
+          <div className="mt-2 flex flex-col items-start gap-1 sm:flex-row sm:items-center sm:gap-1.5">
             <AlbumTypeBadge type={album.album_type} />
             <p className="text-muted-foreground truncate text-xs">
               {year} · {album.total_tracks}곡
