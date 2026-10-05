@@ -2439,3 +2439,4 @@ Spotify 연동 백엔드, 프론트 기획(`_workspace/planning.md`), QA 리뷰(
 | 2026-09-08 | docs: 9/08 세션 기록, 구현 범위·브라우저 검증 과제 갱신 | docs | 커밋 `f264121` |
 | 2026-10-05 | refactor(frontend): '이상형 월드컵' 명칭 통일, 프리미티브 transition 범위 축소 | frontend | 커밋 `7bd57d4` |
 | 2026-10-05 | fix(frontend): 모바일 하단 탭을 header 밖으로 — 화면 맨 위에 붙던 문제 | frontend | 커밋 `639bfd2` |
+| 2026-10-05 | docs: 브라우저 확인된 항목을 TASKS.md 에서 줄임 | docs | 커밋 `66dfe4b` |
