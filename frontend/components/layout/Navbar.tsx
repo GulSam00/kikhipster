@@ -3,7 +3,7 @@
 import { Home, LayoutGrid, LogOut, Search, Trophy, User, type LucideIcon } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useSyncExternalStore } from 'react';
 
 import { Button } from '@/components/ui/button';
 
@@ -25,14 +25,29 @@ const navLinks: { href: string; label: string; shortLabel?: string; icon: Lucide
   { href: '/tournament', label: '이상형 월드컵', shortLabel: '월드컵', icon: Trophy },
 ];
 
+/** 로그아웃처럼 같은 탭에서 토큰을 지울 때 쓴다 — `storage` 이벤트는 **다른 탭**에서만 온다. */
+const AUTH_CHANGE_EVENT = 'kikhipster:auth-change';
+
+function subscribeToken(onChange: () => void) {
+  window.addEventListener('storage', onChange);
+  window.addEventListener(AUTH_CHANGE_EVENT, onChange);
+  return () => {
+    window.removeEventListener('storage', onChange);
+    window.removeEventListener(AUTH_CHANGE_EVENT, onChange);
+  };
+}
+
 export default function Navbar() {
+  // `usePathname()` 때문에 이 컴포넌트가 이동마다 다시 렌더되므로, 로그인 콜백이 토큰을 쓰고
+  // 이동한 직후에도 스냅샷이 다시 읽힌다. `useState` + `useEffect` 가 아닌 이유는
+  // `react-hooks/set-state-in-effect` 와 `use-reduced-motion.ts` 의 설명을 참고.
   const pathname = usePathname();
   const router = useRouter();
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-
-  useEffect(() => {
-    setIsLoggedIn(!!localStorage.getItem('access_token'));
-  }, [pathname]);
+  const isLoggedIn = useSyncExternalStore(
+    subscribeToken,
+    () => !!localStorage.getItem('access_token'),
+    () => false,
+  );
 
   function handleLogout() {
     localStorage.removeItem('access_token');
@@ -40,7 +55,7 @@ export default function Navbar() {
     localStorage.removeItem('user_id');
     // 모듈 캐시에 남은 이전 사용자를 지운다. 안 지우면 로그아웃 직후에도 '내 댓글'로 보인다.
     clearMeCache();
-    setIsLoggedIn(false);
+    window.dispatchEvent(new Event(AUTH_CHANGE_EVENT));
     router.push('/');
   }
 
