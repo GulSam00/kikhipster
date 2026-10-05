@@ -8,13 +8,12 @@ import { useParams, useRouter } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 
-import CountUp from '@/components/reactbits/CountUp';
-import ShinyText from '@/components/reactbits/ShinyText';
 import StarBorder from '@/components/reactbits/StarBorder';
 import CommentSection from '@/components/social/CommentSection';
 import BracketBackground from '@/components/tournament/BracketBackground';
 import FlapCounter from '@/components/tournament/FlapCounter';
 import FullBracket from '@/components/tournament/FullBracket';
+import PlayConfetti from '@/components/tournament/PlayConfetti';
 import PoolItemPlayButton from '@/components/tournament/PoolItemPlayButton';
 import { ItemFallbackIcon } from '@/components/tournament/PoolItemTile';
 import { Button } from '@/components/ui/button';
@@ -38,7 +37,13 @@ import type { Play, PlayRound, TournamentRankingItem } from '@/types/tournament'
  * 거의 안 보인다 — 그래서 좁은 화면만 한 단계 줄인다. 반투명 배경 + 블러라 무엇을
  * 고르는 중인지는 버튼 뒤로 비쳐 보인다.
  *
- * **움직임은 뺐다.** Button 프리미티브의 기본값인 hover 색 전환(`transition-all`)과
+ * **그림자는 안 깐다.** 예전엔 `shadow-lg` 가 같이 붙어 반투명+블러와 함께
+ * glassmorphism 기본 세트가 돼 있었다. 반투명과 블러는 근거가 있지만(버튼 아래로 앨범
+ * 아트가 비쳐야 한다) 그림자는 아니다 — DESIGN.md § Visual reference 가 "다크 캔버스에서
+ * 그림자는 거의 안 보인다"고 적고 hover 효과를 그림자 대신 `scale` 로 정한 근거가 있다.
+ * 안 보이는 그림자라 지웠다 (2026-09-08).
+ *
+ * **움직임도 뺐다.** Button 프리미티브의 기본값인 hover 색 전환과
  * 누를 때 1px 내려가는 것(`active:…translate-y-px`)을 끈다 — 이 화면에서 움직이는 것은
  * 고른 카드가 올라가고 진 카드가 물러나는 전환 하나여야 하고, 커버 한가운데 64px 버튼이
  * 같이 들썩이면 그쪽으로 눈이 간다. hover 색 자체는 남는다(즉시 바뀔 뿐이다) —
@@ -53,36 +58,8 @@ import type { Play, PlayRound, TournamentRankingItem } from '@/types/tournament'
  * `inset-0 m-auto` 로 정렬하면 transform 은 비워 둘 수 있다.
  */
 const COVER_PLAY_BUTTON =
-  'absolute inset-0 m-auto size-14 rounded-full bg-secondary/80 shadow-lg backdrop-blur-sm transition-none active:not-aria-[haspopup]:translate-y-0 sm:size-16';
+  'absolute inset-0 m-auto size-14 rounded-full bg-secondary/80 backdrop-blur-sm transition-none active:not-aria-[haspopup]:translate-y-0 sm:size-16';
 const COVER_PLAY_ICON = 'size-6 sm:size-7';
-
-/**
- * 라운드 제목의 "희귀도".
- *
- * 라운드가 올라갈수록 제목이 더 귀해 보이게 한다. **색상환으로 등급을 나누는 흔한 방식은
- * 여기서 쓸 수 없다** — DESIGN.md § Color budget 이 saturated 토큰을 `primary`(amber)와
- * `destructive` 둘로 제한하는데, 이 화면은 선택 버튼 두 개로 이미 WARN 선에 걸쳐 있다.
- * 대신 § Visual reference 가 다크 UI 에 대해 말하는 축을 쓴다 — **"캔버스가 검을수록
- * 그림자보다 밝기 단계로 위계를 표현한다."** 그래서 등급을 나누는 것은 색상이 아니라
- * ① 광택이 얼마나 밝게 훑는지 ② 얼마나 자주 훑는지 두 가지다.
- *
- * `shine` 은 `--muted-foreground` 에서 `--foreground` 로 가는 비율(%)이다. hex 를 새로
- * 만들지 않고 `color-mix()` 로 두 토큰 사이를 섞으므로 § Color 의 하드코딩 금지에 걸리지
- * 않고, 테마가 바뀌어도 따라간다.
- *
- * 키는 `round_num` 인데 **이건 경기 수가 아니라 지수다** — `roundLabel()` 이
- * `2 ** roundNum` 으로 이름을 만든다(5 → `32강`, 3 → `8강`). 1·2 만 결승·준결승으로 예외.
- *
- * 표에 없는 라운드(64강·128강 = 6·7)는 광택이 아예 없다. 아직 귀할 단계가 아니고,
- * 128강에서부터 제목이 번쩍이면 결승까지 갈 곳이 없다.
- */
-const TITLE_RARITY: Record<number, { shine: number; speed: number; delay: number }> = {
-  5: { shine: 35, speed: 6, delay: 4 }, // 32강
-  4: { shine: 55, speed: 5, delay: 3 }, // 16강
-  3: { shine: 75, speed: 4, delay: 2.5 }, // 8강
-  2: { shine: 90, speed: 3.5, delay: 2 }, // 준결승
-  1: { shine: 100, speed: 3, delay: 1.5 }, // 결승 — 여기가 천장이라 이 값은 건드리지 않는다
-};
 
 export default function PlayPage() {
   const router = useRouter();
@@ -197,6 +174,9 @@ export default function PlayPage() {
     const winner = play.winner_item_id ? items[play.winner_item_id] : undefined;
     return (
       <div className="mx-auto w-full max-w-md px-4 py-12 text-center">
+        {/* 한 판이 끝난 그 순간에 한 번만 터진다. 되풀이하지 않는다. */}
+        <PlayConfetti />
+
         <Trophy className="text-primary mx-auto mb-4 size-15" />
 
         {/* 우승은 이 화면의 주인공이라 커버를 크게 놓는다 — 대결 카드보다 크다. */}
@@ -245,12 +225,7 @@ export default function PlayPage() {
               <CardContent className="flex flex-col gap-0.5 py-1">
                 <p className="text-muted-foreground text-xs">우승 비율</p>
                 <p className="text-xl font-bold tabular-nums">
-                  {reduced ? (
-                    Math.round(winnerStats.championship_rate * 100)
-                  ) : (
-                    <CountUp to={Math.round(winnerStats.championship_rate * 100)} duration={1.2} />
-                  )}
-                  %
+                  {Math.round(winnerStats.championship_rate * 100)}%
                 </p>
                 <p className="text-muted-foreground text-xs tabular-nums">
                   {winnerStats.championship_count}/{winnerStats.play_count}판
@@ -261,12 +236,7 @@ export default function PlayPage() {
               <CardContent className="flex flex-col gap-0.5 py-1">
                 <p className="text-muted-foreground text-xs">승률</p>
                 <p className="text-xl font-bold tabular-nums">
-                  {reduced ? (
-                    Math.round(winnerStats.match_win_rate * 100)
-                  ) : (
-                    <CountUp to={Math.round(winnerStats.match_win_rate * 100)} duration={1.2} />
-                  )}
-                  %
+                  {Math.round(winnerStats.match_win_rate * 100)}%
                 </p>
                 <p className="text-muted-foreground text-xs tabular-nums">
                   {winnerStats.match_win_count}/{winnerStats.match_count}경기
@@ -457,7 +427,6 @@ function PlayMatch({
     뺐다 — 판이 끝나 간다는 건 제목과 배경 대진표('우승' 자리)가 이미 말하고 있어서,
     같은 말을 문장으로 한 번 더 하는 것이 거슬렸다.
   */
-  const rarity = TITLE_RARITY[match.round_num];
   const title = roundLabel(match.round_num);
 
   return (
@@ -488,31 +457,7 @@ function PlayMatch({
               이미 § Color budget 의 WARN 선(2개)에 걸쳐 있다.
             */}
             {isFinal && <Trophy className="size-7" />}
-            {/*
-              제목을 라운드별로 다르게 훑는다(React Bits `ShinyText`, 등급표는 위
-              `TITLE_RARITY`). 광택은 `--muted-foreground` 바탕 위를 `--foreground` 쪽으로
-              섞인 색이 지나가는 것이라 전부 무채색이다 — § Color budget 의 primary 2개
-              (선택 버튼)는 어느 라운드에서도 그대로다.
-
-              `color`/`shineColor` 에 hex 대신 CSS 변수와 `color-mix()` 를 넘긴다. 원본
-              기본값은 `#b5b5b5`/`#ffffff` 하드코딩인데, 이 값들은 그대로
-              `linear-gradient()` 문자열에 들어가므로 색 함수도 똑같이 동작한다.
-
-              `key` 에 라운드를 넣어야 라운드가 바뀔 때 광택 주기가 처음부터 다시 돈다 —
-              안 그러면 32강의 느린 주기를 물려받은 채로 결승에 들어간다.
-            */}
-            {rarity && !reduced ? (
-              <ShinyText
-                key={match.round_num}
-                text={title}
-                speed={rarity.speed}
-                delay={rarity.delay}
-                color="var(--muted-foreground)"
-                shineColor={`color-mix(in oklch, var(--foreground) ${rarity.shine}%, var(--muted-foreground))`}
-              />
-            ) : (
-              <span>{title}</span>
-            )}
+            <span>{title}</span>
           </p>
 
           {/*

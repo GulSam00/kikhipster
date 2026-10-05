@@ -162,7 +162,13 @@ function MatchCell({
               'flex items-center gap-1 px-2 py-1.5',
               i === 0 ? 'border-border border-b' : '',
               won ? 'text-foreground font-medium' : '',
-              lost ? 'text-muted-foreground line-through' : '',
+              /*
+                진 쪽은 **밝기로만** 구분한다. 예전엔 `line-through` 를 같이 올렸는데, deslop-ignore 09
+                이긴 쪽이 이미 `font-medium` + `text-foreground` + 체크 아이콘 세 가지로
+                표시되므로 네 번째 신호였고, 취소선은 '지워진 것'의 기호지 '진 것'의
+                기호가 아니다 (2026-09-08).
+              */
+              lost ? 'text-muted-foreground' : '',
             ].join(' ')}
           >
             <span className="truncate">{label(id)}</span>

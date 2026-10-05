@@ -1,6 +1,6 @@
-@import "tailwindcss";
-@import "tw-animate-css";
-@import "shadcn/tailwind.css";
+@import 'tailwindcss';
+@import 'tw-animate-css';
+@import 'shadcn/tailwind.css';
 
 @custom-variant dark (&:is(.dark *));
 
@@ -79,6 +79,32 @@
     }
     100% {
       transform: translate(-100%, 0%);
+      opacity: 0;
+    }
+  }
+
+  /*
+    우승 화면 콘페티(`components/tournament/PlayConfetti.tsx`). 조각마다 다른 흘림·회전이
+    필요한데 keyframes 는 하나뿐이라, 다른 값은 조각이 인라인 스타일로 넘기는 커스텀
+    속성(`--confetti-drift` / `--confetti-spin`)으로 받는다. 색은 여기서 정하지 않는다 —
+    조각이 토큰 클래스(`bg-foreground` 등)로 칠한다.
+
+    `forwards` 라 끝나면 화면 밖(105vh)에 멈춘 채로 남는다. 컴포넌트가 5.2초 뒤 스스로
+    언마운트하므로 DOM 에도 남지 않는다.
+  */
+  --animate-confetti-fall: confetti-fall linear forwards;
+
+  @keyframes confetti-fall {
+    0% {
+      transform: translate3d(0, -12vh, 0) rotate(0deg);
+      opacity: 1;
+    }
+    80% {
+      opacity: 1;
+    }
+    100% {
+      transform: translate3d(var(--confetti-drift, 0px), 105vh, 0)
+        rotate(var(--confetti-spin, 360deg));
       opacity: 0;
     }
   }
