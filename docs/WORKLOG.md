@@ -8,6 +8,11 @@
 
 ## 세션 기록
 
+### 2026-10-09 — 고아 좋아요 정리, JWT 시크릿 검증
+
+- **고아 `likes` 정리.** 탑스터·월드컵 삭제 라우터가 `purge_comments` 옆에서 `purge_likes` 도 부른다(같은 트랜잭션). 댓글에 달린 좋아요(`target_type="comment"`)도 같이 지운다 — `purge_comments` 가 댓글 id 를 먼저 모아 넘기고, 댓글 한 건 삭제(`_delete`)도 그 댓글의 좋아요를 지운다. 실제 DB 에서 탑스터+댓글 2건+좋아요 3건을 만들어 지웠더니 다른 대상 댓글의 좋아요 1건만 남았다. 기존 고아 행은 0건이라 데이터 정리는 필요 없었다.
+- **JWT 시크릿 기동 검증.** `APP_ENV=production` 이면 `JWT_SECRET_KEY` 가 자리표시자(`change-me-in-production` 등)이거나 32자 미만일 때 `Settings` 생성이 실패한다. 기본값 `development` 에서는 경고만 — `.env.example` 을 그대로 복사한 로컬 개발이 막히지 않게 하려는 것이다. **배포(ECS) 환경변수에 `APP_ENV=production` 을 반드시 넣을 것** — 안 넣으면 검증이 꺼진 채 뜬다.
+
 ### 2026-10-05 — 브라우저 검증 일괄 수행, 하단 탭바 버그 수정
 
 - **하단 탭바가 화면 맨 위에 붙어 있던 버그.** `Navbar` 의 모바일 탭(`fixed bottom-0`)이 `backdrop-blur` 가

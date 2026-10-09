@@ -9,7 +9,7 @@ from models.like import Like
 from models.topster import Topster, TopsterItem
 from models.user import User
 from routers.comment import comment_counts, purge_comments
-from routers.like import like_counts
+from routers.like import like_counts, purge_likes
 from routers.deps import get_current_user
 from schemas.topster import TopsterCreate, TopsterResponse, TopsterUpdate
 
@@ -243,6 +243,7 @@ def delete_topster(
 
     # 댓글은 이제 FK가 아니라 (target_type, target_id)로 붙어 있어 DB가 대신 지워주지 않는다.
     purge_comments("topster", topster.id, db)
+    purge_likes("topster", str(topster.id), db)
     db.delete(topster)
     db.commit()
 

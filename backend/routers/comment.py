@@ -14,6 +14,7 @@ from models.topster import Topster
 from models.tournament import Tournament
 from models.user import User
 from routers.deps import get_optional_user
+from routers.like import purge_likes
 from schemas.comment import (
     DEFAULT_GUEST_NICKNAME,
     CommentCreate,
@@ -237,6 +238,7 @@ def _update(target_type, target_id, comment_id, content, viewer, guest_token, db
 def _delete(target_type, target_id, comment_id, viewer, guest_token, db):
     guest_hash = hash_guest_token(guest_token)
     comment = _owned_comment_or_error(target_type, target_id, comment_id, viewer, guest_hash, db)
+    purge_likes("comment", str(comment.id), db)
     db.delete(comment)
     db.commit()
 
@@ -271,7 +273,17 @@ def _report(target_type, target_id, comment_id, reason, viewer, guest_token, db)
 
 
 def purge_comments(target_type: str, target_id: str, db: Session) -> None:
-    """대상 삭제 시 호출한다. FK가 없어 DB가 대신 지워주지 않는다."""
+    """대상 삭제 시 호출한다. FK가 없어 DB가 대신 지워주지 않는다.
+
+    댓글에 달린 좋아요(`target_type="comment"`)도 같이 지운다 — 댓글 id 를 먼저 모아야 한다.
+    """
+    ids = [
+        str(cid)
+        for (cid,) in db.query(Comment.id).filter_by(
+            target_type=target_type, target_id=str(target_id)
+        )
+    ]
+    purge_likes("comment", ids, db)
     db.query(Comment).filter_by(target_type=target_type, target_id=str(target_id)).delete()
 
 
