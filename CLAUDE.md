@@ -37,6 +37,10 @@ cd backend  && ./venv/Scripts/python.exe -m uvicorn main:app --reload --port 800
 cd frontend && npm run dev                                      # :3300
 ```
 
+- **테스트는 `cd backend && ./venv/Scripts/python.exe -m pytest` / `cd frontend && pnpm test`.** 백엔드는 **진짜 PostgreSQL**
+  (`kikhipster_test` DB 를 자동 생성, 개발 DB 는 안 건드린다)에 붙고 세션 시작마다 `alembic upgrade head` 를 돌리므로 DB 가
+  떠 있어야 한다. 접속 주소는 `backend/.env` 의 `DATABASE_URL` 에서 DB 이름만 `_test` 로 바꿔 만든다(`TEST_DATABASE_URL` 로 덮어쓴다).
+  프론트는 `lib/domain` 순수 함수만 vitest 로 덮는다. CI 는 `.github/workflows/ci.yml`.
 - **`frontend/` 의 패키지는 pnpm 으로 관리한다.** `pnpm-lock.yaml` 만 있고 `package-lock.json` 은 없다. `npm install` 을 쓰면 pnpm 의 `node_modules/.pnpm` 링크 구조를 훑다가 `Cannot read properties of null (reading 'matches')` 로 죽는다(2026-08-31 실제로 겪음). 패키지 추가는 `cd frontend && pnpm add -D <pkg>`. 스크립트 실행(`npm run dev` 등)은 어느 쪽이든 된다.
 - **`.env` 를 고치면 백엔드를 반드시 재기동한다.** uvicorn `--reload` 는 `.py` 만 감시해서 `.env` 변경은 반영되지 않는다.
 - OAuth Redirect URI는 **백엔드 8000** 이다 — 프론트 3300이 아니다. `http://localhost:8000/api/auth/callback/{google,kakao}`

@@ -8,6 +8,20 @@
 
 ## 세션 기록
 
+### 2026-10-09 (계속) — 테스트·CI 도입
+
+- **백엔드 pytest 62개.** 진짜 PostgreSQL 을 쓴다 — SQLite 대체는 일부러 안 했다(과거 버그 3건이 전부 "실제 DB 로 돌려 봐야 드러나는" 종류였고
+  모델이 `postgresql.UUID`·`JSONB` 를 쓴다). `kikhipster_test` 를 자동 생성하고 세션 시작마다 `alembic upgrade head` 로 스키마를 올려
+  **마이그레이션 체인 자체도 매번 검증**된다. 테스트마다 전 테이블 truncate. 덮는 것: JWT 발급·만료·위조 · 탑스터 CRUD/권한/검증/조회수/삭제 연쇄 ·
+  월드컵 생성·강수 검증·대진 생성·투표 가드·소유자 전용 플레이·랭킹 집계·삭제 연쇄 · 댓글(비로그인 해시 저장·소유 판정·신고 409) · 좋아요(토글·배치 라우트 순서) ·
+  `Settings` 시크릿 검증 · iTunes 순수 함수(KR→US 스토어프론트, 싱글/EP 판정).
+- **뮤테이션 확인.** `routers/topster.py` 의 `purge_likes` 호출을 지우면 `test_delete_cascades_comments_and_likes` 가 실제로 실패한다 — 방금 넣은 고아 좋아요 수정이 회귀에 걸린다.
+- **프론트 vitest 28개** — `lib/domain` 순수 함수(대진 계산 · 앨범 제목 꼬리 제거 · 한계값 · 재생 큐 정규화). 컴포넌트 테스트는 안 만들었다(브라우저 확인 영역).
+- **CI** `.github/workflows/ci.yml` — backend(Postgres 서비스 + Python 3.9 + pytest), frontend(`pnpm install --frozen-lockfile` → tsc → eslint → vitest → build).
+  **GitHub 에서 한 번도 안 돌려 봤다** — 로컬에서 같은 명령이 통과하는 것까지만 확인했다.
+- **하네스 함정 두 개.** ① alembic `fileConfig` 가 기존 로거를 꺼서(`disable_existing_loggers`) 경고 로그를 검사하는 테스트는 로거를 다시 켜야 한다. ② 로컬 DB 포트가 15432 라
+  포트를 하드코딩하지 않고 `backend/.env` 에서 가져온다.
+
 ### 2026-10-09 — 고아 좋아요 정리, JWT 시크릿 검증
 
 - **고아 `likes` 정리.** 탑스터·월드컵 삭제 라우터가 `purge_comments` 옆에서 `purge_likes` 도 부른다(같은 트랜잭션). 댓글에 달린 좋아요(`target_type="comment"`)도 같이 지운다 — `purge_comments` 가 댓글 id 를 먼저 모아 넘기고, 댓글 한 건 삭제(`_delete`)도 그 댓글의 좋아요를 지운다. 실제 DB 에서 탑스터+댓글 2건+좋아요 3건을 만들어 지웠더니 다른 대상 댓글의 좋아요 1건만 남았다. 기존 고아 행은 0건이라 데이터 정리는 필요 없었다.
@@ -2467,3 +2481,4 @@ Spotify 연동 백엔드, 프론트 기획(`_workspace/planning.md`), QA 리뷰(
 | 2026-10-05 | fix(frontend): 모바일 앨범 카드 메타를 두 줄로 — 곡 수 말줄임 해소 | docs, frontend | 커밋 `6f77f76` |
 | 2026-10-05 | fix(frontend): Navbar 로그인 상태를 useSyncExternalStore 로 — set-state-in-effect 해소 | docs, frontend | 커밋 `a5799e4` |
 | 2026-10-05 | fix(frontend): 검색 페이지 effect 안 setState 제거 — 로딩을 파생값으로 | docs, frontend | 커밋 `b7ee89e` |
+| 2026-10-09 | fix(backend): 삭제 시 고아 좋아요 정리, 운영 환경에서 취약한 JWT 시크릿 거부 | backend, docs | 커밋 `4c72dbc` |
