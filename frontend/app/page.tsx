@@ -20,6 +20,13 @@ import { listTournaments } from '@/lib/api/tournaments';
 const TOPSTER_COUNT = 12;
 const TOURNAMENT_COUNT = 6;
 
+/**
+ * 최근 탑스터·월드컵은 요청 시점의 목록이다 — 빌드 때 한 번 굽는 정적 페이지로 두면 ① 배포 후에도
+ * 빌드 시점의 목록이 계속 나오고 ② **빌드 환경에 백엔드가 없으면 prerender 에서 `fetch failed` 로
+ * 빌드가 죽는다**(CI 첫 실행에서 실제로 겪음 — 로컬은 백엔드가 떠 있어 통과했다).
+ */
+export const dynamic = 'force-dynamic';
+
 export default async function HomePage() {
   const [topsters, tournaments] = await Promise.all([
     listTopsters(TOPSTER_COUNT),

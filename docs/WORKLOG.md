@@ -2482,3 +2482,4 @@ Spotify 연동 백엔드, 프론트 기획(`_workspace/planning.md`), QA 리뷰(
 | 2026-10-05 | fix(frontend): Navbar 로그인 상태를 useSyncExternalStore 로 — set-state-in-effect 해소 | docs, frontend | 커밋 `a5799e4` |
 | 2026-10-05 | fix(frontend): 검색 페이지 effect 안 setState 제거 — 로딩을 파생값으로 | docs, frontend | 커밋 `b7ee89e` |
 | 2026-10-09 | fix(backend): 삭제 시 고아 좋아요 정리, 운영 환경에서 취약한 JWT 시크릿 거부 | backend, docs | 커밋 `4c72dbc` |
+| 2026-10-09 | test: 백엔드 pytest 62개·프론트 vitest 28개와 GitHub Actions CI 도입 | .github, CLAUDE.md, backend, docs, frontend | 커밋 `250b9c1` |
