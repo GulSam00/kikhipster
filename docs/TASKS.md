@@ -36,7 +36,7 @@ Docker Desktop 이 먼저 떠 있어야 한다.
 
 ### T3. 설계상 구멍
 
-- [ ] **CI 를 GitHub 에서 한 번도 돌려 보지 못했다 (2026-10-09).** `.github/workflows/ci.yml` 은 로컬에서
+- [ ] **CI 두 번째 실행을 확인해야 한다 (2026-10-10).** 첫 실행은 실패했고(`eval_type_backport` 누락 · `/` 정적 prerender) 고쳐 푸시했다. `.github/workflows/ci.yml` 은 로컬에서
   같은 명령(`pytest` · `tsc` · `eslint` · `vitest` · `build`)이 전부 통과하는 것까지만 확인했다. **푸시한 뒤
   Actions 탭에서 첫 실행을 봐야 한다** — 특히 Postgres 서비스 컨테이너·`pnpm/action-setup` 버전·Python 3.9
   의존성 설치가 로컬과 다를 수 있다. 브랜치 보호(필수 체크 지정)는 아직 안 걸었다

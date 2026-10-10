@@ -19,6 +19,8 @@
 - **프론트 vitest 28개** — `lib/domain` 순수 함수(대진 계산 · 앨범 제목 꼬리 제거 · 한계값 · 재생 큐 정규화). 컴포넌트 테스트는 안 만들었다(브라우저 확인 영역).
 - **CI** `.github/workflows/ci.yml` — backend(Postgres 서비스 + Python 3.9 + pytest), frontend(`pnpm install --frozen-lockfile` → tsc → eslint → vitest → build).
   **GitHub 에서 한 번도 안 돌려 봤다** — 로컬에서 같은 명령이 통과하는 것까지만 확인했다.
+- **CI 첫 실행이 두 건 실패했고 둘 다 진짜 문제였다.** ① 백엔드: `requirements.txt` 에 `eval_type_backport` 가 없었다. 로컬 venv 에만 깔려 있어서 `X | None` 타입 힌트를 Python 3.9 가 풀 수 있었고, **깨끗한 환경(= CI, Dockerfile `python:3.9-slim`)에서는 `deps.py` import 부터 죽는다 — 이 상태로 배포했으면 이미지가 기동하지 못했다.** 고정 버전으로 추가. 깨끗한 venv 에서 `requirements-dev.txt` 만으로 62개 통과를 확인. ② 프론트: `next build` 가 `/` 를 정적으로 굽다가 백엔드 호출(`fetch failed`)로 죽었다 — 로컬은 백엔드가 떠 있어 통과. 최근 목록을 빌드 시점에 굽는 것 자체가 잘못이라 `export const dynamic = 'force-dynamic'`. 백엔드를 끈 상태(`NEXT_PUBLIC_API_URL=http://localhost:9`)로 빌드가 통과함을 확인.
+- **테스트 동시 실행 금지.** 같은 `kikhipster_test` DB 에 두 pytest 를 동시에 돌리면 `truncate` 가 서로의 락에 걸려 멈춘다(하나를 강제로 죽이면 `idle in transaction` 세션이 남아 다음 실행도 멈춘다 — `pg_terminate_backend` 로 정리).
 - **하네스 함정 두 개.** ① alembic `fileConfig` 가 기존 로거를 꺼서(`disable_existing_loggers`) 경고 로그를 검사하는 테스트는 로거를 다시 켜야 한다. ② 로컬 DB 포트가 15432 라
   포트를 하드코딩하지 않고 `backend/.env` 에서 가져온다.
 
@@ -2483,3 +2485,4 @@ Spotify 연동 백엔드, 프론트 기획(`_workspace/planning.md`), QA 리뷰(
 | 2026-10-05 | fix(frontend): 검색 페이지 effect 안 setState 제거 — 로딩을 파생값으로 | docs, frontend | 커밋 `b7ee89e` |
 | 2026-10-09 | fix(backend): 삭제 시 고아 좋아요 정리, 운영 환경에서 취약한 JWT 시크릿 거부 | backend, docs | 커밋 `4c72dbc` |
 | 2026-10-09 | test: 백엔드 pytest 62개·프론트 vitest 28개와 GitHub Actions CI 도입 | .github, CLAUDE.md, backend, docs, frontend | 커밋 `250b9c1` |
+| 2026-10-10 | fix: CI 첫 실행 실패 두 건 — eval_type_backport 의존성 누락, 홈 정적 prerender | backend, docs, frontend | 커밋 `ec01af2` |
