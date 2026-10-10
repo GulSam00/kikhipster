@@ -1,9 +1,15 @@
 import { Eye, Heart, MessageCircle } from 'lucide-react';
+import type { ReactNode } from 'react';
+
 import { cn } from '@/lib/utils';
 
 interface Props {
   viewCount: number;
-  likeCount: number;
+  /**
+   * 수 또는 그 수를 그리는 조각. 상세 화면은 여기에 `LikeCount` 를 넣어 **버튼을 눌렀을 때
+   * 같이 바뀌게** 한다 — 서버 응답값을 그대로 두면 좋아요를 눌러도 안 움직인다 (2026-09-08).
+   */
+  likeCount: ReactNode;
   commentCount: number;
   className?: string;
 }
@@ -23,7 +29,7 @@ export default function ItemStats({ viewCount, likeCount, commentCount, classNam
   ];
 
   return (
-    <div className={cn('flex items-center gap-2 text-xs text-muted-foreground', className)}>
+    <div className={cn('text-muted-foreground flex items-center gap-2 text-xs', className)}>
       {stats.map(({ icon: Icon, label, value }) => (
         <span key={label} className="flex shrink-0 items-center gap-0.5">
           <Icon className="size-3" aria-hidden />

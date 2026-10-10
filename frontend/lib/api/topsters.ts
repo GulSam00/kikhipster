@@ -1,4 +1,5 @@
 import { apiFetch } from '@/lib/api/client';
+
 import type { Topster, TopsterCreateBody, TopsterSort, TopsterUpdateBody } from '@/types/topster';
 
 /**

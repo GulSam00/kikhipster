@@ -1,6 +1,7 @@
 'use client';
 
 import type { ReactNode, RefObject } from 'react';
+
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
 
@@ -39,7 +40,7 @@ export default function InfiniteListFooter({
           <div
             role="status"
             aria-label="더 불러오는 중"
-            className="mt-4 flex justify-center text-muted-foreground"
+            className="text-muted-foreground mt-4 flex justify-center"
           >
             <Spinner />
           </div>
@@ -54,7 +55,7 @@ export default function InfiniteListFooter({
       )}
 
       {reachedEnd && loadedCount >= limit && (
-        <p className="mt-6 text-center text-sm text-muted-foreground">모두 불러왔습니다</p>
+        <p className="text-muted-foreground mt-6 text-center text-sm">모두 불러왔습니다</p>
       )}
     </>
   );

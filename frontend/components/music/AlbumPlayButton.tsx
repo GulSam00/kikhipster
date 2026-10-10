@@ -1,14 +1,18 @@
 'use client';
 
-import { useState, type ComponentProps, type MouseEvent } from 'react';
 import { Play } from 'lucide-react';
+import { useState, type ComponentProps, type MouseEvent } from 'react';
+import { toast } from 'sonner';
+
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
-import { usePlayer } from '@/contexts/PlayerContext';
+
 import { albumQueueTracks } from '@/lib/domain/playable';
 import { cn } from '@/lib/utils';
+
 import type { QueueTrack } from '@/types/player';
-import { toast } from 'sonner';
+
+import { usePlayer } from '@/contexts/PlayerContext';
 
 interface Props {
   albumId: string;

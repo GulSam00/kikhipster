@@ -1,19 +1,21 @@
-import type { Metadata } from "next";
-import Link from "next/link";
-import { BarChart3 } from "lucide-react";
-import { getTournament, tournamentPath } from "@/lib/api/tournaments";
-import CommentSection from "@/components/social/CommentSection";
-import DetailActionBar from "@/components/common/DetailActionBar";
-import DetailHeader from "@/components/common/DetailHeader";
-import LikeButton from "@/components/social/LikeButton";
-import OwnerMenu from "@/components/common/OwnerMenu";
-import PlayLauncher from "@/components/tournament/PlayLauncher";
-import PoolGrid from "@/components/tournament/PoolGrid";
-import ShareButton from "@/components/common/ShareButton";
-import ViewCounter from "@/components/common/ViewCounter";
-import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
-import { fetchPoolItems, ITEM_TYPE_LABEL } from "@/lib/domain/pool-item";
+import { BarChart3 } from 'lucide-react';
+import type { Metadata } from 'next';
+import Link from 'next/link';
+
+import DetailActionBar from '@/components/common/DetailActionBar';
+import DetailHeader from '@/components/common/DetailHeader';
+import OwnerMenu from '@/components/common/OwnerMenu';
+import ShareButton from '@/components/common/ShareButton';
+import ViewCounter from '@/components/common/ViewCounter';
+import CommentSection from '@/components/social/CommentSection';
+import LikeButton from '@/components/social/LikeButton';
+import PlayLauncher from '@/components/tournament/PlayLauncher';
+import PoolGrid from '@/components/tournament/PoolGrid';
+import { Button } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator';
+
+import { getTournament, tournamentPath } from '@/lib/api/tournaments';
+import { fetchPoolItems, ITEM_TYPE_LABEL } from '@/lib/domain/pool-item';
 
 /**
  * 첫 화면에서 서버가 미리 받아 두는 개수. 풀이 최대 512개라 전부 그리면
@@ -40,11 +42,11 @@ export async function generateMetadata({
     return {
       title: t.title,
       description: summary,
-      openGraph: { title: t.title, description: summary, type: "article" },
+      openGraph: { title: t.title, description: summary, type: 'article' },
     };
   } catch {
     // 없는 월드컵이면 페이지 렌더에서 어차피 에러 경계로 간다 — 메타에서 터뜨리지 않는다.
-    return { title: "월드컵" };
+    return { title: '월드컵' };
   }
 }
 
@@ -73,6 +75,7 @@ export default async function TournamentDetailPage({
         likeCount={tournament.like_count}
         commentCount={tournament.comment_count}
         description={tournament.description}
+        likeTarget={{ type: 'tournament', id: tournament.id }}
         ownerMenu={
           /* 이 페이지는 Server Component라 로그인 사용자를 모른다 — 메뉴만 클라이언트다. */
           <OwnerMenu
@@ -86,11 +89,17 @@ export default async function TournamentDetailPage({
         }
       />
 
-      <h2 className="mb-4 font-heading text-lg font-bold">
-        후보 {tournament.item_count}
+      {/*
+        곡 월드컵인지 앨범 월드컵인지 알리는 자리. 제목 위 배지로 두었다가 2026-09-08에
+        여기로 옮겼다 — 종류는 후보 그리드를 볼 때 필요한 정보지 제목보다 먼저 읽을
+        정보가 아니고, 이미 있던 '후보 N' 제목이 같은 대상을 가리키고 있었다.
+        썸네일과 후보 그리드는 둘 다 앨범 아트라 그림만으로는 구분되지 않는다.
+      */}
+      <h2 className="font-heading mb-4 text-lg font-bold">
+        {ITEM_TYPE_LABEL[tournament.item_type]} 후보 {tournament.item_count}
       </h2>
       {items.length === 0 ? (
-        <p className="py-6 text-center text-sm text-muted-foreground">
+        <p className="text-muted-foreground py-6 text-center text-sm">
           후보 정보를 불러오지 못했습니다.
         </p>
       ) : (
@@ -111,7 +120,7 @@ export default async function TournamentDetailPage({
                 tournamentId={tournament.id}
                 availableSizes={tournament.available_sizes}
               />
-              <Button asChild variant="outline" size="lg" className="h-11">
+              <Button asChild variant="outline" size="lg" className="h-12 px-6">
                 <Link href={`/tournament/${tournament.id}/ranking`}>
                   <BarChart3 />
                   랭킹보기
@@ -125,11 +134,9 @@ export default async function TournamentDetailPage({
                 targetType="tournament"
                 targetId={tournament.id}
                 name={tournament.title}
+                tone="icon"
               />
-              <ShareButton
-                path={`/tournament/${tournament.id}`}
-                className="rounded-full"
-              />
+              <ShareButton path={`/tournament/${tournament.id}`} iconOnly />
             </>
           }
         />

@@ -59,7 +59,5 @@ export function parentMatch(play: Play, match: PlayRound): PlayRound | null {
   if (match.round_num <= 1) return null;
   const parentRound = match.round_num - 1;
   const parentNum = Math.floor(match.match_num / 2);
-  return (
-    play.rounds.find((r) => r.round_num === parentRound && r.match_num === parentNum) ?? null
-  );
+  return play.rounds.find((r) => r.round_num === parentRound && r.match_num === parentNum) ?? null;
 }

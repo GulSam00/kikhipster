@@ -1,17 +1,21 @@
-"use client";
+'use client';
 
-import { useEffect, useState, type ReactNode } from "react";
-import Link from "next/link";
-import Image from "next/image";
-import { BarChart3, Play } from "lucide-react";
-import ItemStats from "@/components/common/ItemStats";
-import ShareButton from "@/components/common/ShareButton";
-import { ItemFallbackIcon } from "@/components/tournament/PoolItemTile";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { fetchPoolItems, type PoolItem } from "@/lib/domain/pool-item";
-import { formatDate } from "@/lib/utils";
-import type { TournamentSummary } from "@/types/tournament";
+import { BarChart3, Play } from 'lucide-react';
+import Image from 'next/image';
+import Link from 'next/link';
+import { useEffect, useState, type ReactNode } from 'react';
+
+import ItemStats from '@/components/common/ItemStats';
+import ShareButton from '@/components/common/ShareButton';
+import { ItemFallbackIcon } from '@/components/tournament/PoolItemTile';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+
+import { fetchPoolItems, ITEM_TYPE_LABEL, type PoolItem } from '@/lib/domain/pool-item';
+import { formatDate } from '@/lib/utils';
+
+import type { TournamentSummary } from '@/types/tournament';
 
 interface Props {
   tournament: TournamentSummary;
@@ -48,30 +52,19 @@ export default function TournamentCard({ tournament, actions }: Props) {
       <CardContent className="flex flex-col gap-3">
         <Link
           href={href}
-          className="flex items-start gap-3 rounded-lg outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+          className="focus-visible:ring-ring/50 flex items-start gap-3 rounded-lg outline-none focus-visible:ring-3"
         >
-          <div className="grid size-16 shrink-0 grid-cols-2 gap-0.5 overflow-hidden rounded-md bg-muted p-0.5">
+          <div className="bg-muted grid size-16 shrink-0 grid-cols-2 gap-0.5 overflow-hidden rounded-md p-0.5">
             {Array.from({ length: 4 }).map((_, i) => {
               const item = previews[i];
               return (
-                <div
-                  key={i}
-                  className="relative overflow-hidden rounded-[2px] bg-foreground/5"
-                >
+                <div key={i} className="bg-foreground/5 relative overflow-hidden rounded-[2px]">
                   {item?.coverUrl && (
-                    <Image
-                      src={item.coverUrl}
-                      alt=""
-                      fill
-                      className="object-cover"
-                    />
+                    <Image src={item.coverUrl} alt="" fill className="object-cover" />
                   )}
                   {!item?.coverUrl && (
-                    <div className="flex size-full items-center justify-center text-muted-foreground">
-                      <ItemFallbackIcon
-                        itemType={tournament.item_type}
-                        className="size-2.5"
-                      />
+                    <div className="text-muted-foreground flex size-full items-center justify-center">
+                      <ItemFallbackIcon itemType={tournament.item_type} className="size-2.5" />
                     </div>
                   )}
                 </div>
@@ -82,11 +75,21 @@ export default function TournamentCard({ tournament, actions }: Props) {
           <div className="min-w-0 flex-1">
             {/*
               예전에는 여기에 '앨범 N' · '플레이 N' 배지 두 개가 있었다. 조회·좋아요·댓글로
-              바꾸면서 뺐다 — 종류와 후보 수는 상세에 그대로 있고, 카드에서는 같은 자리에
-              두 벌의 숫자를 겹쳐 보여주게 된다.
+              바꾸면서 뺐다 — 카드에서는 같은 자리에 두 벌의 숫자를 겹쳐 보여주게 된다.
+
+              **종류 배지는 2026-09-01에 다시 넣었다.** 그때 뺀 것은 *수량*(앨범 N)이고
+              이것은 *종류*다. 수량은 `ItemStats` 와 겹쳤지만 종류는 겹치는 정보가 없다 —
+              썸네일만으로는 곡 월드컵인지 앨범 월드컵인지 알 수 없다(둘 다 앨범 아트를
+              쓴다). 대시보드는 카드가 여러 장 깔리는 화면이라 § Color budget 을 지켜
+              무채색으로 둔다.
             */}
-            <p className="truncate text-sm font-medium">{tournament.title}</p>
-            <p className="truncate text-xs text-muted-foreground">
+            <div className="flex items-center gap-1.5">
+              <Badge variant="outline" className="text-muted-foreground shrink-0">
+                {ITEM_TYPE_LABEL[tournament.item_type]}
+              </Badge>
+              <p className="truncate text-sm font-medium">{tournament.title}</p>
+            </div>
+            <p className="text-muted-foreground truncate text-xs">
               {tournament.user.nickname} · {formatDate(tournament.created_at)}
             </p>
             <ItemStats

@@ -1,5 +1,6 @@
-import type { ReactNode } from 'react';
 import Image from 'next/image';
+import type { ReactNode } from 'react';
+
 import { cn } from '@/lib/utils';
 
 interface Props {
@@ -29,11 +30,11 @@ interface Props {
  */
 export default function CoverImage({ src, alt, fallback, className, sizes }: Props) {
   return (
-    <div className={cn('relative overflow-hidden bg-muted', className)}>
+    <div className={cn('bg-muted relative overflow-hidden', className)}>
       {src ? (
         <Image src={src} alt={alt} fill sizes={sizes} className="object-cover" />
       ) : (
-        <div className="flex size-full items-center justify-center text-muted-foreground">
+        <div className="text-muted-foreground flex size-full items-center justify-center">
           {fallback}
         </div>
       )}

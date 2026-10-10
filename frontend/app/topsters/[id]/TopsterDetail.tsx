@@ -1,24 +1,27 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
 import { Download } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
-import { ApiError } from '@/lib/api/client';
-import { getTopster, topsterPath } from '@/lib/api/topsters';
-import CommentSection from '@/components/social/CommentSection';
+
 import DetailActionBar from '@/components/common/DetailActionBar';
 import DetailHeader from '@/components/common/DetailHeader';
-import LikeButton from '@/components/social/LikeButton';
 import OwnerMenu from '@/components/common/OwnerMenu';
 import ShareButton from '@/components/common/ShareButton';
-import TopsterCanvas from '@/components/topster/TopsterCanvas';
 import ViewCounter from '@/components/common/ViewCounter';
-import { Badge } from '@/components/ui/badge';
+import CommentSection from '@/components/social/CommentSection';
+import LikeButton from '@/components/social/LikeButton';
+import TopsterCanvas from '@/components/topster/TopsterCanvas';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Spinner } from '@/components/ui/spinner';
+
 import { useAlbumItems } from '@/lib/hooks/use-album-covers';
+
+import { ApiError } from '@/lib/api/client';
+import { getTopster, topsterPath } from '@/lib/api/topsters';
 import { downloadTopsterImage } from '@/lib/render/topster-image';
+
 import type { Topster } from '@/types/topster';
 
 /**
@@ -32,10 +35,7 @@ export default function TopsterDetail({ id }: { id: string }) {
   const [topster, setTopster] = useState<Topster | null>(null);
   const [loading, setLoading] = useState(true);
   const [downloading, setDownloading] = useState(false);
-  const albumIds = useMemo(
-    () => topster?.items.map((it) => it.album_spotify_id) ?? [],
-    [topster],
-  );
+  const albumIds = useMemo(() => topster?.items.map((it) => it.album_spotify_id) ?? [], [topster]);
   const albums = useAlbumItems(albumIds);
 
   useEffect(() => {
@@ -70,7 +70,7 @@ export default function TopsterDetail({ id }: { id: string }) {
 
   if (loading) {
     return (
-      <div className="flex flex-1 items-center justify-center gap-2 text-muted-foreground">
+      <div className="text-muted-foreground flex flex-1 items-center justify-center gap-2">
         <Spinner />
         불러오는 중...
       </div>
@@ -99,11 +99,7 @@ export default function TopsterDetail({ id }: { id: string }) {
         likeCount={topster.like_count}
         commentCount={topster.comment_count}
         description={topster.description}
-        badges={
-          <Badge variant="secondary" className="px-1.5 text-[10px]">
-            {topster.width}×{topster.height}
-          </Badge>
-        }
+        likeTarget={{ type: 'topster', id: topster.id }}
         ownerMenu={
           /* 격자·배경색·넘버링은 수정 화면에서 고친다. */
           <OwnerMenu
@@ -131,7 +127,8 @@ export default function TopsterDetail({ id }: { id: string }) {
             onClick={handleDownload}
             disabled={downloading || topster.items.length === 0}
             size="lg"
-            className="h-11"
+            /* 주요 동작이라 기본 lg(h-11)보다 한 단계 키운다. 좁은 화면에서는 폭을 채운다. */
+            className="h-12 w-full px-6 sm:w-auto"
           >
             <Download />
             {downloading ? '만드는 중...' : '이미지 저장'}
@@ -139,8 +136,13 @@ export default function TopsterDetail({ id }: { id: string }) {
         }
         engage={
           <>
-            <LikeButton targetType="topster" targetId={topster.id} name={topster.title} />
-            <ShareButton path={`/topsters/${topster.id}`} className="rounded-full" />
+            <LikeButton
+              targetType="topster"
+              targetId={topster.id}
+              name={topster.title}
+              tone="icon"
+            />
+            <ShareButton path={`/topsters/${topster.id}`} iconOnly />
           </>
         }
       />

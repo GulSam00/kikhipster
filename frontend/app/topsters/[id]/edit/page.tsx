@@ -1,15 +1,19 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import { useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
-import { ApiError } from '@/lib/api/client';
-import { getTopster, updateTopster } from '@/lib/api/topsters';
+
 import TopsterEditor, { type TopsterEditorInitial } from '@/components/topster/TopsterEditor';
 import { Spinner } from '@/components/ui/spinner';
+
 import { useAlbumItems } from '@/lib/hooks/use-album-covers';
-import type { PoolItem } from '@/lib/domain/pool-item';
 import { useMe } from '@/lib/hooks/use-me';
+
+import { ApiError } from '@/lib/api/client';
+import { getTopster, updateTopster } from '@/lib/api/topsters';
+import type { PoolItem } from '@/lib/domain/pool-item';
+
 import type { Topster, TopsterCreateBody } from '@/types/topster';
 
 export default function EditTopsterPage() {
@@ -19,10 +23,7 @@ export default function EditTopsterPage() {
   const [topster, setTopster] = useState<Topster | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const albumIds = useMemo(
-    () => topster?.items.map((it) => it.album_spotify_id) ?? [],
-    [topster],
-  );
+  const albumIds = useMemo(() => topster?.items.map((it) => it.album_spotify_id) ?? [], [topster]);
   const albums = useAlbumItems(albumIds);
 
   useEffect(() => {
@@ -82,10 +83,9 @@ export default function EditTopsterPage() {
     router.push(`/topsters/${id}`);
   }
 
-
   if (loading || (topster && !ready)) {
     return (
-      <div className="flex flex-1 items-center justify-center gap-2 text-muted-foreground">
+      <div className="text-muted-foreground flex flex-1 items-center justify-center gap-2">
         <Spinner />
         불러오는 중...
       </div>

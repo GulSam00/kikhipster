@@ -2,10 +2,13 @@
 
 import { useCallback, useState } from 'react';
 import { toast } from 'sonner';
-import { usePlayer } from '@/contexts/PlayerContext';
+
 import { albumQueueTracks, poolItemToQueue } from '@/lib/domain/playable';
 import type { PoolItem } from '@/lib/domain/pool-item';
+
 import type { TournamentItemType } from '@/types/tournament';
+
+import { usePlayer } from '@/contexts/PlayerContext';
 
 /**
  * 월드컵 후보(곡·앨범) 하나를 눌렀을 때 재생목록에 넣고 트는 동작.

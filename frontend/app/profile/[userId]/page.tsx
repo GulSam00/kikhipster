@@ -1,18 +1,12 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
-import { useParams } from 'next/navigation';
-import Link from 'next/link';
 import { LayoutGrid, TriangleAlert, Trophy, UserX } from 'lucide-react';
+import Link from 'next/link';
+import { useParams } from 'next/navigation';
+import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
-import { ApiError } from '@/lib/api/client';
-import type { PublicUser } from '@/types/user';
-import { getUser } from '@/lib/api/auth';
-import { userTopstersPath } from '@/lib/api/topsters';
-import { userTournamentsPath } from '@/lib/api/tournaments';
-import { useInfiniteList } from '@/lib/hooks/use-infinite-list';
+
 import InfiniteListFooter from '@/components/common/InfiniteListFooter';
-import { Skeleton } from '@/components/ui/skeleton';
 import TopsterCard from '@/components/topster/TopsterCard';
 import TournamentCard from '@/components/tournament/TournamentCard';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
@@ -20,9 +14,19 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Empty, EmptyContent, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty';
+import { Skeleton } from '@/components/ui/skeleton';
 import { Spinner } from '@/components/ui/spinner';
+
+import { useInfiniteList } from '@/lib/hooks/use-infinite-list';
+
+import { getUser } from '@/lib/api/auth';
+import { ApiError } from '@/lib/api/client';
+import { userTopstersPath } from '@/lib/api/topsters';
+import { userTournamentsPath } from '@/lib/api/tournaments';
+
 import type { Topster } from '@/types/topster';
 import type { TournamentSummary } from '@/types/tournament';
+import type { PublicUser } from '@/types/user';
 
 export default function UserProfilePage() {
   const { userId } = useParams<{ userId: string }>();
@@ -78,7 +82,7 @@ export default function UserProfilePage() {
 
   if (loading) {
     return (
-      <div className="flex flex-1 items-center justify-center gap-2 text-muted-foreground">
+      <div className="text-muted-foreground flex flex-1 items-center justify-center gap-2">
         <Spinner />
         불러오는 중...
       </div>
@@ -128,20 +132,22 @@ export default function UserProfilePage() {
       <Card className="mb-8">
         <CardContent className="flex items-center gap-4">
           <Avatar size="lg" className="size-16">
-            <AvatarFallback className="bg-primary text-xl font-bold text-primary-foreground">
+            <AvatarFallback className="bg-primary text-primary-foreground text-xl font-bold">
               {user.nickname[0]?.toUpperCase()}
             </AvatarFallback>
           </Avatar>
           <div className="min-w-0">
             <h1 className="font-heading text-xl font-bold">{user.nickname}</h1>
-            <Badge variant="outline" className="mt-1 capitalize">{user.provider}</Badge>
+            <Badge variant="outline" className="mt-1 capitalize">
+              {user.provider}
+            </Badge>
           </div>
         </CardContent>
       </Card>
 
       <section>
         {/* 총 개수는 서버가 안 주므로, 끝까지 받았을 때만 숫자를 보인다. */}
-        <h2 className="mb-4 font-heading text-lg font-bold">
+        <h2 className="font-heading mb-4 text-lg font-bold">
           탑스터{topsterList.reachedEnd ? ` ${topsters.length}` : ''}
         </h2>
 
@@ -180,7 +186,7 @@ export default function UserProfilePage() {
       </section>
 
       <section className="mt-10">
-        <h2 className="mb-4 font-heading text-lg font-bold">
+        <h2 className="font-heading mb-4 text-lg font-bold">
           월드컵{tournamentList.reachedEnd ? ` ${tournaments.length}` : ''}
         </h2>
 

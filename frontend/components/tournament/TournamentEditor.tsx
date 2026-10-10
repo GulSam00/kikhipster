@@ -1,19 +1,10 @@
 'use client';
 
-import { type ReactNode } from 'react';
-import { useRouter } from 'next/navigation';
+import { ArrowLeft, Check, ChevronDown, Disc3, Music2, Plus, Search, X } from 'lucide-react';
 import Image from 'next/image';
-import {
-  ArrowLeft,
-  Check,
-  ChevronDown,
-  Disc3,
-  Music2,
-  Plus,
-  Search,
-  X,
-} from 'lucide-react';
-import { TOURNAMENT_MAX_POOL, TOURNAMENT_MIN_POOL } from '@/lib/domain/limits';
+import { useRouter } from 'next/navigation';
+import { type ReactNode } from 'react';
+
 import PoolItemTile, { ItemFallbackIcon } from '@/components/tournament/PoolItemTile';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -23,10 +14,18 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
+
+import {
+  useTournamentDraft,
+  type SearchMode,
+  type TournamentDraftInitial,
+} from '@/lib/hooks/use-tournament-draft';
+
+import { TOURNAMENT_MAX_POOL, TOURNAMENT_MIN_POOL } from '@/lib/domain/limits';
 import { albumToPoolItem, trackToPoolItem, type PoolItem } from '@/lib/domain/pool-item';
-import { useTournamentDraft, type SearchMode, type TournamentDraftInitial } from '@/lib/hooks/use-tournament-draft';
 import { cn } from '@/lib/utils';
-import type { TournamentItemType, TournamentCreateBody } from '@/types/tournament';
+
+import type { TournamentCreateBody, TournamentItemType } from '@/types/tournament';
 
 export type { TournamentDraftInitial as TournamentEditorInitial };
 
@@ -104,13 +103,13 @@ export default function TournamentEditor({ initial, onSubmit, backHref, extraAct
               key={value}
               type="button"
               onClick={() => selectItemType(value)}
-              className="rounded-xl text-left outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+              className="focus-visible:ring-ring/50 rounded-xl text-left outline-none focus-visible:ring-3"
             >
-              <Card className="h-full transition-colors hover:bg-accent">
+              <Card className="hover:bg-accent h-full transition-colors">
                 <CardContent className="flex flex-col gap-1">
-                  <Icon className="mb-1 size-6 text-muted-foreground" />
+                  <Icon className="text-muted-foreground mb-1 size-6" />
                   <p className="text-lg font-bold">{label}</p>
-                  <p className="text-xs text-muted-foreground">{desc}</p>
+                  <p className="text-muted-foreground text-xs">{desc}</p>
                 </CardContent>
               </Card>
             </button>
@@ -154,11 +153,16 @@ export default function TournamentEditor({ initial, onSubmit, backHref, extraAct
               maxLength={500}
               rows={4}
             />
-            <p className="text-xs text-muted-foreground tabular-nums">{description.length}/500</p>
+            <p className="text-muted-foreground text-xs tabular-nums">{description.length}/500</p>
           </div>
         </div>
 
-        <Button size="lg" className="h-11 w-full" disabled={!title.trim()} onClick={() => setStep('pool')}>
+        <Button
+          size="lg"
+          className="h-11 w-full"
+          disabled={!title.trim()}
+          onClick={() => setStep('pool')}
+        >
           다음
         </Button>
       </div>
@@ -176,7 +180,7 @@ export default function TournamentEditor({ initial, onSubmit, backHref, extraAct
       />
 
       <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-        <p className="text-sm text-muted-foreground tabular-nums">
+        <p className="text-muted-foreground text-sm tabular-nums">
           {pool.length}개 담김 · 최소 {TOURNAMENT_MIN_POOL} / 최대 {TOURNAMENT_MAX_POOL}
         </p>
         {itemType === 'track' && (
@@ -190,7 +194,7 @@ export default function TournamentEditor({ initial, onSubmit, backHref, extraAct
       </div>
 
       <div className="relative mb-3">
-        <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
+        <Search className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2" />
         <Input
           value={q}
           onChange={(e) => setQ(e.target.value)}
@@ -239,18 +243,18 @@ export default function TournamentEditor({ initial, onSubmit, backHref, extraAct
                       type="button"
                       onClick={() => expandAlbum(a)}
                       aria-expanded={isOpen}
-                      className="flex w-full cursor-pointer items-center gap-2 rounded-md px-2 py-2 text-left transition-colors hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+                      className="hover:bg-accent focus-visible:ring-ring flex w-full cursor-pointer items-center gap-2 rounded-md px-2 py-2 text-left transition-colors focus-visible:ring-2 focus-visible:outline-none"
                     >
                       <Cover item={item} itemType="album" />
                       <span className="min-w-0 flex-1">
                         <span className="block truncate text-sm">{a.title}</span>
-                        <span className="block truncate text-xs text-muted-foreground">
+                        <span className="text-muted-foreground block truncate text-xs">
                           {a.artist_name} · {a.total_tracks}곡
                         </span>
                       </span>
                       <ChevronDown
                         className={cn(
-                          'size-4 shrink-0 text-muted-foreground transition-transform',
+                          'text-muted-foreground size-4 shrink-0 transition-transform',
                           isOpen && 'rotate-180',
                         )}
                       />
@@ -260,7 +264,7 @@ export default function TournamentEditor({ initial, onSubmit, backHref, extraAct
                   {itemType === 'track' && isOpen && (
                     <div className="mb-1 ml-4 border-l pl-2">
                       {!tracks ? (
-                        <p className="py-3 text-center text-xs text-muted-foreground">
+                        <p className="text-muted-foreground py-3 text-center text-xs">
                           수록곡 불러오는 중...
                         </p>
                       ) : (
@@ -349,8 +353,10 @@ function StepHeader({
         <ArrowLeft />
         이전
       </Button>
-      <p className="mb-1 text-xs text-muted-foreground tabular-nums">{step} / {total}</p>
-      <h1 className="mb-6 font-heading text-2xl font-bold">{title}</h1>
+      <p className="text-muted-foreground mb-1 text-xs tabular-nums">
+        {step} / {total}
+      </p>
+      <h1 className="font-heading mb-6 text-2xl font-bold">{title}</h1>
     </>
   );
 }
@@ -380,7 +386,7 @@ function PickedTile({
       type="button"
       onClick={onRemove}
       aria-label={`${item.title} 빼기`}
-      className="group relative block w-full cursor-pointer rounded-xl text-left outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+      className="group focus-visible:ring-ring/50 relative block w-full cursor-pointer rounded-xl text-left outline-none focus-visible:ring-3"
     >
       <PoolItemTile item={item} itemType={itemType} />
       {/*
@@ -404,11 +410,11 @@ function PickedTile({
  */
 function Cover({ item, itemType }: { item: PoolItem; itemType: TournamentItemType }) {
   return (
-    <span className="relative size-9 shrink-0 overflow-hidden rounded-md bg-muted">
+    <span className="bg-muted relative size-9 shrink-0 overflow-hidden rounded-md">
       {item.coverUrl ? (
         <Image src={item.coverUrl} alt="" fill className="object-cover" />
       ) : (
-        <span className="flex size-full items-center justify-center text-muted-foreground">
+        <span className="text-muted-foreground flex size-full items-center justify-center">
           <ItemFallbackIcon itemType={itemType} className="size-4" />
         </span>
       )}
@@ -433,19 +439,19 @@ function ResultRow({
       onClick={onToggle}
       aria-pressed={picked}
       className={cn(
-        'flex w-full cursor-pointer items-center gap-2 rounded-md px-2 py-2 text-left transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none',
-        picked ? 'bg-primary/15 ring-1 ring-primary ring-inset' : 'hover:bg-accent',
+        'focus-visible:ring-ring flex w-full cursor-pointer items-center gap-2 rounded-md px-2 py-2 text-left transition-colors focus-visible:ring-2 focus-visible:outline-none',
+        picked ? 'bg-primary/15 ring-primary ring-1 ring-inset' : 'hover:bg-accent',
       )}
     >
       <Cover item={item} itemType={itemType} />
       <span className="min-w-0 flex-1">
         <span className="block truncate text-sm">{item.title}</span>
-        <span className="block truncate text-xs text-muted-foreground">{item.subtitle}</span>
+        <span className="text-muted-foreground block truncate text-xs">{item.subtitle}</span>
       </span>
       {picked ? (
-        <Check className="size-4 shrink-0 text-primary" />
+        <Check className="text-primary size-4 shrink-0" />
       ) : (
-        <Plus className="size-4 shrink-0 text-muted-foreground" />
+        <Plus className="text-muted-foreground size-4 shrink-0" />
       )}
     </button>
   );

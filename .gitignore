@@ -6,6 +6,8 @@ backend/.env
 *.pyc
 
 # Node
+/node_modules/
+/package-lock.json
 frontend/node_modules/
 frontend/.next/
 frontend/.env.local

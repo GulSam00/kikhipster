@@ -1,12 +1,13 @@
 'use client';
 
-import { Suspense, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { Suspense, useEffect } from 'react';
+
 import { Spinner } from '@/components/ui/spinner';
 
 function CallbackStatus() {
   return (
-    <div className="flex flex-1 items-center justify-center gap-2 text-muted-foreground">
+    <div className="text-muted-foreground flex flex-1 items-center justify-center gap-2">
       <Spinner />
       로그인 처리 중...
     </div>

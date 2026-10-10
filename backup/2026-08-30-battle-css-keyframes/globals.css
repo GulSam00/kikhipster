@@ -1,0 +1,239 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-sans);
+  --font-heading: var(--font-sans);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+/*
+  React Bits `StarBorder` 가 쓰는 애니메이션. 결승 카드 위·아래를 빛이 서로 반대 방향으로
+  훑고 지나간다(`components/reactbits/StarBorder.tsx`).
+
+  원본은 `tailwind.config.js` 의 `theme.extend` 에 넣으라고 하지만 이 프로젝트에는 config
+  파일이 없다(Tailwind v4, `components.json` 의 `"config": ""`). v4 에서는 `@theme` 안의
+  `--animate-*` 가 곧 `animate-*` 유틸리티가 되므로 여기에 둔다.
+*/
+@theme {
+  --animate-star-movement-top: star-movement-top linear infinite alternate;
+  --animate-star-movement-bottom: star-movement-bottom linear infinite alternate;
+
+  @keyframes star-movement-top {
+    0% {
+      transform: translate(0%, 0%);
+      opacity: 1;
+    }
+    100% {
+      transform: translate(100%, 0%);
+      opacity: 0;
+    }
+  }
+
+  @keyframes star-movement-bottom {
+    0% {
+      transform: translate(0%, 0%);
+      opacity: 1;
+    }
+    100% {
+      transform: translate(-100%, 0%);
+      opacity: 0;
+    }
+  }
+}
+
+/*
+  대결에서 이긴 카드가 진 카드를 튕겨 내보내고 가운데로 오는 연출
+  (`app/play/[playId]/page.tsx`).
+
+  **방향은 `--battle-dir` 하나로 처리한다** — 이긴 쪽이 왼쪽이면 `1`, 오른쪽이면 `-1`.
+  좌/우 keyframes 를 네 벌 만들지 않으려고 부호를 변수로 뺐다.
+
+  가운데로 가는 거리가 `calc(50% + var(--battle-gap) / 2)` 인 이유: `translateX` 의 `%` 는
+  자기 폭 기준이라 **자기 폭의 절반 + 칸 사이 간격의 절반**이 정확히 2열 격자의 중앙이다.
+  간격이 반응형이자 라운드별로 달라져서 유틸리티가 아니라 변수로 들고 있다.
+
+  18% 지점이 부딪히는 순간이다. 이긴 카드는 거기까지 상대 쪽으로 밀고 들어갔다가 중앙으로
+  가고, 진 카드는 그때까지 버티다가 날아간다 — 맞아서 밀려나는 것처럼 보이게 하는 박자다.
+*/
+@theme {
+  --animate-battle-winner: battle-winner 620ms cubic-bezier(0.34, 1.2, 0.5, 1) forwards;
+  --animate-battle-loser: battle-loser 620ms cubic-bezier(0.4, 0, 0.7, 0.5) forwards;
+
+  @keyframes battle-winner {
+    0% {
+      transform: translateX(0) scale(1);
+    }
+    /* 부딪히며 상대 쪽으로 밀고 들어간다. */
+    16% {
+      transform: translateX(calc(var(--battle-dir) * 9%)) scale(1.03);
+    }
+    /*
+      **여기서 한 박자 버틴다.** 곧바로 중앙으로 출발하면 아직 날아가는 중인 진 카드와
+      크게 겹친다. 상대가 대충 빠진 뒤에 자리를 옮겨야 "밀어내고 나서 들어간다" 로 읽힌다.
+    */
+    34% {
+      transform: translateX(calc(var(--battle-dir) * 4%)) scale(1.02);
+    }
+    100% {
+      transform: translateX(calc(var(--battle-dir) * (50% + var(--battle-gap) / 2))) scale(1.06);
+    }
+  }
+
+  @keyframes battle-loser {
+    0% {
+      transform: translateX(0) rotate(0deg);
+      opacity: 1;
+    }
+    16% {
+      transform: translateX(calc(var(--battle-dir) * 4%)) rotate(calc(var(--battle-dir) * 1deg));
+      opacity: 1;
+    }
+    /*
+      **날아가는 내내 불투명해야 한다.**
+      예전엔 16% 부터 100% 까지 서서히 사라지게 해 놨는데, 그러면 비행 구간 대부분에서
+      진 카드가 반투명한 창이 되어 **그 뒤로 이긴 카드의 내용이 비쳐 보였다**(2026-08-30 지적).
+      화면 밖으로 거의 빠져나간 뒤에야 지운다.
+    */
+    72% {
+      opacity: 1;
+    }
+    100% {
+      transform: translateX(calc(var(--battle-dir) * 175%)) rotate(calc(var(--battle-dir) * 16deg));
+      opacity: 0;
+    }
+  }
+}
+
+/* base color: zinc / brand accent: amber */
+:root {
+  --radius: 0.625rem;
+
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.141 0.005 285.823);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.141 0.005 285.823);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.141 0.005 285.823);
+  --primary: oklch(0.769 0.188 70.08);
+  --primary-foreground: oklch(0.141 0.005 285.823);
+  --secondary: oklch(0.967 0.001 286.375);
+  --secondary-foreground: oklch(0.21 0.006 285.885);
+  --muted: oklch(0.967 0.001 286.375);
+  --muted-foreground: oklch(0.552 0.016 285.938);
+  --accent: oklch(0.967 0.001 286.375);
+  --accent-foreground: oklch(0.21 0.006 285.885);
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: oklch(0.92 0.004 286.32);
+  --input: oklch(0.92 0.004 286.32);
+  --ring: oklch(0.828 0.189 84.429);
+
+  --chart-1: oklch(0.606 0.25 292.717);
+  --chart-2: oklch(0.702 0.183 293.541);
+  --chart-3: oklch(0.541 0.281 293.009);
+  --chart-4: oklch(0.491 0.27 292.581);
+  --chart-5: oklch(0.432 0.232 292.759);
+
+  --sidebar: oklch(0.985 0 0);
+  --sidebar-foreground: oklch(0.141 0.005 285.823);
+  --sidebar-primary: oklch(0.769 0.188 70.08);
+  --sidebar-primary-foreground: oklch(0.141 0.005 285.823);
+  --sidebar-accent: oklch(0.967 0.001 286.375);
+  --sidebar-accent-foreground: oklch(0.21 0.006 285.885);
+  --sidebar-border: oklch(0.92 0.004 286.32);
+  --sidebar-ring: oklch(0.828 0.189 84.429);
+}
+
+.dark {
+  color-scheme: dark;
+
+  --background: oklch(0.141 0.005 285.823);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.21 0.006 285.885);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.21 0.006 285.885);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.769 0.188 70.08);
+  --primary-foreground: oklch(0.141 0.005 285.823);
+  --secondary: oklch(0.274 0.006 286.033);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.274 0.006 286.033);
+  --muted-foreground: oklch(0.705 0.015 286.067);
+  --accent: oklch(0.274 0.006 286.033);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive: oklch(0.704 0.191 22.216);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.828 0.189 84.429);
+
+  --chart-1: oklch(0.702 0.183 293.541);
+  --chart-2: oklch(0.606 0.25 292.717);
+  --chart-3: oklch(0.541 0.281 293.009);
+  --chart-4: oklch(0.491 0.27 292.581);
+  --chart-5: oklch(0.432 0.232 292.759);
+
+  --sidebar: oklch(0.21 0.006 285.885);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-primary: oklch(0.828 0.189 84.429);
+  --sidebar-primary-foreground: oklch(0.141 0.005 285.823);
+  --sidebar-accent: oklch(0.274 0.006 286.033);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.828 0.189 84.429);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  html {
+    @apply font-sans;
+  }
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+  }
+}

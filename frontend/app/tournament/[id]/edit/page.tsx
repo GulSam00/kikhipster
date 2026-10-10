@@ -1,16 +1,20 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
-import { ApiError } from '@/lib/api/client';
-import { getTournament, updateTournament } from '@/lib/api/tournaments';
+
 import TournamentEditor, {
   type TournamentEditorInitial,
 } from '@/components/tournament/TournamentEditor';
 import { Spinner } from '@/components/ui/spinner';
-import { fetchPoolItems } from '@/lib/domain/pool-item';
+
 import { useMe } from '@/lib/hooks/use-me';
+
+import { ApiError } from '@/lib/api/client';
+import { getTournament, updateTournament } from '@/lib/api/tournaments';
+import { fetchPoolItems } from '@/lib/domain/pool-item';
+
 import type { TournamentCreateBody, TournamentDetail } from '@/types/tournament';
 
 export default function EditTournamentPage() {
@@ -72,10 +76,9 @@ export default function EditTournamentPage() {
     router.push(`/tournament/${id}`);
   }
 
-
   if (loading) {
     return (
-      <div className="flex flex-1 items-center justify-center gap-2 text-muted-foreground">
+      <div className="text-muted-foreground flex flex-1 items-center justify-center gap-2">
         <Spinner />
         불러오는 중...
       </div>
@@ -101,11 +104,5 @@ export default function EditTournamentPage() {
 
   if (!initial) return null;
 
-  return (
-    <TournamentEditor
-      initial={initial}
-      onSubmit={save}
-      backHref={`/tournament/${id}`}
-    />
-  );
+  return <TournamentEditor initial={initial} onSubmit={save} backHref={`/tournament/${id}`} />;
 }

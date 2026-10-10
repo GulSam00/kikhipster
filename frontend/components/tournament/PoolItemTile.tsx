@@ -1,11 +1,14 @@
-import Link from 'next/link';
 import { Disc3, Music2, Pause, Play } from 'lucide-react';
+import Link from 'next/link';
+
 import CoverImage from '@/components/common/CoverImage';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Spinner } from '@/components/ui/spinner';
-import { cn } from '@/lib/utils';
+
 import type { PoolItem } from '@/lib/domain/pool-item';
+import { cn } from '@/lib/utils';
+
 import type { TournamentItemType } from '@/types/tournament';
 
 interface Props {
@@ -34,7 +37,13 @@ interface Props {
 }
 
 /** 커버 없는 항목의 폴백 아이콘 — 곡이면 음표, 앨범이면 디스크. */
-export function ItemFallbackIcon({ itemType, className }: { itemType: TournamentItemType; className?: string }) {
+export function ItemFallbackIcon({
+  itemType,
+  className,
+}: {
+  itemType: TournamentItemType;
+  className?: string;
+}) {
   const Icon = itemType === 'album' ? Disc3 : Music2;
   return <Icon className={className} />;
 }
@@ -61,7 +70,7 @@ export default function PoolItemTile({
         />
         <div className="min-w-0">
           <p className="truncate text-sm font-medium">{item.title}</p>
-          <p className="truncate text-xs text-muted-foreground">{item.subtitle}</p>
+          <p className="text-muted-foreground truncate text-xs">{item.subtitle}</p>
         </div>
       </CardContent>
 
@@ -77,14 +86,14 @@ export default function PoolItemTile({
             'absolute top-4 right-4 z-10 flex gap-1 transition-opacity',
             playing
               ? 'opacity-100'
-              : 'opacity-100 sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100',
+              : 'opacity-100 sm:opacity-0 sm:group-focus-within:opacity-100 sm:group-hover:opacity-100',
           )}
         >
           {href && (
             <Button
               variant="secondary"
               size="icon"
-              className="size-9 rounded-full bg-secondary/90"
+              className="bg-secondary/90 size-9 rounded-full"
               asChild
             >
               <Link href={href} aria-label={`${item.title} 앨범 보기`}>
@@ -96,7 +105,7 @@ export default function PoolItemTile({
             <Button
               variant="secondary"
               size="icon"
-              className="size-9 rounded-full bg-secondary/90"
+              className="bg-secondary/90 size-9 rounded-full"
               onClick={onPlay}
               disabled={loading}
               aria-label={`${item.title} 재생`}

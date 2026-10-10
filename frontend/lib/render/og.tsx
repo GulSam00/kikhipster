@@ -1,5 +1,6 @@
 /* eslint-disable @next/next/no-img-element -- ImageResponse(satori)는 next/image 를 렌더하지 못한다. 여기서는 <img> 가 정상이다. */
 import type { ReactElement } from 'react';
+
 import { SITE_NAME } from '@/lib/site';
 
 /**
@@ -111,7 +112,14 @@ export function OgShell({ kind, title, subtitle, covers }: ShellProps): ReactEle
           }}
         >
           {shown.map((url, i) => (
-            <img key={i} src={url} alt="" width={cell} height={cell} style={{ objectFit: 'cover' }} />
+            <img
+              key={i}
+              src={url}
+              alt=""
+              width={cell}
+              height={cell}
+              style={{ objectFit: 'cover' }}
+            />
           ))}
         </div>
       ) : null}

@@ -1,14 +1,21 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
 import type { DropResult } from '@hello-pangea/dnd';
+import { useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
+
+import { useRequireAuth } from '@/lib/hooks/use-require-auth';
+
 import { searchAlbums } from '@/lib/api/music';
 import { albumToPoolItem, type PoolItem } from '@/lib/domain/pool-item';
-import { useRequireAuth } from '@/lib/hooks/use-require-auth';
 import { downloadTopsterImage } from '@/lib/render/topster-image';
+
 import type { AlbumSummary } from '@/types/music';
-import { DEFAULT_TOPSTER_OPTIONS, type TopsterCreateBody, type TopsterOptions } from '@/types/topster';
+import {
+  DEFAULT_TOPSTER_OPTIONS,
+  type TopsterCreateBody,
+  type TopsterOptions,
+} from '@/types/topster';
 
 export interface GridItem {
   position: number;
@@ -95,7 +102,8 @@ export function useTopsterDraft({ initial, onSubmit }: Args): UseTopsterDraftRes
   // 격자는 상태가 아니라 파생값이다 — effect로 동기화하면 연쇄 렌더가 생긴다.
   // 격자를 줄이면 넘치는 배치는 화면에서 빠질 뿐 placements 에는 남는다.
   const grid: GridItem[] = useMemo(
-    () => Array.from({ length: cellCount }, (_, i) => ({ position: i, album: placements[i] ?? null })),
+    () =>
+      Array.from({ length: cellCount }, (_, i) => ({ position: i, album: placements[i] ?? null })),
     [cellCount, placements],
   );
 
@@ -128,7 +136,10 @@ export function useTopsterDraft({ initial, onSubmit }: Args): UseTopsterDraftRes
   /** placements 를 최소 cellCount 길이로 맞춘 뒤 조작한다. */
   function updatePlacements(fn: (draft: (PoolItem | null)[]) => void) {
     setPlacements((prev) => {
-      const next = Array.from({ length: Math.max(cellCount, prev.length) }, (_, i) => prev[i] ?? null);
+      const next = Array.from(
+        { length: Math.max(cellCount, prev.length) },
+        (_, i) => prev[i] ?? null,
+      );
       fn(next);
       return next;
     });

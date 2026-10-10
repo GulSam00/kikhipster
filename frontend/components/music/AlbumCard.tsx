@@ -1,8 +1,11 @@
-import Link from 'next/link';
 import { Disc3 } from 'lucide-react';
-import AlbumPlayButton from '@/components/music/AlbumPlayButton';
+import Link from 'next/link';
+
 import CoverImage from '@/components/common/CoverImage';
+import AlbumPlayButton from '@/components/music/AlbumPlayButton';
+import AlbumTypeBadge from '@/components/music/AlbumTypeBadge';
 import { Card, CardContent } from '@/components/ui/card';
+
 import type { AlbumSummary } from '@/types/music';
 
 interface Props {
@@ -19,8 +22,13 @@ export default function AlbumCard({ album }: Props) {
       클릭 처리도 다르다. 링크를 형제로 두고 `absolute inset-0` 으로 덮으면 카드 전체가
       여전히 클릭 대상이면서 버튼은 그 위(z-10)에 남는다.
     */
-    <Card size="sm" className="group relative h-full gap-2 transition-colors hover:bg-accent">
-      <CardContent className="flex flex-col gap-2">
+    /*
+      `size="sm"`(--card-spacing 12px) 대신 기본값(16px)을 쓰고 `gap-2` 로 덮지 않는다 —
+      패딩과 세로 간격이 모두 `--card-spacing` 하나에서 나오므로 이 한 곳만 바꾸면
+      카드 안이 고르게 넓어진다. 열 수를 줄여 카드 자체가 커진 것과 짝이다.
+    */
+    <Card className="group hover:bg-accent relative h-full transition-colors">
+      <CardContent className="flex flex-col gap-3">
         <CoverImage
           src={album.cover_url}
           alt={album.title}
@@ -29,18 +37,28 @@ export default function AlbumCard({ album }: Props) {
           sizes="(min-width: 1024px) 16vw, (min-width: 640px) 25vw, 45vw"
         />
         <div className="min-w-0">
+          {/*
+            배지를 제목 **아래** 메타 줄에 둔다. 제목 옆에 붙이면 모바일 2열(카드 폭 150px
+            남짓)에서 제목이 배지에 밀려 두세 글자만 남는다 — 종류보다 제목이 먼저다.
+
+            메타 줄은 모바일에서 **두 줄**로 나눈다(배지 위, `연도 · 곡 수` 아래). 한 줄에 두면 배지
+            폭 때문에 메타에 46px 남짓만 남아 `2026 · …` 으로 잘렸다(320px, 2026-10-05 실측).
+          */}
           <p className="truncate text-sm font-medium">{album.title}</p>
-          <p className="truncate text-xs text-muted-foreground">{album.artist_name}</p>
-          <p className="text-xs text-muted-foreground">
-            {year} · {album.total_tracks}곡
-          </p>
+          <p className="text-muted-foreground mt-0.5 truncate text-xs">{album.artist_name}</p>
+          <div className="mt-2 flex flex-col items-start gap-1 sm:flex-row sm:items-center sm:gap-1.5">
+            <AlbumTypeBadge type={album.album_type} />
+            <p className="text-muted-foreground truncate text-xs">
+              {year} · {album.total_tracks}곡
+            </p>
+          </div>
         </div>
       </CardContent>
 
       <Link
         href={`/albums/${album.id}`}
         aria-label={album.title}
-        className="absolute inset-0 rounded-xl outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+        className="focus-visible:ring-ring/50 absolute inset-0 rounded-xl outline-none focus-visible:ring-3"
       />
 
       {/*
@@ -51,7 +69,7 @@ export default function AlbumCard({ album }: Props) {
         albumId={album.id}
         albumTitle={album.title}
         variant="secondary"
-        className="absolute top-4 right-4 z-10 bg-secondary/90 opacity-100 transition-opacity sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100"
+        className="bg-secondary/90 absolute top-4 right-4 z-10 opacity-100 transition-opacity sm:opacity-0 sm:group-focus-within:opacity-100 sm:group-hover:opacity-100"
       />
     </Card>
   );

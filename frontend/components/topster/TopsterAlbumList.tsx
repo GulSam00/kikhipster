@@ -1,8 +1,10 @@
 'use client';
 
 import Link from 'next/link';
+
 import type { PoolItem } from '@/lib/domain/pool-item';
 import { cn } from '@/lib/utils';
+
 import type { TopsterItem } from '@/types/topster';
 
 interface Props {
@@ -92,19 +94,25 @@ export default function TopsterAlbumList({
 
               const inner = (
                 <>
-                  {showNumbering && <span className="tabular-nums opacity-60">{item.position + 1}. </span>}
+                  {showNumbering && (
+                    <span className="tabular-nums opacity-60">{item.position + 1}. </span>
+                  )}
                   {text}
                 </>
               );
               // 잘라내지 않는다 — 긴 제목은 줄바꿈해서 전부 보여준다.
-              const base = 'block rounded-sm px-1 leading-snug break-words outline-none transition-colors';
+              const base =
+                'block rounded-sm px-1 leading-snug break-words outline-none transition-colors';
 
               return (
                 <li key={item.position} style={{ fontSize: `${fontSize}px` }} title={text}>
                   {linkItems ? (
                     <Link
                       href={`/albums/${item.album_spotify_id}`}
-                      className={cn(base, 'hover:bg-white/10 focus-visible:ring-3 focus-visible:ring-ring/50')}
+                      className={cn(
+                        base,
+                        'focus-visible:ring-ring/50 hover:bg-white/10 focus-visible:ring-3',
+                      )}
                     >
                       {inner}
                     </Link>
