@@ -252,6 +252,17 @@ class ITunesMusicService:
             raise HTTPException(status_code=404, detail="아티스트를 찾을 수 없습니다")
         return self._map_artist(results[0])
 
+    async def get_artist_album_artist_names(self, artist_id: str) -> list[str]:
+        """KR 앨범 레코드의 `artistName` 목록 — 한국어 이름 보완용(`services/artist_names.py`).
+
+        앨범 목록 조회(`get_artist_albums`)와 달리 매핑하지 않고 이름만 돌려준다.
+        """
+        data = await self._request(
+            "/lookup",
+            params={"id": artist_id, "entity": "album", "country": "KR", "limit": 20},
+        )
+        return [r["artistName"] for r in data.get("results", []) if r.get("artistName")]
+
     async def get_artist_albums(
         self, artist_id: str, market: str = "KR", limit: int = 50,
         include_singles: bool = True,

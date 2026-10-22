@@ -9,6 +9,8 @@ class ArtistSummary(BaseModel):
     image_url: str | None = None
     genres: list[str] = []
     popularity: int = 0
+    # 한국어 이름. `artist_names` 표에서 붙인다(없으면 None = 영어 이름 그대로). 캐시 payload 에는 넣지 않는다.
+    name_ko: str | None = None
 
 
 class ArtistDetail(ArtistSummary):
