@@ -2487,3 +2487,4 @@ Spotify 연동 백엔드, 프론트 기획(`_workspace/planning.md`), QA 리뷰(
 | 2026-10-09 | test: 백엔드 pytest 62개·프론트 vitest 28개와 GitHub Actions CI 도입 | .github, CLAUDE.md, backend, docs, frontend | 커밋 `250b9c1` |
 | 2026-10-10 | fix: CI 첫 실행 실패 두 건 — eval_type_backport 의존성 누락, 홈 정적 prerender | backend, docs, frontend | 커밋 `ec01af2` |
 | 2026-10-10 | docs: CI 첫 실행 실패 원인과 테스트 동시 실행 금지 기록 | docs | 커밋 `311f2b4` |
+| 2026-10-22 | docs: 아티스트 한국어 이름 검증 스크립트와 결과 보관, CI 확인 항목 정리 | _workspace, docs | 커밋 `2d512c6` |
