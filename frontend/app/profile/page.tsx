@@ -1,18 +1,12 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
 import { LayoutGrid, Plus, TriangleAlert, Trophy } from 'lucide-react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
-import { ApiError } from '@/lib/api/client';
-import type { Me } from '@/types/user';
-import { getMe } from '@/lib/api/auth';
-import { myTopstersPath, topsterPath } from '@/lib/api/topsters';
-import { myTournamentsPath, tournamentPath } from '@/lib/api/tournaments';
-import { useInfiniteList } from '@/lib/hooks/use-infinite-list';
+
 import InfiniteListFooter from '@/components/common/InfiniteListFooter';
-import { Skeleton } from '@/components/ui/skeleton';
 import OwnerItemActions from '@/components/common/OwnerItemActions';
 import TopsterCard from '@/components/topster/TopsterCard';
 import TournamentCard from '@/components/tournament/TournamentCard';
@@ -20,10 +14,27 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty';
+import {
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from '@/components/ui/empty';
+import { Skeleton } from '@/components/ui/skeleton';
 import { Spinner } from '@/components/ui/spinner';
+
+import { useInfiniteList } from '@/lib/hooks/use-infinite-list';
+
+import { getMe } from '@/lib/api/auth';
+import { ApiError } from '@/lib/api/client';
+import { myTopstersPath, topsterPath } from '@/lib/api/topsters';
+import { myTournamentsPath, tournamentPath } from '@/lib/api/tournaments';
+
 import type { Topster } from '@/types/topster';
 import type { TournamentSummary } from '@/types/tournament';
+import type { Me } from '@/types/user';
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -32,7 +43,10 @@ export default function ProfilePage() {
   const [loadError, setLoadError] = useState(false);
 
   useEffect(() => {
-    if (!localStorage.getItem('access_token')) { router.push('/login'); return; }
+    if (!localStorage.getItem('access_token')) {
+      router.push('/login');
+      return;
+    }
     async function load() {
       try {
         const user = await getMe();
@@ -81,7 +95,7 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <div className="flex flex-1 items-center justify-center gap-2 text-muted-foreground">
+      <div className="text-muted-foreground flex flex-1 items-center justify-center gap-2">
         <Spinner />
         불러오는 중...
       </div>
@@ -114,14 +128,16 @@ export default function ProfilePage() {
       <Card className="mb-8">
         <CardContent className="flex items-center gap-4">
           <Avatar size="lg" className="size-16">
-            <AvatarFallback className="bg-primary text-xl font-bold text-primary-foreground">
+            <AvatarFallback className="bg-primary text-primary-foreground text-xl font-bold">
               {me.nickname[0]?.toUpperCase()}
             </AvatarFallback>
           </Avatar>
           <div className="min-w-0">
             <h1 className="font-heading text-xl font-bold">{me.nickname}</h1>
-            <p className="truncate text-sm text-muted-foreground">{me.email}</p>
-            <Badge variant="outline" className="mt-1 capitalize">{me.provider}</Badge>
+            <p className="text-muted-foreground truncate text-sm">{me.email}</p>
+            <Badge variant="outline" className="mt-1 capitalize">
+              {me.provider}
+            </Badge>
           </div>
         </CardContent>
       </Card>

@@ -1,12 +1,16 @@
 'use client';
 
-import { useMemo, type ReactNode } from 'react';
-import Link from 'next/link';
 import Image from 'next/image';
+import Link from 'next/link';
+import { useMemo, type ReactNode } from 'react';
+
 import ItemStats from '@/components/common/ItemStats';
 import { Card, CardContent } from '@/components/ui/card';
+
 import { useAlbumItems } from '@/lib/hooks/use-album-covers';
+
 import { cn } from '@/lib/utils';
+
 import type { Topster } from '@/types/topster';
 
 interface Props {
@@ -28,26 +32,19 @@ interface Props {
  * `useAlbumCovers` 에 등록하면 같은 화면의 모든 카드 몫이 한 번의 요청으로 합쳐진다.
  * 커버를 아직 못 받았거나 없는 칸은 예전처럼 색으로만 구분한다.
  */
-export default function TopsterCard({
-  topster,
-  showAuthor = true,
-  actions,
-}: Props) {
+export default function TopsterCard({ topster, showAuthor = true, actions }: Props) {
   const cellCount = topster.width * topster.height;
-  const albumIds = useMemo(
-    () => topster.items.map((it) => it.album_spotify_id),
-    [topster.items],
-  );
+  const albumIds = useMemo(() => topster.items.map((it) => it.album_spotify_id), [topster.items]);
   const albums = useAlbumItems(albumIds);
 
   // 링크가 카드 전체가 아니게 되면서 group-hover 를 못 쓴다 — 안쪽 앵커에 hover 가
   // 걸렸을 때 카드를 틴트하는 has-* 로 같은 피드백을 유지한다.
   return (
-    <Card size="sm" className="h-full gap-2 transition-colors has-[a:hover]:bg-accent">
+    <Card size="sm" className="has-[a:hover]:bg-accent h-full gap-2 transition-colors">
       <CardContent className="flex flex-col gap-2">
         <Link
           href={`/topsters/${topster.id}`}
-          className="group flex flex-col gap-2 rounded-lg outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+          className="group focus-visible:ring-ring/50 flex flex-col gap-2 rounded-lg outline-none focus-visible:ring-3"
         >
           {/*
             배경색은 탑스터마다 다르므로 카드 미리보기도 그 색을 쓴다 — 목록에서
@@ -95,7 +92,7 @@ export default function TopsterCard({
               닉네임 옆에 숫자 3종을 붙이면 둘 다 잘린다.
             */}
             {showAuthor && (
-              <p className="truncate text-xs text-muted-foreground">{topster.user.nickname}</p>
+              <p className="text-muted-foreground truncate text-xs">{topster.user.nickname}</p>
             )}
             <ItemStats
               viewCount={topster.view_count}

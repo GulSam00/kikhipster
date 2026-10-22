@@ -1,6 +1,7 @@
 'use client';
 
 import type { CSSProperties } from 'react';
+
 import { useBoxSize, type BoxSize } from '@/lib/hooks/use-box-size';
 
 export type { BoxSize };
@@ -31,10 +32,7 @@ export function computeCell(width: number, height: number, gap: number, box: Box
   return Math.max(
     0,
     Math.floor(
-      Math.min(
-        (box.width - gap * (width - 1)) / width,
-        (box.height - gap * (height - 1)) / height,
-      ),
+      Math.min((box.width - gap * (width - 1)) / width, (box.height - gap * (height - 1)) / height),
     ),
   );
 }

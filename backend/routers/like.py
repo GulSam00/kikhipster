@@ -36,6 +36,19 @@ def like_counts(db: Session, target_type: str, target_ids: list[str]) -> dict[st
     return {tid: count for tid, count in rows}
 
 
+def purge_likes(target_type: str, target_ids: list[str] | str, db: Session) -> None:
+    """대상 삭제 시 호출한다. `likes` 는 다형성이라 대상에 FK가 없어 DB가 대신 지워주지 않는다.
+
+    커밋은 호출부가 한다 — 대상 삭제와 같은 트랜잭션에 실려야 하나만 남는 일이 없다.
+    """
+    ids = [target_ids] if isinstance(target_ids, str) else list(target_ids)
+    if not ids:
+        return
+    db.query(Like).filter(
+        Like.target_type == target_type, Like.target_id.in_([str(i) for i in ids])
+    ).delete(synchronize_session=False)
+
+
 # ---------------------------------------------------------------------------
 # 배치 조회
 #

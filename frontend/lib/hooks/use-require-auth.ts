@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 
 /**
  * 로그인하지 않은 사용자를 `/login` 으로 보낸다.

@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
+
 import { markTopsterViewed } from '@/lib/api/topsters';
 import { markTournamentViewed } from '@/lib/api/tournaments';
 

@@ -1,6 +1,7 @@
 'use client';
 
 import type { PoolItem } from '@/lib/domain/pool-item';
+
 import type { TopsterOptions } from '@/types/topster';
 
 /**
@@ -118,8 +119,9 @@ export async function renderTopsterBlob({
 
   // 빈 행도 자리를 지켜야 격자와 목록의 줄이 어긋나지 않는다.
   const rows = Array.from({ length: height }, (_, r) =>
-    Array.from({ length: width }, (_, c) => items.find((it) => it.position === r * width + c))
-      .filter((it): it is NonNullable<typeof it> => Boolean(it)),
+    Array.from({ length: width }, (_, c) =>
+      items.find((it) => it.position === r * width + c),
+    ).filter((it): it is NonNullable<typeof it> => Boolean(it)),
   );
 
   const hasList = show_album_info && rows.some((r) => r.length > 0);
@@ -231,7 +233,10 @@ export async function renderTopsterBlob({
 
 /** 파일명에 못 쓰는 문자를 걷어낸다. 제목이 비면 'topster'. */
 function safeName(title: string): string {
-  const cleaned = title.trim().replace(/[\\/:*?"<>|]/g, '').slice(0, 60);
+  const cleaned = title
+    .trim()
+    .replace(/[\\/:*?"<>|]/g, '')
+    .slice(0, 60);
   return cleaned || 'topster';
 }
 

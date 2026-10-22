@@ -1,8 +1,11 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { createTopster } from '@/lib/api/topsters';
+
 import TopsterEditor from '@/components/topster/TopsterEditor';
+
+import { createTopster } from '@/lib/api/topsters';
+
 import type { TopsterCreateBody } from '@/types/topster';
 
 export default function NewTopsterPage() {

@@ -1,0 +1,6019 @@
+{
+ "summary": {
+  "all": {
+   "n": 651,
+   "hangul": 265,
+   "item_no_ko": 17,
+   "latin_same": 13,
+   "no_item": 356,
+   "hangul_pct": 40.7,
+   "any_label_pct": 42.7
+  },
+  "by_bucket": {
+   "top(1-10)": {
+    "n": 116,
+    "hangul": 40,
+    "item_no_ko": 2,
+    "no_item": 74,
+    "hangul_pct": 34.5,
+    "any_label_pct": 34.5
+   },
+   "tail(11-50)": {
+    "n": 535,
+    "hangul": 225,
+    "item_no_ko": 15,
+    "latin_same": 13,
+    "no_item": 282,
+    "hangul_pct": 42.1,
+    "any_label_pct": 44.5
+   }
+  },
+  "by_term": {
+   "indie": {
+    "n": 50,
+    "hangul": 37,
+    "latin_same": 3,
+    "no_item": 10,
+    "hangul_pct": 74.0,
+    "any_label_pct": 80.0
+   },
+   "rock band": {
+    "n": 48,
+    "hangul": 18,
+    "no_item": 30,
+    "hangul_pct": 37.5,
+    "any_label_pct": 37.5
+   },
+   "hip hop": {
+    "n": 48,
+    "hangul": 31,
+    "item_no_ko": 4,
+    "no_item": 13,
+    "hangul_pct": 64.6,
+    "any_label_pct": 64.6
+   },
+   "발라드": {
+    "n": 50,
+    "hangul": 1,
+    "item_no_ko": 2,
+    "no_item": 47,
+    "hangul_pct": 2.0,
+    "any_label_pct": 2.0
+   },
+   "인디": {
+    "n": 3,
+    "hangul": 1,
+    "no_item": 2,
+    "hangul_pct": 33.3,
+    "any_label_pct": 33.3
+   },
+   "R&B": {
+    "n": 30,
+    "hangul": 21,
+    "item_no_ko": 1,
+    "latin_same": 1,
+    "no_item": 7,
+    "hangul_pct": 70.0,
+    "any_label_pct": 73.3
+   },
+   "jazz": {
+    "n": 47,
+    "hangul": 16,
+    "item_no_ko": 2,
+    "no_item": 29,
+    "hangul_pct": 34.0,
+    "any_label_pct": 34.0
+   },
+   "electronic": {
+    "n": 20,
+    "hangul": 16,
+    "item_no_ko": 1,
+    "no_item": 3,
+    "hangul_pct": 80.0,
+    "any_label_pct": 80.0
+   },
+   "j-pop": {
+    "n": 50,
+    "hangul": 12,
+    "item_no_ko": 1,
+    "latin_same": 2,
+    "no_item": 35,
+    "hangul_pct": 24.0,
+    "any_label_pct": 28.0
+   },
+   "k-pop": {
+    "n": 50,
+    "hangul": 20,
+    "latin_same": 7,
+    "no_item": 23,
+    "hangul_pct": 40.0,
+    "any_label_pct": 54.0
+   },
+   "trot": {
+    "n": 50,
+    "no_item": 50,
+    "hangul_pct": 0.0,
+    "any_label_pct": 0.0
+   },
+   "heavy metal": {
+    "n": 45,
+    "hangul": 30,
+    "no_item": 15,
+    "hangul_pct": 66.7,
+    "any_label_pct": 66.7
+   },
+   "folk": {
+    "n": 44,
+    "hangul": 21,
+    "item_no_ko": 1,
+    "no_item": 22,
+    "hangul_pct": 47.7,
+    "any_label_pct": 47.7
+   },
+   "singer songwriter": {
+    "n": 27,
+    "hangul": 9,
+    "item_no_ko": 2,
+    "no_item": 16,
+    "hangul_pct": 33.3,
+    "any_label_pct": 33.3
+   },
+   "lofi": {
+    "n": 49,
+    "no_item": 49,
+    "hangul_pct": 0.0,
+    "any_label_pct": 0.0
+   },
+   "punk": {
+    "n": 40,
+    "hangul": 32,
+    "item_no_ko": 3,
+    "no_item": 5,
+    "hangul_pct": 80.0,
+    "any_label_pct": 80.0
+   }
+  },
+  "itunes_name_already_hangul": 39
+ },
+ "artists": [
+  {
+   "id": "1133281424",
+   "name": "Indie",
+   "term": "indie",
+   "rank": 1,
+   "cls": "no_item",
+   "bucket": "top(1-10)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "115234",
+   "name": "Weezer",
+   "term": "indie",
+   "rank": 2,
+   "cls": "hangul",
+   "bucket": "top(1-10)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "6483093",
+   "name": "The Killers",
+   "term": "indie",
+   "rank": 3,
+   "cls": "hangul",
+   "bucket": "top(1-10)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "110951238",
+   "name": "Danger Mouse",
+   "term": "indie",
+   "rank": 4,
+   "cls": "hangul",
+   "bucket": "top(1-10)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1210752783",
+   "name": "Carlos Muñoz",
+   "term": "indie",
+   "rank": 5,
+   "cls": "no_item",
+   "bucket": "top(1-10)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1182900937",
+   "name": "Corey Taylor",
+   "term": "indie",
+   "rank": 6,
+   "cls": "hangul",
+   "bucket": "top(1-10)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "501437762",
+   "name": "Mac DeMarco",
+   "term": "indie",
+   "rank": 7,
+   "cls": "hangul",
+   "bucket": "top(1-10)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1352449404",
+   "name": "JAŸ-Z",
+   "term": "indie",
+   "rank": 8,
+   "cls": "hangul",
+   "bucket": "top(1-10)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "471744",
+   "name": "Coldplay",
+   "term": "indie",
+   "rank": 9,
+   "cls": "hangul",
+   "bucket": "top(1-10)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "349736311",
+   "name": "twenty one pilots",
+   "term": "indie",
+   "rank": 10,
+   "cls": "hangul",
+   "bucket": "top(1-10)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "62820413",
+   "name": "Arctic Monkeys",
+   "term": "indie",
+   "rank": 11,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "290242959",
+   "name": "Tame Impala",
+   "term": "indie",
+   "rank": 12,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1361068",
+   "name": "Pharrell Williams",
+   "term": "indie",
+   "rank": 13,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "635806094",
+   "name": "Kygo",
+   "term": "indie",
+   "rank": 14,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "260414340",
+   "name": "OneRepublic",
+   "term": "indie",
+   "rank": 15,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "359553651",
+   "name": "AJR",
+   "term": "indie",
+   "rank": 16,
+   "cls": "latin_same",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "528928008",
+   "name": "Glass Animals",
+   "term": "indie",
+   "rank": 17,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "542640016",
+   "name": "The 1975",
+   "term": "indie",
+   "rank": 18,
+   "cls": "latin_same",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1503010262",
+   "name": "James Jackson",
+   "term": "indie",
+   "rank": 19,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "71676",
+   "name": "Willie Nelson",
+   "term": "indie",
+   "rank": 20,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "497546276",
+   "name": "Mitski",
+   "term": "indie",
+   "rank": 21,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1883403",
+   "name": "Kings of Leon",
+   "term": "indie",
+   "rank": 22,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1646302",
+   "name": "The Smashing Pumpkins",
+   "term": "indie",
+   "rank": 23,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "273428126",
+   "name": "Bon Iver",
+   "term": "indie",
+   "rank": 24,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "281070699",
+   "name": "Florence + the Machine",
+   "term": "indie",
+   "rank": 25,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "77924842",
+   "name": "John Congleton",
+   "term": "indie",
+   "rank": 26,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "122615",
+   "name": "The Cranberries",
+   "term": "indie",
+   "rank": 27,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "5893059",
+   "name": "The Black Keys",
+   "term": "indie",
+   "rank": 28,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "689684535",
+   "name": "Mario Cáceres",
+   "term": "indie",
+   "rank": 29,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "560395",
+   "name": "Julian Casablancas",
+   "term": "indie",
+   "rank": 30,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "213048599",
+   "name": "YUNGBLUD",
+   "term": "indie",
+   "rank": 31,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "826980",
+   "name": "Jack White",
+   "term": "indie",
+   "rank": 32,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "465711",
+   "name": "Brandon Boyd",
+   "term": "indie",
+   "rank": 33,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "312095",
+   "name": "Beck",
+   "term": "indie",
+   "rank": 34,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "311145",
+   "name": "R.E.M.",
+   "term": "indie",
+   "rank": 35,
+   "cls": "latin_same",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "3447642",
+   "name": "The All-American Rejects",
+   "term": "indie",
+   "rank": 36,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "467112",
+   "name": "Modest Mouse",
+   "term": "indie",
+   "rank": 37,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "259437105",
+   "name": "Vampire Weekend",
+   "term": "indie",
+   "rank": 38,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1464756",
+   "name": "Peter Buck",
+   "term": "indie",
+   "rank": 39,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "923255950",
+   "name": "BØRNS",
+   "term": "indie",
+   "rank": 40,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "270429387",
+   "name": "Travie McCoy",
+   "term": "indie",
+   "rank": 41,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "524929515",
+   "name": "Tom Odell",
+   "term": "indie",
+   "rank": 42,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "494311026",
+   "name": "alt-J",
+   "term": "indie",
+   "rank": 43,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "75949392",
+   "name": "Gym Class Heroes",
+   "term": "indie",
+   "rank": 44,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "410732500",
+   "name": "GROUPLOVE",
+   "term": "indie",
+   "rank": 45,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "140777342",
+   "name": "Janelle Monáe",
+   "term": "indie",
+   "rank": 46,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "960112019",
+   "name": "KALEO",
+   "term": "indie",
+   "rank": 47,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "115433",
+   "name": "Peter Gabriel",
+   "term": "indie",
+   "rank": 48,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "79407608",
+   "name": "John Reis",
+   "term": "indie",
+   "rank": 49,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1373705",
+   "name": "John Pierce",
+   "term": "indie",
+   "rank": 50,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "591118265",
+   "name": "Madhavas Rock Band",
+   "term": "rock band",
+   "rank": 1,
+   "cls": "no_item",
+   "bucket": "top(1-10)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "437497607",
+   "name": "The LDS Scripture Rock Band",
+   "term": "rock band",
+   "rank": 2,
+   "cls": "no_item",
+   "bucket": "top(1-10)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "355304745",
+   "name": "Highlander Celtic Rock Band Australia",
+   "term": "rock band",
+   "rank": 3,
+   "cls": "no_item",
+   "bucket": "top(1-10)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "673283203",
+   "name": "Sammy Price & The \"Rock\" Band",
+   "term": "rock band",
+   "rank": 4,
+   "cls": "no_item",
+   "bucket": "top(1-10)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "935397853",
+   "name": "The Wolf Rock Band",
+   "term": "rock band",
+   "rank": 5,
+   "cls": "no_item",
+   "bucket": "top(1-10)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "183148314",
+   "name": "Lafayette Afro Rock Band",
+   "term": "rock band",
+   "rank": 6,
+   "cls": "no_item",
+   "bucket": "top(1-10)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1489378416",
+   "name": "Vedānta Rock Band",
+   "term": "rock band",
+   "rank": 7,
+   "cls": "no_item",
+   "bucket": "top(1-10)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1350020902",
+   "name": "The Rolling Rock Band",
+   "term": "rock band",
+   "rank": 8,
+   "cls": "no_item",
+   "bucket": "top(1-10)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1333835556",
+   "name": "Black Rock Band",
+   "term": "rock band",
+   "rank": 9,
+   "cls": "no_item",
+   "bucket": "top(1-10)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1471796418",
+   "name": "Arekta Rock Band",
+   "term": "rock band",
+   "rank": 10,
+   "cls": "no_item",
+   "bucket": "top(1-10)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1556380153",
+   "name": "Count Buffalo & The Jazz Rock Band",
+   "term": "rock band",
+   "rank": 11,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1771052293",
+   "name": "rock'band",
+   "term": "rock band",
+   "rank": 12,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1720608100",
+   "name": "Rock Band",
+   "term": "rock band",
+   "rank": 13,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "304270345",
+   "name": "Mustard",
+   "term": "rock band",
+   "rank": 14,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "198357",
+   "name": "Traditional",
+   "term": "rock band",
+   "rank": 15,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "136975",
+   "name": "The Beatles",
+   "term": "rock band",
+   "rank": 16,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "54657",
+   "name": "Elton John",
+   "term": "rock band",
+   "rank": 17,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1098537400",
+   "name": "Vin Gordon & The Real Rock Band",
+   "term": "rock band",
+   "rank": 18,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "31070684",
+   "name": "Travis Barker",
+   "term": "rock band",
+   "rank": 19,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "379253927",
+   "name": "Eddy Wilson's Rock Band",
+   "term": "rock band",
+   "rank": 20,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "4792587",
+   "name": "Band",
+   "term": "rock band",
+   "rank": 21,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1607591785",
+   "name": "Magical Rock Band",
+   "term": "rock band",
+   "rank": 22,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1261262034",
+   "name": "Rock Band For Old Men",
+   "term": "rock band",
+   "rank": 23,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "340754516",
+   "name": "Bari Koral Family Rock Band",
+   "term": "rock band",
+   "rank": 24,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "299905980",
+   "name": "Lafayette Afro-Rock Band",
+   "term": "rock band",
+   "rank": 25,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "129045039",
+   "name": "Zac Brown Band",
+   "term": "rock band",
+   "rank": 26,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "14400049",
+   "name": "Mark Ronson",
+   "term": "rock band",
+   "rank": 27,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1492936948",
+   "name": "Zu Rock Band",
+   "term": "rock band",
+   "rank": 28,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "995779282",
+   "name": "Rainbow Rock Band",
+   "term": "rock band",
+   "rank": 29,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "431706574",
+   "name": "Quadrant D - BCHS Rockband",
+   "term": "rock band",
+   "rank": 30,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "171366",
+   "name": "Frank Sinatra",
+   "term": "rock band",
+   "rank": 31,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "256673270",
+   "name": "Hayley Williams",
+   "term": "rock band",
+   "rank": 32,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "178834",
+   "name": "Bruce Springsteen",
+   "term": "rock band",
+   "rank": 33,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "75950796",
+   "name": "Paramore",
+   "term": "rock band",
+   "rank": 34,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1556379994",
+   "name": "Count Buffalo & His Rock Band",
+   "term": "rock band",
+   "rank": 36,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1666919035",
+   "name": "Interludio Rockband",
+   "term": "rock band",
+   "rank": 37,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "909253",
+   "name": "Jack Johnson",
+   "term": "rock band",
+   "rank": 38,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "4403303",
+   "name": "Patrick Rock Band",
+   "term": "rock band",
+   "rank": 39,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "638538",
+   "name": "David Gilmour",
+   "term": "rock band",
+   "rank": 40,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "14154",
+   "name": "Wyclef Jean",
+   "term": "rock band",
+   "rank": 41,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "27060348",
+   "name": "Darius Rucker",
+   "term": "rock band",
+   "rank": 42,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1213405916",
+   "name": "Lewis Capaldi",
+   "term": "rock band",
+   "rank": 43,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "5305761",
+   "name": "Keyshia Cole",
+   "term": "rock band",
+   "rank": 44,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "569510",
+   "name": "Chris Tomlin",
+   "term": "rock band",
+   "rank": 45,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "173831",
+   "name": "Don Henley",
+   "term": "rock band",
+   "rank": 46,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1092903",
+   "name": "Deftones",
+   "term": "rock band",
+   "rank": 47,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1489368550",
+   "name": "Ian Davis: Rock Band",
+   "term": "rock band",
+   "rank": 48,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "262260873",
+   "name": "Maren Morris",
+   "term": "rock band",
+   "rank": 49,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "639014934",
+   "name": "Jacques Webster II",
+   "term": "hip hop",
+   "rank": 1,
+   "cls": "no_item",
+   "bucket": "top(1-10)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "22109189",
+   "name": "MIKE DEAN",
+   "term": "hip hop",
+   "rank": 2,
+   "cls": "hangul",
+   "bucket": "top(1-10)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1140623439",
+   "name": "Rod Wave",
+   "term": "hip hop",
+   "rank": 3,
+   "cls": "item_no_ko",
+   "bucket": "top(1-10)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "95705522",
+   "name": "Chris Brown",
+   "term": "hip hop",
+   "rank": 4,
+   "cls": "hangul",
+   "bucket": "top(1-10)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "549236696",
+   "name": "Travis Scott",
+   "term": "hip hop",
+   "rank": 5,
+   "cls": "hangul",
+   "bucket": "top(1-10)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "479756766",
+   "name": "The Weeknd",
+   "term": "hip hop",
+   "rank": 6,
+   "cls": "hangul",
+   "bucket": "top(1-10)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "73705833",
+   "name": "J. Cole",
+   "term": "hip hop",
+   "rank": 7,
+   "cls": "hangul",
+   "bucket": "top(1-10)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "296887979",
+   "name": "Aubrey Drake Graham",
+   "term": "hip hop",
+   "rank": 8,
+   "cls": "no_item",
+   "bucket": "top(1-10)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "271256",
+   "name": "Drake",
+   "term": "hip hop",
+   "rank": 9,
+   "cls": "hangul",
+   "bucket": "top(1-10)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1168822104",
+   "name": "YoungBoy Never Broke Again",
+   "term": "hip hop",
+   "rank": 10,
+   "cls": "hangul",
+   "bucket": "top(1-10)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "128050210",
+   "name": "Future",
+   "term": "hip hop",
+   "rank": 11,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1276656483",
+   "name": "Lil Baby",
+   "term": "hip hop",
+   "rank": 12,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "670534462",
+   "name": "Metro Boomin",
+   "term": "hip hop",
+   "rank": 13,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "2715720",
+   "name": "Kanye West",
+   "term": "hip hop",
+   "rank": 14,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "602788167",
+   "name": "Leland Wayne",
+   "term": "hip hop",
+   "rank": 15,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "541282483",
+   "name": "Lil Durk",
+   "term": "hip hop",
+   "rank": 16,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "368183298",
+   "name": "Kendrick Lamar",
+   "term": "hip hop",
+   "rank": 17,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1318488685",
+   "name": "Sergio Kitchens",
+   "term": "hip hop",
+   "rank": 18,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1236267297",
+   "name": "Gunna",
+   "term": "hip hop",
+   "rank": 19,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "966309175",
+   "name": "Post Malone",
+   "term": "hip hop",
+   "rank": 20,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "5869117",
+   "name": "Lil Wayne",
+   "term": "hip hop",
+   "rank": 21,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "383252635",
+   "name": "Wheezy",
+   "term": "hip hop",
+   "rank": 22,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "605800394",
+   "name": "SZA",
+   "term": "hip hop",
+   "rank": 23,
+   "cls": "item_no_ko",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "292461",
+   "name": "Southside",
+   "term": "hip hop",
+   "rank": 24,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1368733420",
+   "name": "Juice WRLD",
+   "term": "hip hop",
+   "rank": 25,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1419227",
+   "name": "Beyoncé",
+   "term": "hip hop",
+   "rank": 26,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "940710524",
+   "name": "Lil Uzi Vert",
+   "term": "hip hop",
+   "rank": 27,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "81886939",
+   "name": "Young Thug",
+   "term": "hip hop",
+   "rank": 28,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "894820464",
+   "name": "21 Savage",
+   "term": "hip hop",
+   "rank": 29,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "953921140",
+   "name": "Kodak Black",
+   "term": "hip hop",
+   "rank": 31,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "885621068",
+   "name": "London On Da Track",
+   "term": "hip hop",
+   "rank": 32,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1152182223",
+   "name": "Tay Keith",
+   "term": "hip hop",
+   "rank": 34,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "991187319",
+   "name": "Moneybagg Yo",
+   "term": "hip hop",
+   "rank": 35,
+   "cls": "item_no_ko",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "111051",
+   "name": "Eminem",
+   "term": "hip hop",
+   "rank": 36,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "278464538",
+   "name": "Nicki Minaj",
+   "term": "hip hop",
+   "rank": 37,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1410841257",
+   "name": "benny blanco",
+   "term": "hip hop",
+   "rank": 38,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "298383551",
+   "name": "Kevin Gates",
+   "term": "hip hop",
+   "rank": 39,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "63346553",
+   "name": "Rihanna",
+   "term": "hip hop",
+   "rank": 40,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1180160",
+   "name": "D. Carter",
+   "term": "hip hop",
+   "rank": 41,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1068300376",
+   "name": "A Boogie wit da Hoodie",
+   "term": "hip hop",
+   "rank": 42,
+   "cls": "item_no_ko",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "990402287",
+   "name": "Summer Walker",
+   "term": "hip hop",
+   "rank": 43,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "267073362",
+   "name": "Frank Dukes",
+   "term": "hip hop",
+   "rank": 44,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1529269214",
+   "name": "OZ",
+   "term": "hip hop",
+   "rank": 45,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1206160754",
+   "name": "Nick Mira",
+   "term": "hip hop",
+   "rank": 46,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "278873078",
+   "name": "Bruno Mars",
+   "term": "hip hop",
+   "rank": 47,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1175595427",
+   "name": "DaBaby",
+   "term": "hip hop",
+   "rank": 48,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "456624992",
+   "name": "Cubeatz",
+   "term": "hip hop",
+   "rank": 49,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "3342627",
+   "name": "Timbaland",
+   "term": "hip hop",
+   "rank": 50,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1095636608",
+   "name": "발라드 매니아",
+   "term": "발라드",
+   "rank": 1,
+   "cls": "no_item",
+   "bucket": "top(1-10)",
+   "korean_name_in_itunes": true
+  },
+  {
+   "id": "1445659813",
+   "name": "발라드 공장",
+   "term": "발라드",
+   "rank": 2,
+   "cls": "no_item",
+   "bucket": "top(1-10)",
+   "korean_name_in_itunes": true
+  },
+  {
+   "id": "1124710093",
+   "name": "발라드 메이트",
+   "term": "발라드",
+   "rank": 3,
+   "cls": "no_item",
+   "bucket": "top(1-10)",
+   "korean_name_in_itunes": true
+  },
+  {
+   "id": "1089427966",
+   "name": "노래방 인기 발라드",
+   "term": "발라드",
+   "rank": 4,
+   "cls": "no_item",
+   "bucket": "top(1-10)",
+   "korean_name_in_itunes": true
+  },
+  {
+   "id": "419955361",
+   "name": "Salvador Aponte",
+   "term": "발라드",
+   "rank": 5,
+   "cls": "no_item",
+   "bucket": "top(1-10)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1023696011",
+   "name": "The Ballad",
+   "term": "발라드",
+   "rank": 6,
+   "cls": "no_item",
+   "bucket": "top(1-10)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1004896318",
+   "name": "The 발라드",
+   "term": "발라드",
+   "rank": 7,
+   "cls": "no_item",
+   "bucket": "top(1-10)",
+   "korean_name_in_itunes": true
+  },
+  {
+   "id": "1445633558",
+   "name": "김오키 새턴발라드",
+   "term": "발라드",
+   "rank": 8,
+   "cls": "no_item",
+   "bucket": "top(1-10)",
+   "korean_name_in_itunes": true
+  },
+  {
+   "id": "88986",
+   "name": "Armando Manzanero",
+   "term": "발라드",
+   "rank": 9,
+   "cls": "hangul",
+   "bucket": "top(1-10)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "6489125",
+   "name": "Yasmil Marrufo",
+   "term": "발라드",
+   "rank": 10,
+   "cls": "no_item",
+   "bucket": "top(1-10)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "434187842",
+   "name": "Carlos De La Garza",
+   "term": "발라드",
+   "rank": 11,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "15774773",
+   "name": "Rayito",
+   "term": "발라드",
+   "rank": 12,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "89011",
+   "name": "Marco Antonio Muñiz",
+   "term": "발라드",
+   "rank": 13,
+   "cls": "item_no_ko",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "83906546",
+   "name": "Raul Garcia",
+   "term": "발라드",
+   "rank": 14,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "860137784",
+   "name": "Edwin Luna",
+   "term": "발라드",
+   "rank": 15,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "296702",
+   "name": "Roberto Cantoral",
+   "term": "발라드",
+   "rank": 16,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "26172312",
+   "name": "Los Panchos",
+   "term": "발라드",
+   "rank": 17,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "294795",
+   "name": "Agustín Lara",
+   "term": "발라드",
+   "rank": 18,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "299894",
+   "name": "Alvaro Carrillo",
+   "term": "발라드",
+   "rank": 19,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "153377371",
+   "name": "Pierre-Andre Valade",
+   "term": "발라드",
+   "rank": 20,
+   "cls": "item_no_ko",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "481571",
+   "name": "Fernando Osorio",
+   "term": "발라드",
+   "rank": 21,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "80965065",
+   "name": "Pierre-André Valade",
+   "term": "발라드",
+   "rank": 22,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "15383753",
+   "name": "Luis Carlos Monroy",
+   "term": "발라드",
+   "rank": 23,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "73249831",
+   "name": "Gustavo Lopez",
+   "term": "발라드",
+   "rank": 24,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1834114546",
+   "name": "유일무이 락발라드",
+   "term": "발라드",
+   "rank": 25,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": true
+  },
+  {
+   "id": "424905926",
+   "name": "Chucho Rincón",
+   "term": "발라드",
+   "rank": 26,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "553659",
+   "name": "Luis Demetrio",
+   "term": "발라드",
+   "rank": 27,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "168442157",
+   "name": "Julio Rodriguez",
+   "term": "발라드",
+   "rank": 28,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1424838423",
+   "name": "발라드 녀석들",
+   "term": "발라드",
+   "rank": 29,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": true
+  },
+  {
+   "id": "6821514",
+   "name": "Alberto Cervantes",
+   "term": "발라드",
+   "rank": 30,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "265915029",
+   "name": "Adrian Dargelos",
+   "term": "발라드",
+   "rank": 31,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "873727",
+   "name": "Consuelo Velázquez",
+   "term": "발라드",
+   "rank": 32,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "6730062",
+   "name": "Los Tres Ases",
+   "term": "발라드",
+   "rank": 33,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "27394423",
+   "name": "Alfredo Gil",
+   "term": "발라드",
+   "rank": 34,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "863269259",
+   "name": "Larruso",
+   "term": "발라드",
+   "rank": 35,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1866596848",
+   "name": "조선락발라드",
+   "term": "발라드",
+   "rank": 36,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": true
+  },
+  {
+   "id": "170544255",
+   "name": "Luis Garcia",
+   "term": "발라드",
+   "rank": 37,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "170128922",
+   "name": "Enrique Guzman",
+   "term": "발라드",
+   "rank": 38,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "6773253032",
+   "name": "한 편의 발라드",
+   "term": "발라드",
+   "rank": 39,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": true
+  },
+  {
+   "id": "1646603",
+   "name": "Manoella Torres",
+   "term": "발라드",
+   "rank": 40,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "131244254",
+   "name": "Los Tres Diamantes",
+   "term": "발라드",
+   "rank": 41,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "62026099",
+   "name": "Alfredo Mazzucchi",
+   "term": "발라드",
+   "rank": 42,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "162248179",
+   "name": "Braulio",
+   "term": "발라드",
+   "rank": 43,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "6730075",
+   "name": "Los Tres Reyes",
+   "term": "발라드",
+   "rank": 44,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "219920133",
+   "name": "Carlos Macías",
+   "term": "발라드",
+   "rank": 45,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "19543107",
+   "name": "Danny Daniel",
+   "term": "발라드",
+   "rank": 46,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1378024",
+   "name": "Gabriel Ruiz",
+   "term": "발라드",
+   "rank": 47,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "259676409",
+   "name": "Manolo Galván",
+   "term": "발라드",
+   "rank": 48,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "302756",
+   "name": "Claudio Estrada",
+   "term": "발라드",
+   "rank": 49,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "4657495",
+   "name": "Juan Carlos",
+   "term": "발라드",
+   "rank": 50,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1475838570",
+   "name": "인디",
+   "term": "인디",
+   "rank": 1,
+   "cls": "no_item",
+   "bucket": "top(1-10)",
+   "korean_name_in_itunes": true
+  },
+  {
+   "id": "252239625",
+   "name": "ONE OK ROCK",
+   "term": "인디",
+   "rank": 31,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1562260610",
+   "name": "인디",
+   "term": "인디",
+   "rank": 36,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": true
+  },
+  {
+   "id": "320569549",
+   "name": "Justin Bieber",
+   "term": "R&B",
+   "rank": 10,
+   "cls": "hangul",
+   "bucket": "top(1-10)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "412778295",
+   "name": "Ariana Grande",
+   "term": "R&B",
+   "rank": 11,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "642591128",
+   "name": "Bryson Tiller",
+   "term": "R&B",
+   "rank": 12,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "198431322",
+   "name": "Jhené Aiko",
+   "term": "R&B",
+   "rank": 22,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "157749142",
+   "name": "DJ Khaled",
+   "term": "R&B",
+   "rank": 24,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1082533559",
+   "name": "XXXTENTACION",
+   "term": "R&B",
+   "rank": 25,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "666648192",
+   "name": "PARTYNEXTDOOR",
+   "term": "R&B",
+   "rank": 26,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "298905856",
+   "name": "Allen Ritter",
+   "term": "R&B",
+   "rank": 27,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "82842423",
+   "name": "Khalid",
+   "term": "R&B",
+   "rank": 28,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "76034938",
+   "name": "Kuk Harrell",
+   "term": "R&B",
+   "rank": 29,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "21488",
+   "name": "Jermaine Dupri",
+   "term": "R&B",
+   "rank": 30,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "442122051",
+   "name": "Frank Ocean",
+   "term": "R&B",
+   "rank": 31,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "960127446",
+   "name": "Brent Faiyaz",
+   "term": "R&B",
+   "rank": 32,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "440458549",
+   "name": "Tory Lanez",
+   "term": "R&B",
+   "rank": 33,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "398128",
+   "name": "Justin Timberlake",
+   "term": "R&B",
+   "rank": 34,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "419944559",
+   "name": "Mac Miller",
+   "term": "R&B",
+   "rank": 35,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "29339385",
+   "name": "Jeff Bhasker",
+   "term": "R&B",
+   "rank": 36,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "830588310",
+   "name": "Doja Cat",
+   "term": "R&B",
+   "rank": 38,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "15885",
+   "name": "USHER",
+   "term": "R&B",
+   "rank": 39,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "690126399",
+   "name": "Kehlani",
+   "term": "R&B",
+   "rank": 40,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "35315",
+   "name": "Dr. Dre",
+   "term": "R&B",
+   "rank": 41,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "258431869",
+   "name": "R&B",
+   "term": "R&B",
+   "rank": 42,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "29254083",
+   "name": "Miguel",
+   "term": "R&B",
+   "rank": 43,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "206995749",
+   "name": "James Fauntleroy",
+   "term": "R&B",
+   "rank": 44,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1319520607",
+   "name": "Omer Fedi",
+   "term": "R&B",
+   "rank": 45,
+   "cls": "item_no_ko",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "91853",
+   "name": "Mariah Carey",
+   "term": "R&B",
+   "rank": 46,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "12113",
+   "name": "Babyface",
+   "term": "R&B",
+   "rank": 47,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "290507990",
+   "name": "Fisticuffs",
+   "term": "R&B",
+   "rank": 48,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "262836961",
+   "name": "Adele",
+   "term": "R&B",
+   "rank": 49,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "123049323",
+   "name": "H.E.R.",
+   "term": "R&B",
+   "rank": 50,
+   "cls": "latin_same",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1760401983",
+   "name": "Jazz",
+   "term": "jazz",
+   "rank": 1,
+   "cls": "no_item",
+   "bucket": "top(1-10)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1462214773",
+   "name": "Jazz",
+   "term": "jazz",
+   "rank": 2,
+   "cls": "no_item",
+   "bucket": "top(1-10)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1457092053",
+   "name": "Jazz",
+   "term": "jazz",
+   "rank": 3,
+   "cls": "no_item",
+   "bucket": "top(1-10)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "649361",
+   "name": "Mike Elizondo",
+   "term": "jazz",
+   "rank": 5,
+   "cls": "no_item",
+   "bucket": "top(1-10)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1468290871",
+   "name": "Diplo",
+   "term": "jazz",
+   "rank": 6,
+   "cls": "no_item",
+   "bucket": "top(1-10)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "31733124",
+   "name": "Trey Songz",
+   "term": "jazz",
+   "rank": 7,
+   "cls": "hangul",
+   "bucket": "top(1-10)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "28721078",
+   "name": "Sia",
+   "term": "jazz",
+   "rank": 8,
+   "cls": "hangul",
+   "bucket": "top(1-10)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "260860787",
+   "name": "Tyler Williams",
+   "term": "jazz",
+   "rank": 9,
+   "cls": "no_item",
+   "bucket": "top(1-10)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "2249190",
+   "name": "Mark Williams",
+   "term": "jazz",
+   "rank": 10,
+   "cls": "no_item",
+   "bucket": "top(1-10)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "876745",
+   "name": "Chad Smith",
+   "term": "jazz",
+   "rank": 11,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "277293880",
+   "name": "Lady Gaga",
+   "term": "jazz",
+   "rank": 12,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1465747930",
+   "name": "Jazz",
+   "term": "jazz",
+   "rank": 13,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "49436",
+   "name": "Quincy Jones",
+   "term": "jazz",
+   "rank": 14,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "121982",
+   "name": "Bob Marley",
+   "term": "jazz",
+   "rank": 15,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1210275020",
+   "name": "Steve Lacy",
+   "term": "jazz",
+   "rank": 16,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "127329",
+   "name": "Marvin Gaye",
+   "term": "jazz",
+   "rank": 17,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "356545647",
+   "name": "Skrillex",
+   "term": "jazz",
+   "rank": 18,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "155138",
+   "name": "Sean Paul",
+   "term": "jazz",
+   "rank": 20,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "799597",
+   "name": "Michael Bublé",
+   "term": "jazz",
+   "rank": 21,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "469243",
+   "name": "Teddy Riley",
+   "term": "jazz",
+   "rank": 22,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "178956",
+   "name": "Brian Holland",
+   "term": "jazz",
+   "rank": 23,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "499780",
+   "name": "Alan Bergman",
+   "term": "jazz",
+   "rank": 24,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "155814",
+   "name": "Prince",
+   "term": "jazz",
+   "rank": 25,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "580650079",
+   "name": "Leslie Odom, Jr.",
+   "term": "jazz",
+   "rank": 26,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "252009",
+   "name": "Leon Huff",
+   "term": "jazz",
+   "rank": 27,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "39042",
+   "name": "Burt Bacharach",
+   "term": "jazz",
+   "rank": 28,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "197443",
+   "name": "Elvis Presley",
+   "term": "jazz",
+   "rank": 29,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "467719",
+   "name": "Jonathan Cain",
+   "term": "jazz",
+   "rank": 30,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1200612",
+   "name": "Michael Anthony",
+   "term": "jazz",
+   "rank": 31,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "4993830",
+   "name": "Arif Mardin",
+   "term": "jazz",
+   "rank": 32,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "878620224",
+   "name": "Hillsong Worship",
+   "term": "jazz",
+   "rank": 33,
+   "cls": "item_no_ko",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "550734",
+   "name": "Neal Schon",
+   "term": "jazz",
+   "rank": 34,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "14169",
+   "name": "Narada Michael Walden",
+   "term": "jazz",
+   "rank": 35,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "27522754",
+   "name": "Terrace Martin",
+   "term": "jazz",
+   "rank": 36,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "472400",
+   "name": "Jagged Edge",
+   "term": "jazz",
+   "rank": 38,
+   "cls": "item_no_ko",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "505814882",
+   "name": "Leland Whitty",
+   "term": "jazz",
+   "rank": 39,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "7181587",
+   "name": "Eric Valentine",
+   "term": "jazz",
+   "rank": 40,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "293082",
+   "name": "Lee Oskar",
+   "term": "jazz",
+   "rank": 41,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1459389657",
+   "name": "Nate Mercereau",
+   "term": "jazz",
+   "rank": 42,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "3297504",
+   "name": "Idina Menzel",
+   "term": "jazz",
+   "rank": 43,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "467697441",
+   "name": "Sheldon Ferguson",
+   "term": "jazz",
+   "rank": 44,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "931545",
+   "name": "Jerry Garcia",
+   "term": "jazz",
+   "rank": 45,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "255233",
+   "name": "George Harrison",
+   "term": "jazz",
+   "rank": 46,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "92320072",
+   "name": "Mark Tremonti",
+   "term": "jazz",
+   "rank": 47,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "395056650",
+   "name": "Travis Sayles",
+   "term": "jazz",
+   "rank": 48,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1199829",
+   "name": "Robert Bell",
+   "term": "jazz",
+   "rank": 49,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "27547332",
+   "name": "Carlos Santana",
+   "term": "jazz",
+   "rank": 50,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "496921",
+   "name": "Electronic",
+   "term": "electronic",
+   "rank": 1,
+   "cls": "hangul",
+   "bucket": "top(1-10)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "397186",
+   "name": "Rick Rubin",
+   "term": "electronic",
+   "rank": 14,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "183313439",
+   "name": "Ed Sheeran",
+   "term": "electronic",
+   "rank": 17,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1065981054",
+   "name": "Billie Eilish",
+   "term": "electronic",
+   "rank": 19,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "31066479",
+   "name": "Stargate",
+   "term": "electronic",
+   "rank": 24,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "464296584",
+   "name": "Lana Del Rey",
+   "term": "electronic",
+   "rank": 26,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "378430797",
+   "name": "Julia Michaels",
+   "term": "electronic",
+   "rank": 29,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "980795202",
+   "name": "Marshmello",
+   "term": "electronic",
+   "rank": 30,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "538640321",
+   "name": "TM88",
+   "term": "electronic",
+   "rank": 32,
+   "cls": "item_no_ko",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "341060861",
+   "name": "FNZ",
+   "term": "electronic",
+   "rank": 35,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "435300447",
+   "name": "2 Chainz",
+   "term": "electronic",
+   "rank": 37,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "324916925",
+   "name": "Halsey",
+   "term": "electronic",
+   "rank": 39,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "273058501",
+   "name": "Kid Cudi",
+   "term": "electronic",
+   "rank": 40,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "156488786",
+   "name": "Sam Smith",
+   "term": "electronic",
+   "rank": 43,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "140083",
+   "name": "R. Kelly",
+   "term": "electronic",
+   "rank": 44,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1031397873",
+   "name": "Dua Lipa",
+   "term": "electronic",
+   "rank": 45,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "148662",
+   "name": "LINKIN PARK",
+   "term": "electronic",
+   "rank": 46,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "358714030",
+   "name": "Imagine Dragons",
+   "term": "electronic",
+   "rank": 48,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "25514958",
+   "name": "Daddy Yankee",
+   "term": "electronic",
+   "rank": 49,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "602917745",
+   "name": "Ty Dolla $ign",
+   "term": "electronic",
+   "rank": 50,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1492604670",
+   "name": "Ado",
+   "term": "j-pop",
+   "rank": 1,
+   "cls": "hangul",
+   "bucket": "top(1-10)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "868322864",
+   "name": "pop",
+   "term": "j-pop",
+   "rank": 2,
+   "cls": "no_item",
+   "bucket": "top(1-10)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1002344997",
+   "name": "POP (ex.プラニメ)",
+   "term": "j-pop",
+   "rank": 3,
+   "cls": "no_item",
+   "bucket": "top(1-10)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1333450804",
+   "name": "KEVIN WOO",
+   "term": "j-pop",
+   "rank": 4,
+   "cls": "no_item",
+   "bucket": "top(1-10)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "81316604",
+   "name": "Yumi Arai",
+   "term": "j-pop",
+   "rank": 5,
+   "cls": "hangul",
+   "bucket": "top(1-10)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "667106153",
+   "name": "LONDON BLUE",
+   "term": "j-pop",
+   "rank": 6,
+   "cls": "no_item",
+   "bucket": "top(1-10)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "5421148",
+   "name": "John Lamb",
+   "term": "j-pop",
+   "rank": 7,
+   "cls": "no_item",
+   "bucket": "top(1-10)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "608271237",
+   "name": "Andrew Underberg",
+   "term": "j-pop",
+   "rank": 8,
+   "cls": "item_no_ko",
+   "bucket": "top(1-10)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "273946876",
+   "name": "Rykeyz",
+   "term": "j-pop",
+   "rank": 9,
+   "cls": "no_item",
+   "bucket": "top(1-10)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1452603479",
+   "name": "Switch",
+   "term": "j-pop",
+   "rank": 10,
+   "cls": "no_item",
+   "bucket": "top(1-10)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "81565860",
+   "name": "ATU",
+   "term": "j-pop",
+   "rank": 11,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1380316386",
+   "name": "Pink Noise",
+   "term": "j-pop",
+   "rank": 12,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "219831314",
+   "name": "Yama",
+   "term": "j-pop",
+   "rank": 13,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1665948559",
+   "name": "Kanan",
+   "term": "j-pop",
+   "rank": 14,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1131245581",
+   "name": "GANG PARADE",
+   "term": "j-pop",
+   "rank": 15,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "74493141",
+   "name": "Tatsuro Yamashita",
+   "term": "j-pop",
+   "rank": 16,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1487088719",
+   "name": "Ayase",
+   "term": "j-pop",
+   "rank": 17,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1037939997",
+   "name": "DAY6",
+   "term": "j-pop",
+   "rank": 18,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "18756224",
+   "name": "Hikaru Utada",
+   "term": "j-pop",
+   "rank": 19,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1490256993",
+   "name": "YOASOBI",
+   "term": "j-pop",
+   "rank": 20,
+   "cls": "latin_same",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "339700617",
+   "name": "Tomoko Aran",
+   "term": "j-pop",
+   "rank": 21,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "547888445",
+   "name": "Jake Mason",
+   "term": "j-pop",
+   "rank": 22,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1609101376",
+   "name": "Reo",
+   "term": "j-pop",
+   "rank": 23,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1553148162",
+   "name": "AURA",
+   "term": "j-pop",
+   "rank": 24,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "530814268",
+   "name": "Kenshi Yonezu",
+   "term": "j-pop",
+   "rank": 25,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "75131368",
+   "name": "加藤和彦",
+   "term": "j-pop",
+   "rank": 26,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "74494544",
+   "name": "RYO-Z",
+   "term": "j-pop",
+   "rank": 27,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "74494556",
+   "name": "ILMARI",
+   "term": "j-pop",
+   "rank": 28,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "971826499",
+   "name": "TAEMIN",
+   "term": "j-pop",
+   "rank": 29,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "76114430",
+   "name": "Kiyoshi",
+   "term": "j-pop",
+   "rank": 30,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1598354859",
+   "name": "UTA",
+   "term": "j-pop",
+   "rank": 31,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1395368",
+   "name": "Fairchild",
+   "term": "j-pop",
+   "rank": 32,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "74593483",
+   "name": "宇崎竜童",
+   "term": "j-pop",
+   "rank": 33,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1080967231",
+   "name": "Eve",
+   "term": "j-pop",
+   "rank": 34,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "507337447",
+   "name": "Daniel James",
+   "term": "j-pop",
+   "rank": 35,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1445766114",
+   "name": "Verbal",
+   "term": "j-pop",
+   "rank": 36,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1519029669",
+   "name": "Taka",
+   "term": "j-pop",
+   "rank": 37,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "296293646",
+   "name": "MINJI",
+   "term": "j-pop",
+   "rank": 38,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "958416186",
+   "name": "GFRIEND",
+   "term": "j-pop",
+   "rank": 39,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "399051480",
+   "name": "Tago",
+   "term": "j-pop",
+   "rank": 40,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1211661444",
+   "name": "Oneye",
+   "term": "j-pop",
+   "rank": 41,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "259021134",
+   "name": "Miki Matsubara",
+   "term": "j-pop",
+   "rank": 42,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "495060253",
+   "name": "the 90s",
+   "term": "j-pop",
+   "rank": 43,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "74066466",
+   "name": "BoA",
+   "term": "j-pop",
+   "rank": 44,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "121939461",
+   "name": "Lamp",
+   "term": "j-pop",
+   "rank": 45,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1522715379",
+   "name": "Uno",
+   "term": "j-pop",
+   "rank": 46,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "960568308",
+   "name": "OFFICIAL HIGE DANDISM",
+   "term": "j-pop",
+   "rank": 47,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "569972619",
+   "name": "Aimer",
+   "term": "j-pop",
+   "rank": 48,
+   "cls": "latin_same",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "915846615",
+   "name": "shiro",
+   "term": "j-pop",
+   "rank": 49,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1450395897",
+   "name": "72",
+   "term": "j-pop",
+   "rank": 50,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1820264141",
+   "name": "Saja Boys",
+   "term": "k-pop",
+   "rank": 1,
+   "cls": "hangul",
+   "bucket": "top(1-10)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1478164763",
+   "name": "HUNTR/X",
+   "term": "k-pop",
+   "rank": 2,
+   "cls": "no_item",
+   "bucket": "top(1-10)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1820264140",
+   "name": "KPop Demon Hunters Cast",
+   "term": "k-pop",
+   "rank": 3,
+   "cls": "no_item",
+   "bucket": "top(1-10)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1448848583",
+   "name": "K-Pop",
+   "term": "k-pop",
+   "rank": 4,
+   "cls": "no_item",
+   "bucket": "top(1-10)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "743643727",
+   "name": "Supreme Boi",
+   "term": "k-pop",
+   "rank": 5,
+   "cls": "no_item",
+   "bucket": "top(1-10)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1141774019",
+   "name": "BLACKPINK",
+   "term": "k-pop",
+   "rank": 6,
+   "cls": "hangul",
+   "bucket": "top(1-10)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1851406320",
+   "name": "Bang Chan",
+   "term": "k-pop",
+   "rank": 7,
+   "cls": "no_item",
+   "bucket": "top(1-10)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1439301205",
+   "name": "ATEEZ",
+   "term": "k-pop",
+   "rank": 8,
+   "cls": "hangul",
+   "bucket": "top(1-10)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1203816887",
+   "name": "TWICE",
+   "term": "k-pop",
+   "rank": 9,
+   "cls": "hangul",
+   "bucket": "top(1-10)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "549650278",
+   "name": "Don Mills",
+   "term": "k-pop",
+   "rank": 10,
+   "cls": "no_item",
+   "bucket": "top(1-10)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1354883995",
+   "name": "j-hope",
+   "term": "k-pop",
+   "rank": 11,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1439549457",
+   "name": "RM",
+   "term": "k-pop",
+   "rank": 12,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1304823362",
+   "name": "Stray Kids",
+   "term": "k-pop",
+   "rank": 13,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "883131348",
+   "name": "BTS",
+   "term": "k-pop",
+   "rank": 14,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "80159541",
+   "name": "SUGA",
+   "term": "k-pop",
+   "rank": 15,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1842821692",
+   "name": "HAN",
+   "term": "k-pop",
+   "rank": 16,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "785052275",
+   "name": "Jung Kook",
+   "term": "k-pop",
+   "rank": 17,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1843517665",
+   "name": "IDO",
+   "term": "k-pop",
+   "rank": 18,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "913944",
+   "name": "JENNIE",
+   "term": "k-pop",
+   "rank": 19,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "415508398",
+   "name": "Andrew Choi",
+   "term": "k-pop",
+   "rank": 20,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1635469693",
+   "name": "NewJeans",
+   "term": "k-pop",
+   "rank": 21,
+   "cls": "latin_same",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1541011620",
+   "name": "ENHYPEN",
+   "term": "k-pop",
+   "rank": 22,
+   "cls": "latin_same",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1406242696",
+   "name": "ROSÉ",
+   "term": "k-pop",
+   "rank": 23,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1454642552",
+   "name": "TOMORROW X TOGETHER",
+   "term": "k-pop",
+   "rank": 24,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "999644772",
+   "name": "SEVENTEEN",
+   "term": "k-pop",
+   "rank": 25,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1597957100",
+   "name": "Vince",
+   "term": "k-pop",
+   "rank": 26,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1458622666",
+   "name": "Gigi",
+   "term": "k-pop",
+   "rank": 27,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "906961899",
+   "name": "Red Velvet",
+   "term": "k-pop",
+   "rank": 28,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1616740364",
+   "name": "LE SSERAFIM",
+   "term": "k-pop",
+   "rank": 29,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1106380814",
+   "name": "KUSH",
+   "term": "k-pop",
+   "rank": 30,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "657630070",
+   "name": "EXO",
+   "term": "k-pop",
+   "rank": 31,
+   "cls": "latin_same",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1263829495",
+   "name": "P.O.P",
+   "term": "k-pop",
+   "rank": 32,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1820264149",
+   "name": "samUIL Lee",
+   "term": "k-pop",
+   "rank": 33,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1235849306",
+   "name": "NCT 127",
+   "term": "k-pop",
+   "rank": 34,
+   "cls": "latin_same",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1540251304",
+   "name": "aespa",
+   "term": "k-pop",
+   "rank": 35,
+   "cls": "latin_same",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1378887586",
+   "name": "i-dle",
+   "term": "k-pop",
+   "rank": 36,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "916143654",
+   "name": "Grizzly",
+   "term": "k-pop",
+   "rank": 37,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "418893613",
+   "name": "J.Y. Park",
+   "term": "k-pop",
+   "rank": 38,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1094559707",
+   "name": "BUMZU",
+   "term": "k-pop",
+   "rank": 39,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "686709604",
+   "name": "250",
+   "term": "k-pop",
+   "rank": 40,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "591053020",
+   "name": "Jay John Henry",
+   "term": "k-pop",
+   "rank": 41,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1151251102",
+   "name": "WOOZI",
+   "term": "k-pop",
+   "rank": 42,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1734551937",
+   "name": "ILLIT",
+   "term": "k-pop",
+   "rank": 43,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "992315362",
+   "name": "MONSTA X",
+   "term": "k-pop",
+   "rank": 44,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "802694659",
+   "name": "GOT7",
+   "term": "k-pop",
+   "rank": 45,
+   "cls": "latin_same",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1620160561",
+   "name": "Jimin",
+   "term": "k-pop",
+   "rank": 46,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1003885476",
+   "name": "Manuka",
+   "term": "k-pop",
+   "rank": 47,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1451964345",
+   "name": "ITZY",
+   "term": "k-pop",
+   "rank": 48,
+   "cls": "latin_same",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "409076743",
+   "name": "IU",
+   "term": "k-pop",
+   "rank": 49,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "504246785",
+   "name": "SOO-MAN LEE",
+   "term": "k-pop",
+   "rank": 50,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1789307620",
+   "name": "Trot",
+   "term": "trot",
+   "rank": 1,
+   "cls": "no_item",
+   "bucket": "top(1-10)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "510086855",
+   "name": "Trot",
+   "term": "trot",
+   "rank": 2,
+   "cls": "no_item",
+   "bucket": "top(1-10)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1488076851",
+   "name": "YOOSANSEUL",
+   "term": "trot",
+   "rank": 3,
+   "cls": "no_item",
+   "bucket": "top(1-10)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "386891197",
+   "name": "Eunhui",
+   "term": "trot",
+   "rank": 4,
+   "cls": "no_item",
+   "bucket": "top(1-10)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "253708933",
+   "name": "Suki",
+   "term": "trot",
+   "rank": 5,
+   "cls": "no_item",
+   "bucket": "top(1-10)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "359602899",
+   "name": "Jo Hang Jo",
+   "term": "trot",
+   "rank": 6,
+   "cls": "no_item",
+   "bucket": "top(1-10)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "348389782",
+   "name": "Kim Yongim",
+   "term": "trot",
+   "rank": 7,
+   "cls": "no_item",
+   "bucket": "top(1-10)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "351979843",
+   "name": "Jin Sung",
+   "term": "trot",
+   "rank": 8,
+   "cls": "no_item",
+   "bucket": "top(1-10)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "349644660",
+   "name": "Cho Young Nam",
+   "term": "trot",
+   "rank": 9,
+   "cls": "no_item",
+   "bucket": "top(1-10)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "571261731",
+   "name": "Kum Jan Di",
+   "term": "trot",
+   "rank": 10,
+   "cls": "no_item",
+   "bucket": "top(1-10)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1453960096",
+   "name": "김수정",
+   "term": "trot",
+   "rank": 11,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": true
+  },
+  {
+   "id": "348679145",
+   "name": "Eunha Lee",
+   "term": "trot",
+   "rank": 12,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "937711025",
+   "name": "박근태",
+   "term": "trot",
+   "rank": 13,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": true
+  },
+  {
+   "id": "376943974",
+   "name": "설운도",
+   "term": "trot",
+   "rank": 14,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": true
+  },
+  {
+   "id": "348634702",
+   "name": "혜은이",
+   "term": "trot",
+   "rank": 15,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": true
+  },
+  {
+   "id": "349457779",
+   "name": "Oh Seung Keun",
+   "term": "trot",
+   "rank": 16,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "342915431",
+   "name": "정수라",
+   "term": "trot",
+   "rank": 17,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": true
+  },
+  {
+   "id": "1647716979",
+   "name": "은희",
+   "term": "trot",
+   "rank": 18,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": true
+  },
+  {
+   "id": "821163509",
+   "name": "Yedang Entertainment",
+   "term": "trot",
+   "rank": 19,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1448231856",
+   "name": "박슬기",
+   "term": "trot",
+   "rank": 20,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": true
+  },
+  {
+   "id": "552917671",
+   "name": "규리",
+   "term": "trot",
+   "rank": 21,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": true
+  },
+  {
+   "id": "1189870498",
+   "name": "King Trot",
+   "term": "trot",
+   "rank": 22,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "356564093",
+   "name": "Pearl Sisters",
+   "term": "trot",
+   "rank": 23,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1125963444",
+   "name": "트로트 끝판왕",
+   "term": "trot",
+   "rank": 24,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": true
+  },
+  {
+   "id": "1648407029",
+   "name": "Five Sense",
+   "term": "trot",
+   "rank": 25,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1549180764",
+   "name": "Da Hyun Kim",
+   "term": "trot",
+   "rank": 26,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1529242586",
+   "name": "수지",
+   "term": "trot",
+   "rank": 27,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": true
+  },
+  {
+   "id": "841193437",
+   "name": "백승태",
+   "term": "trot",
+   "rank": 28,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": true
+  },
+  {
+   "id": "1045944275",
+   "name": "박성호",
+   "term": "trot",
+   "rank": 29,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": true
+  },
+  {
+   "id": "1495289940",
+   "name": "Lim Young Woong",
+   "term": "trot",
+   "rank": 30,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "581829082",
+   "name": "김박사",
+   "term": "trot",
+   "rank": 31,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": true
+  },
+  {
+   "id": "348398391",
+   "name": "Chu Ga Yeoul",
+   "term": "trot",
+   "rank": 32,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "340327192",
+   "name": "진미령",
+   "term": "trot",
+   "rank": 33,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": true
+  },
+  {
+   "id": "972572913",
+   "name": "김재성",
+   "term": "trot",
+   "rank": 34,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": true
+  },
+  {
+   "id": "921992921",
+   "name": "미스터 팡",
+   "term": "trot",
+   "rank": 35,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": true
+  },
+  {
+   "id": "952632068",
+   "name": "진해성",
+   "term": "trot",
+   "rank": 36,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": true
+  },
+  {
+   "id": "1479116853",
+   "name": "Han Hyejin",
+   "term": "trot",
+   "rank": 37,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1480333699",
+   "name": "박군",
+   "term": "trot",
+   "rank": 38,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": true
+  },
+  {
+   "id": "351836637",
+   "name": "이수미",
+   "term": "trot",
+   "rank": 39,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": true
+  },
+  {
+   "id": "352508166",
+   "name": "유현상",
+   "term": "trot",
+   "rank": 40,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": true
+  },
+  {
+   "id": "349828584",
+   "name": "Na Hoon-A",
+   "term": "trot",
+   "rank": 41,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1451943871",
+   "name": "이창현",
+   "term": "trot",
+   "rank": 42,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": true
+  },
+  {
+   "id": "1105308659",
+   "name": "트로트 매니아",
+   "term": "trot",
+   "rank": 43,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": true
+  },
+  {
+   "id": "1455258782",
+   "name": "강승원",
+   "term": "trot",
+   "rank": 44,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": true
+  },
+  {
+   "id": "564091568",
+   "name": "서울 훼미리",
+   "term": "trot",
+   "rank": 45,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": true
+  },
+  {
+   "id": "351313691",
+   "name": "문정선",
+   "term": "trot",
+   "rank": 46,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": true
+  },
+  {
+   "id": "1352860285",
+   "name": "Kim So You",
+   "term": "trot",
+   "rank": 47,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "542282753",
+   "name": "주연",
+   "term": "trot",
+   "rank": 48,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": true
+  },
+  {
+   "id": "1677465566",
+   "name": "SONG E",
+   "term": "trot",
+   "rank": 49,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "350738085",
+   "name": "김지민",
+   "term": "trot",
+   "rank": 50,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": true
+  },
+  {
+   "id": "106621",
+   "name": "Guns N' Roses",
+   "term": "heavy metal",
+   "rank": 1,
+   "cls": "hangul",
+   "bucket": "top(1-10)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1883858",
+   "name": "Shinedown",
+   "term": "heavy metal",
+   "rank": 2,
+   "cls": "hangul",
+   "bucket": "top(1-10)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "113883",
+   "name": "Jimmy Page",
+   "term": "heavy metal",
+   "rank": 3,
+   "cls": "no_item",
+   "bucket": "top(1-10)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "886834",
+   "name": "Ozzy Osbourne",
+   "term": "heavy metal",
+   "rank": 4,
+   "cls": "hangul",
+   "bucket": "top(1-10)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1445604633",
+   "name": "Moises Lopez",
+   "term": "heavy metal",
+   "rank": 5,
+   "cls": "no_item",
+   "bucket": "top(1-10)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "29302172",
+   "name": "Chino Moreno",
+   "term": "heavy metal",
+   "rank": 6,
+   "cls": "no_item",
+   "bucket": "top(1-10)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1973668",
+   "name": "Three Days Grace",
+   "term": "heavy metal",
+   "rank": 8,
+   "cls": "hangul",
+   "bucket": "top(1-10)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "889780",
+   "name": "Red Hot Chili Peppers",
+   "term": "heavy metal",
+   "rank": 11,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "3296287",
+   "name": "Queen",
+   "term": "heavy metal",
+   "rank": 13,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "3996865",
+   "name": "Metallica",
+   "term": "heavy metal",
+   "rank": 14,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "462221",
+   "name": "Alice In Chains",
+   "term": "heavy metal",
+   "rank": 15,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "166529",
+   "name": "Van Halen",
+   "term": "heavy metal",
+   "rank": 16,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "6907568",
+   "name": "Slipknot",
+   "term": "heavy metal",
+   "rank": 17,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "466532",
+   "name": "Korn",
+   "term": "heavy metal",
+   "rank": 18,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "994656",
+   "name": "Led Zeppelin",
+   "term": "heavy metal",
+   "rank": 19,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "122782",
+   "name": "Bon Jovi",
+   "term": "heavy metal",
+   "rank": 20,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "320265042",
+   "name": "Heavy Metal",
+   "term": "heavy metal",
+   "rank": 21,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "156807",
+   "name": "Disturbed",
+   "term": "heavy metal",
+   "rank": 22,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1659658067",
+   "name": "Heavy Metal",
+   "term": "heavy metal",
+   "rank": 23,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "101604",
+   "name": "3 Doors Down",
+   "term": "heavy metal",
+   "rank": 24,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "106336",
+   "name": "Chris Cornell",
+   "term": "heavy metal",
+   "rank": 25,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1445888631",
+   "name": "Archer",
+   "term": "heavy metal",
+   "rank": 26,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "20598149",
+   "name": "Brian Johnson",
+   "term": "heavy metal",
+   "rank": 27,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "462225",
+   "name": "Jerry Cantrell",
+   "term": "heavy metal",
+   "rank": 28,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "165907",
+   "name": "Black Sabbath",
+   "term": "heavy metal",
+   "rank": 29,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "462723",
+   "name": "Daron Malakian",
+   "term": "heavy metal",
+   "rank": 30,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "121043936",
+   "name": "Bring Me The Horizon",
+   "term": "heavy metal",
+   "rank": 31,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "2036339",
+   "name": "John Paul Jones",
+   "term": "heavy metal",
+   "rank": 32,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1460395676",
+   "name": "Turbo",
+   "term": "heavy metal",
+   "rank": 34,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "26514798",
+   "name": "Geezer Butler",
+   "term": "heavy metal",
+   "rank": 35,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "799046",
+   "name": "David Draiman",
+   "term": "heavy metal",
+   "rank": 36,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "5932064",
+   "name": "Bill Ward",
+   "term": "heavy metal",
+   "rank": 37,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "92713141",
+   "name": "Seether",
+   "term": "heavy metal",
+   "rank": 38,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "462585",
+   "name": "Tony Iommi",
+   "term": "heavy metal",
+   "rank": 39,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1750802",
+   "name": "Skillet",
+   "term": "heavy metal",
+   "rank": 40,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "613161",
+   "name": "Staind",
+   "term": "heavy metal",
+   "rank": 41,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "25328202",
+   "name": "Vince Neil",
+   "term": "heavy metal",
+   "rank": 42,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "899409",
+   "name": "Rage Against the Machine",
+   "term": "heavy metal",
+   "rank": 43,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "26234627",
+   "name": "Mick Mars",
+   "term": "heavy metal",
+   "rank": 44,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "68696",
+   "name": "Tommy Lee",
+   "term": "heavy metal",
+   "rank": 45,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "42102393",
+   "name": "Evanescence",
+   "term": "heavy metal",
+   "rank": 46,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "564219",
+   "name": "Foreigner",
+   "term": "heavy metal",
+   "rank": 47,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "467610583",
+   "name": "Bad Omens",
+   "term": "heavy metal",
+   "rank": 48,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "273843972",
+   "name": "Philip H. Anselmo",
+   "term": "heavy metal",
+   "rank": 49,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "155209",
+   "name": "Pantera",
+   "term": "heavy metal",
+   "rank": 50,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "63998323",
+   "name": "Folk?",
+   "term": "folk",
+   "rank": 1,
+   "cls": "no_item",
+   "bucket": "top(1-10)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1161591796",
+   "name": "Folk",
+   "term": "folk",
+   "rank": 2,
+   "cls": "no_item",
+   "bucket": "top(1-10)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "23961407",
+   "name": "Traditional",
+   "term": "folk",
+   "rank": 3,
+   "cls": "no_item",
+   "bucket": "top(1-10)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "4026455",
+   "name": "Lori McKenna",
+   "term": "folk",
+   "rank": 4,
+   "cls": "no_item",
+   "bucket": "top(1-10)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "2466151",
+   "name": "John Jackson",
+   "term": "folk",
+   "rank": 6,
+   "cls": "no_item",
+   "bucket": "top(1-10)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1273063",
+   "name": "Grateful Dead",
+   "term": "folk",
+   "rank": 7,
+   "cls": "hangul",
+   "bucket": "top(1-10)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1706542",
+   "name": "Chris Rosser",
+   "term": "folk",
+   "rank": 9,
+   "cls": "no_item",
+   "bucket": "top(1-10)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "346678575",
+   "name": "Jordan Reynolds",
+   "term": "folk",
+   "rank": 10,
+   "cls": "no_item",
+   "bucket": "top(1-10)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "267768513",
+   "name": "Douglas Ford",
+   "term": "folk",
+   "rank": 11,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "27057714",
+   "name": "Kristian Bush",
+   "term": "folk",
+   "rank": 12,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "147370",
+   "name": "Neil Young",
+   "term": "folk",
+   "rank": 13,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "180586",
+   "name": "Daryl Hall & John Oates",
+   "term": "folk",
+   "rank": 14,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "462006",
+   "name": "Bob Dylan",
+   "term": "folk",
+   "rank": 17,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "253638",
+   "name": "Van Morrison",
+   "term": "folk",
+   "rank": 18,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "2088043",
+   "name": "T Bone Burnett",
+   "term": "folk",
+   "rank": 20,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1084576956",
+   "name": "Brett Young",
+   "term": "folk",
+   "rank": 21,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "551695",
+   "name": "David Bowie",
+   "term": "folk",
+   "rank": 22,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "59300023",
+   "name": "Kenny Loggins",
+   "term": "folk",
+   "rank": 23,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "485677",
+   "name": "Leonard Cohen",
+   "term": "folk",
+   "rank": 24,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "535066",
+   "name": "Dolly Parton",
+   "term": "folk",
+   "rank": 25,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "307699986",
+   "name": "Mumford & Sons",
+   "term": "folk",
+   "rank": 26,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "461503",
+   "name": "Simon & Garfunkel",
+   "term": "folk",
+   "rank": 27,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "5437668",
+   "name": "Will Adams",
+   "term": "folk",
+   "rank": 28,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "306319865",
+   "name": "Lyrica Anderson",
+   "term": "folk",
+   "rank": 29,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "200498",
+   "name": "Kenny Rogers",
+   "term": "folk",
+   "rank": 30,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "22665",
+   "name": "Suzanne Vega",
+   "term": "folk",
+   "rank": 32,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "203373",
+   "name": "Joni Mitchell",
+   "term": "folk",
+   "rank": 33,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1451967406",
+   "name": "Oak",
+   "term": "folk",
+   "rank": 34,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "3509771",
+   "name": "Christian Karlsson",
+   "term": "folk",
+   "rank": 35,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "552990",
+   "name": "Warren Zevon",
+   "term": "folk",
+   "rank": 36,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "180590",
+   "name": "John Oates",
+   "term": "folk",
+   "rank": 37,
+   "cls": "item_no_ko",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "388900",
+   "name": "Jackson Browne",
+   "term": "folk",
+   "rank": 38,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1682299543",
+   "name": "Max McNown",
+   "term": "folk",
+   "rank": 39,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "127358",
+   "name": "The Temptations",
+   "term": "folk",
+   "rank": 40,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "58945199",
+   "name": "Sean McConnell",
+   "term": "folk",
+   "rank": 41,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "5119923",
+   "name": "Karl Richardson",
+   "term": "folk",
+   "rank": 42,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "199959",
+   "name": "Stephen Stills",
+   "term": "folk",
+   "rank": 43,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "170878",
+   "name": "Alison Krauss",
+   "term": "folk",
+   "rank": 44,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1008844",
+   "name": "Crosby, Stills & Nash",
+   "term": "folk",
+   "rank": 45,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "81479957",
+   "name": "Jake Scott",
+   "term": "folk",
+   "rank": 46,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "57471",
+   "name": "Rod Stewart",
+   "term": "folk",
+   "rank": 47,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "895526551",
+   "name": "Maddie & Tae",
+   "term": "folk",
+   "rank": 48,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "532412540",
+   "name": "Faye Webster",
+   "term": "folk",
+   "rank": 49,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "280981719",
+   "name": "Ian Simpson",
+   "term": "folk",
+   "rank": 50,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "342260741",
+   "name": "Hozier",
+   "term": "singer songwriter",
+   "rank": 2,
+   "cls": "hangul",
+   "bucket": "top(1-10)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "472054",
+   "name": "John Mayer",
+   "term": "singer songwriter",
+   "rank": 4,
+   "cls": "hangul",
+   "bucket": "top(1-10)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "283094644",
+   "name": "Billy Walsh",
+   "term": "singer songwriter",
+   "rank": 6,
+   "cls": "no_item",
+   "bucket": "top(1-10)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "890403665",
+   "name": "Shawn Mendes",
+   "term": "singer songwriter",
+   "rank": 9,
+   "cls": "hangul",
+   "bucket": "top(1-10)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "201419",
+   "name": "Lindsey Buckingham",
+   "term": "singer songwriter",
+   "rank": 10,
+   "cls": "hangul",
+   "bucket": "top(1-10)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "437527769",
+   "name": "Laura Veltz",
+   "term": "singer songwriter",
+   "rank": 11,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "29566804",
+   "name": "John Ryan",
+   "term": "singer songwriter",
+   "rank": 12,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "4416594",
+   "name": "John Lennon",
+   "term": "singer songwriter",
+   "rank": 13,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "42281917",
+   "name": "Luke Laird",
+   "term": "singer songwriter",
+   "rank": 15,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "420862422",
+   "name": "Nicolle Galyon",
+   "term": "singer songwriter",
+   "rank": 16,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1451877974",
+   "name": "Stephen Garrett",
+   "term": "singer songwriter",
+   "rank": 18,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1053549",
+   "name": "Eagles",
+   "term": "singer songwriter",
+   "rank": 19,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "30908738",
+   "name": "Chris DeStefano",
+   "term": "singer songwriter",
+   "rank": 21,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "350720227",
+   "name": "The Lumineers",
+   "term": "singer songwriter",
+   "rank": 23,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "164850338",
+   "name": "Corey Crowder",
+   "term": "singer songwriter",
+   "rank": 24,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "939857856",
+   "name": "Tobias Jesso Jr.",
+   "term": "singer songwriter",
+   "rank": 26,
+   "cls": "item_no_ko",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "312369193",
+   "name": "Brad Tursi",
+   "term": "singer songwriter",
+   "rank": 32,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "316265",
+   "name": "Kelly Clarkson",
+   "term": "singer songwriter",
+   "rank": 33,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "272645942",
+   "name": "Nathan Chapman",
+   "term": "singer songwriter",
+   "rank": 35,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1378981",
+   "name": "James Harris",
+   "term": "singer songwriter",
+   "rank": 36,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "806659",
+   "name": "Dan Wilson",
+   "term": "singer songwriter",
+   "rank": 37,
+   "cls": "item_no_ko",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "153021067",
+   "name": "Josh Hoge",
+   "term": "singer songwriter",
+   "rank": 38,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1455753907",
+   "name": "Joybeth Taylor",
+   "term": "singer songwriter",
+   "rank": 39,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "290833",
+   "name": "Brian Casey",
+   "term": "singer songwriter",
+   "rank": 40,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "19677573",
+   "name": "Jamie Scott",
+   "term": "singer songwriter",
+   "rank": 47,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "277175373",
+   "name": "Daniel Tashian",
+   "term": "singer songwriter",
+   "rank": 48,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "252399",
+   "name": "Kid Rock",
+   "term": "singer songwriter",
+   "rank": 49,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "558478617",
+   "name": "lofi",
+   "term": "lofi",
+   "rank": 1,
+   "cls": "no_item",
+   "bucket": "top(1-10)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "966685035",
+   "name": "Lo-Fi",
+   "term": "lofi",
+   "rank": 2,
+   "cls": "no_item",
+   "bucket": "top(1-10)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1275786023",
+   "name": "Lo-Fi",
+   "term": "lofi",
+   "rank": 3,
+   "cls": "no_item",
+   "bucket": "top(1-10)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1724784742",
+   "name": "Lo-Fi",
+   "term": "lofi",
+   "rank": 4,
+   "cls": "no_item",
+   "bucket": "top(1-10)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "138604976",
+   "name": "Lo-Fi",
+   "term": "lofi",
+   "rank": 5,
+   "cls": "no_item",
+   "bucket": "top(1-10)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1435681474",
+   "name": "Lo-fi",
+   "term": "lofi",
+   "rank": 6,
+   "cls": "no_item",
+   "bucket": "top(1-10)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "98640189",
+   "name": "Lofi",
+   "term": "lofi",
+   "rank": 7,
+   "cls": "no_item",
+   "bucket": "top(1-10)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "419939318",
+   "name": "Lo-Fi Beats",
+   "term": "lofi",
+   "rank": 8,
+   "cls": "no_item",
+   "bucket": "top(1-10)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1716899669",
+   "name": "Lofi Girl",
+   "term": "lofi",
+   "rank": 10,
+   "cls": "no_item",
+   "bucket": "top(1-10)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1540973606",
+   "name": "Lofi Fruits Music",
+   "term": "lofi",
+   "rank": 11,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1554778128",
+   "name": "The Lofi Christian",
+   "term": "lofi",
+   "rank": 12,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1444464537",
+   "name": "Lofi",
+   "term": "lofi",
+   "rank": 13,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1432158758",
+   "name": "LoFi Hip Hop",
+   "term": "lofi",
+   "rank": 14,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1524540428",
+   "name": "Lofi Sleep Chill & Study",
+   "term": "lofi",
+   "rank": 15,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1463089530",
+   "name": "Lo Fi",
+   "term": "lofi",
+   "rank": 16,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1463989711",
+   "name": "LOFI",
+   "term": "lofi",
+   "rank": 17,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "476385321",
+   "name": "LO-FI",
+   "term": "lofi",
+   "rank": 18,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1608076987",
+   "name": "Lo-Fi",
+   "term": "lofi",
+   "rank": 19,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1524975110",
+   "name": "LoFi",
+   "term": "lofi",
+   "rank": 20,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1436074370",
+   "name": "Lo-Fi",
+   "term": "lofi",
+   "rank": 21,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1580033713",
+   "name": "LoFi Hip Hop",
+   "term": "lofi",
+   "rank": 22,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1578238033",
+   "name": "LoFi VGM",
+   "term": "lofi",
+   "rank": 23,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1439631161",
+   "name": "Lofi Hip-Hop Beats",
+   "term": "lofi",
+   "rank": 24,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1713548965",
+   "name": "LOFi",
+   "term": "lofi",
+   "rank": 25,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1314868765",
+   "name": "lofi.samurai",
+   "term": "lofi",
+   "rank": 26,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1790289176",
+   "name": "Lofi Soul Sound",
+   "term": "lofi",
+   "rank": 27,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1509332707",
+   "name": "LoFi GiRL",
+   "term": "lofi",
+   "rank": 28,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1489246999",
+   "name": "Lifted LoFi",
+   "term": "lofi",
+   "rank": 29,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1662647249",
+   "name": "Lofi Sleep Society",
+   "term": "lofi",
+   "rank": 30,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1470819913",
+   "name": "LoFi & Chill",
+   "term": "lofi",
+   "rank": 31,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1068811609",
+   "name": "LoFi",
+   "term": "lofi",
+   "rank": 32,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1773148700",
+   "name": "LoFi Tokyo",
+   "term": "lofi",
+   "rank": 33,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1509484006",
+   "name": "LoFi Travel",
+   "term": "lofi",
+   "rank": 34,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1525148832",
+   "name": "Lofi",
+   "term": "lofi",
+   "rank": 35,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1254330845",
+   "name": "LoFi Chill",
+   "term": "lofi",
+   "rank": 36,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1650265087",
+   "name": "Afro LoFi",
+   "term": "lofi",
+   "rank": 37,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1519904582",
+   "name": "Lofi Soundscapes",
+   "term": "lofi",
+   "rank": 38,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1441801010",
+   "name": "Honshu Lo fi",
+   "term": "lofi",
+   "rank": 39,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1207040902",
+   "name": "Super Secret Lo-Fi Beat Collective",
+   "term": "lofi",
+   "rank": 40,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1703852784",
+   "name": "LoFi Hymnal",
+   "term": "lofi",
+   "rank": 41,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1637614653",
+   "name": "LoFi of Seasons",
+   "term": "lofi",
+   "rank": 42,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1262926996",
+   "name": "Lofi Coffee",
+   "term": "lofi",
+   "rank": 43,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1529742959",
+   "name": "Lofi Lia",
+   "term": "lofi",
+   "rank": 44,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1654078802",
+   "name": "The Lofi Big Band",
+   "term": "lofi",
+   "rank": 45,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1618516957",
+   "name": "Catholic Lofi",
+   "term": "lofi",
+   "rank": 46,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1547441112",
+   "name": "Lofi Crew",
+   "term": "lofi",
+   "rank": 47,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1666043917",
+   "name": "Lofi Sunday",
+   "term": "lofi",
+   "rank": 48,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1531290088",
+   "name": "LoFi Waiter",
+   "term": "lofi",
+   "rank": 49,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1613629710",
+   "name": "Disney Lofi",
+   "term": "lofi",
+   "rank": 50,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "27597781",
+   "name": "Tom DeLonge",
+   "term": "punk",
+   "rank": 3,
+   "cls": "hangul",
+   "bucket": "top(1-10)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "538811449",
+   "name": "5 Seconds of Summer",
+   "term": "punk",
+   "rank": 5,
+   "cls": "hangul",
+   "bucket": "top(1-10)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "5468295",
+   "name": "Daft Punk",
+   "term": "punk",
+   "rank": 8,
+   "cls": "hangul",
+   "bucket": "top(1-10)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "116851",
+   "name": "blink-182",
+   "term": "punk",
+   "rank": 9,
+   "cls": "hangul",
+   "bucket": "top(1-10)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "28673423",
+   "name": "Fall Out Boy",
+   "term": "punk",
+   "rank": 10,
+   "cls": "hangul",
+   "bucket": "top(1-10)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "465954501",
+   "name": "mgk",
+   "term": "punk",
+   "rank": 11,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "14748659",
+   "name": "My Chemical Romance",
+   "term": "punk",
+   "rank": 13,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "459885",
+   "name": "Avril Lavigne",
+   "term": "punk",
+   "rank": 14,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "954266",
+   "name": "Green Day",
+   "term": "punk",
+   "rank": 15,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "167375968",
+   "name": "All Time Low",
+   "term": "punk",
+   "rank": 16,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "204678312",
+   "name": "Punk",
+   "term": "punk",
+   "rank": 19,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "30720949",
+   "name": "Jim Morrison",
+   "term": "punk",
+   "rank": 20,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1248588",
+   "name": "The Doors",
+   "term": "punk",
+   "rank": 22,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "2929326",
+   "name": "Joe Strummer",
+   "term": "punk",
+   "rank": 23,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "3846780",
+   "name": "Robby Krieger",
+   "term": "punk",
+   "rank": 24,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "16252655",
+   "name": "Rise Against",
+   "term": "punk",
+   "rank": 25,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "155546",
+   "name": "Talking Heads",
+   "term": "punk",
+   "rank": 26,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "61499",
+   "name": "The Who",
+   "term": "punk",
+   "rank": 27,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "157709052",
+   "name": "Volbeat",
+   "term": "punk",
+   "rank": 29,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "50077521",
+   "name": "Bullet for My Valentine",
+   "term": "punk",
+   "rank": 30,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "16053322",
+   "name": "Taking Back Sunday",
+   "term": "punk",
+   "rank": 31,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "482336",
+   "name": "Todd Rundgren",
+   "term": "punk",
+   "rank": 32,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "522000",
+   "name": "The Clash",
+   "term": "punk",
+   "rank": 33,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "799141",
+   "name": "The Used",
+   "term": "punk",
+   "rank": 34,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "167203",
+   "name": "Lou Reed",
+   "term": "punk",
+   "rank": 35,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "192466619",
+   "name": "Mayday Parade",
+   "term": "punk",
+   "rank": 36,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "2307230",
+   "name": "Yellowcard",
+   "term": "punk",
+   "rank": 37,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "44984",
+   "name": "Miles Davis",
+   "term": "punk",
+   "rank": 38,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "16252710",
+   "name": "Plain White T's",
+   "term": "punk",
+   "rank": 39,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "150861",
+   "name": "Simple Plan",
+   "term": "punk",
+   "rank": 40,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "1265171",
+   "name": "Yeah Yeah Yeahs",
+   "term": "punk",
+   "rank": 41,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "60715",
+   "name": "Ramones",
+   "term": "punk",
+   "rank": 42,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "280522018",
+   "name": "The Story So Far",
+   "term": "punk",
+   "rank": 43,
+   "cls": "item_no_ko",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "449513466",
+   "name": "The Amity Affliction",
+   "term": "punk",
+   "rank": 44,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "415242",
+   "name": "Hoobastank",
+   "term": "punk",
+   "rank": 45,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "554682150",
+   "name": "Neck Deep",
+   "term": "punk",
+   "rank": 46,
+   "cls": "item_no_ko",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "3630732",
+   "name": "Brand New",
+   "term": "punk",
+   "rank": 47,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "3447440",
+   "name": "AFI",
+   "term": "punk",
+   "rank": 48,
+   "cls": "no_item",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "2928220",
+   "name": "Dropkick Murphys",
+   "term": "punk",
+   "rank": 49,
+   "cls": "item_no_ko",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  },
+  {
+   "id": "116250",
+   "name": "The Misfits",
+   "term": "punk",
+   "rank": 50,
+   "cls": "hangul",
+   "bucket": "tail(11-50)",
+   "korean_name_in_itunes": false
+  }
+ ]
+}

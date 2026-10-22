@@ -1,0 +1,312 @@
+{
+ "summary": {
+  "n": 30,
+  "itunes_resolved": 30,
+  "wikidata_item_found_by_P2850": 28,
+  "has_korean_label": 28,
+  "korean_label_equals_expected": 24,
+  "multi_item_ambiguity": 0
+ },
+ "rows": [
+  {
+   "query": "IU",
+   "expected": "아이유",
+   "itunes_id": "409076743",
+   "itunes_name": "IU",
+   "wd_hits": 1,
+   "wd_ko": "아이유",
+   "wd_item": "Q20145",
+   "match": true
+  },
+  {
+   "query": "BTS",
+   "expected": "방탄소년단",
+   "itunes_id": "883131348",
+   "itunes_name": "BTS",
+   "wd_hits": 1,
+   "wd_ko": "방탄소년단",
+   "wd_item": "Q13580495",
+   "match": true
+  },
+  {
+   "query": "NewJeans",
+   "expected": "뉴진스",
+   "itunes_id": "1635469693",
+   "itunes_name": "NewJeans",
+   "wd_hits": 1,
+   "wd_ko": "NewJeans",
+   "wd_item": "Q113189277",
+   "match": false
+  },
+  {
+   "query": "BLACKPINK",
+   "expected": "블랙핑크",
+   "itunes_id": "1141774019",
+   "itunes_name": "BLACKPINK",
+   "wd_hits": 1,
+   "wd_ko": "블랙핑크",
+   "wd_item": "Q25056945",
+   "match": true
+  },
+  {
+   "query": "aespa",
+   "expected": "에스파",
+   "itunes_id": "1540251304",
+   "itunes_name": "aespa",
+   "wd_hits": 1,
+   "wd_ko": "aespa",
+   "wd_item": "Q100877982",
+   "match": false
+  },
+  {
+   "query": "Stray Kids",
+   "expected": "스트레이 키즈",
+   "itunes_id": "1304823362",
+   "itunes_name": "Stray Kids",
+   "wd_hits": 1,
+   "wd_ko": "스트레이 키즈",
+   "wd_item": "Q46134670",
+   "match": true
+  },
+  {
+   "query": "SEVENTEEN",
+   "expected": "세븐틴",
+   "itunes_id": "999644772",
+   "itunes_name": "SEVENTEEN",
+   "wd_hits": 1,
+   "wd_ko": "세븐틴",
+   "wd_item": "Q14524548",
+   "match": true
+  },
+  {
+   "query": "Epik High",
+   "expected": "에픽하이",
+   "itunes_id": "139334133",
+   "itunes_name": "Epik High",
+   "wd_hits": 0,
+   "wd_ko": null,
+   "wd_item": null,
+   "match": null
+  },
+  {
+   "query": "Hyukoh",
+   "expected": "혁오",
+   "itunes_id": "927548906",
+   "itunes_name": "HYUKOH",
+   "wd_hits": 0,
+   "wd_ko": null,
+   "wd_item": null,
+   "match": null
+  },
+  {
+   "query": "Zion.T",
+   "expected": "자이언티",
+   "itunes_id": "419393676",
+   "itunes_name": "Zion.T",
+   "wd_hits": 1,
+   "wd_ko": "자이언티",
+   "wd_item": "Q12614205",
+   "match": true
+  },
+  {
+   "query": "Crush",
+   "expected": "크러쉬",
+   "itunes_id": "958641367",
+   "itunes_name": "Crush",
+   "wd_hits": 1,
+   "wd_ko": "크러쉬",
+   "wd_item": "Q12620706",
+   "match": true
+  },
+  {
+   "query": "Dean",
+   "expected": "딘",
+   "itunes_id": "2770824",
+   "itunes_name": "DEAN",
+   "wd_hits": 1,
+   "wd_ko": "딘 (가수)",
+   "wd_item": "Q23986703",
+   "match": false
+  },
+  {
+   "query": "Radiohead",
+   "expected": "라디오헤드",
+   "itunes_id": "657515",
+   "itunes_name": "Radiohead",
+   "wd_hits": 1,
+   "wd_ko": "라디오헤드",
+   "wd_item": "Q44190",
+   "match": true
+  },
+  {
+   "query": "The Beatles",
+   "expected": "비틀즈",
+   "itunes_id": "136975",
+   "itunes_name": "The Beatles",
+   "wd_hits": 1,
+   "wd_ko": "비틀즈",
+   "wd_item": "Q1299",
+   "match": true
+  },
+  {
+   "query": "Coldplay",
+   "expected": "콜드플레이",
+   "itunes_id": "471744",
+   "itunes_name": "Coldplay",
+   "wd_hits": 1,
+   "wd_ko": "콜드플레이",
+   "wd_item": "Q45188",
+   "match": true
+  },
+  {
+   "query": "Adele",
+   "expected": "아델",
+   "itunes_id": "262836961",
+   "itunes_name": "Adele",
+   "wd_hits": 1,
+   "wd_ko": "아델",
+   "wd_item": "Q23215",
+   "match": true
+  },
+  {
+   "query": "Taylor Swift",
+   "expected": "테일러 스위프트",
+   "itunes_id": "159260351",
+   "itunes_name": "Taylor Swift",
+   "wd_hits": 1,
+   "wd_ko": "테일러 스위프트",
+   "wd_item": "Q26876",
+   "match": true
+  },
+  {
+   "query": "Billie Eilish",
+   "expected": "빌리 아일리시",
+   "itunes_id": "1065981054",
+   "itunes_name": "Billie Eilish",
+   "wd_hits": 1,
+   "wd_ko": "빌리 아일리시",
+   "wd_item": "Q29564107",
+   "match": true
+  },
+  {
+   "query": "Ed Sheeran",
+   "expected": "에드 시런",
+   "itunes_id": "183313439",
+   "itunes_name": "Ed Sheeran",
+   "wd_hits": 1,
+   "wd_ko": "에드 시런",
+   "wd_item": "Q47447",
+   "match": true
+  },
+  {
+   "query": "Queen",
+   "expected": "퀸",
+   "itunes_id": "3296287",
+   "itunes_name": "Queen",
+   "wd_hits": 1,
+   "wd_ko": "퀸",
+   "wd_item": "Q15862",
+   "match": true
+  },
+  {
+   "query": "Nirvana",
+   "expected": "너바나",
+   "itunes_id": "112018",
+   "itunes_name": "Nirvana",
+   "wd_hits": 1,
+   "wd_ko": "너바나",
+   "wd_item": "Q11649",
+   "match": true
+  },
+  {
+   "query": "Daft Punk",
+   "expected": "다프트 펑크",
+   "itunes_id": "5468295",
+   "itunes_name": "Daft Punk",
+   "wd_hits": 1,
+   "wd_ko": "다프트 펑크",
+   "wd_item": "Q185828",
+   "match": true
+  },
+  {
+   "query": "Bruno Mars",
+   "expected": "브루노 마스",
+   "itunes_id": "278873078",
+   "itunes_name": "Bruno Mars",
+   "wd_hits": 1,
+   "wd_ko": "브루노 마스",
+   "wd_item": "Q1450",
+   "match": true
+  },
+  {
+   "query": "Kenshi Yonezu",
+   "expected": "요네즈 켄시",
+   "itunes_id": "530814268",
+   "itunes_name": "Kenshi Yonezu",
+   "wd_hits": 1,
+   "wd_ko": "요네즈 켄시",
+   "wd_item": "Q11604296",
+   "match": true
+  },
+  {
+   "query": "YOASOBI",
+   "expected": "요아소비",
+   "itunes_id": "1490256993",
+   "itunes_name": "YOASOBI",
+   "wd_hits": 1,
+   "wd_ko": "YOASOBI",
+   "wd_item": "Q95688943",
+   "match": false
+  },
+  {
+   "query": "Ado",
+   "expected": "아도",
+   "itunes_id": "1492604670",
+   "itunes_name": "Ado",
+   "wd_hits": 1,
+   "wd_ko": "아도",
+   "wd_item": "Q104012678",
+   "match": true
+  },
+  {
+   "query": "Arctic Monkeys",
+   "expected": "악틱 몽키즈",
+   "itunes_id": "62820413",
+   "itunes_name": "Arctic Monkeys",
+   "wd_hits": 1,
+   "wd_ko": "악틱 몽키즈",
+   "wd_item": "Q170599",
+   "match": true
+  },
+  {
+   "query": "Tame Impala",
+   "expected": "테임 임팔라",
+   "itunes_id": "290242959",
+   "itunes_name": "Tame Impala",
+   "wd_hits": 1,
+   "wd_ko": "테임 임팔라",
+   "wd_item": "Q9619",
+   "match": true
+  },
+  {
+   "query": "Mac DeMarco",
+   "expected": "맥 드마르코",
+   "itunes_id": "501437762",
+   "itunes_name": "Mac DeMarco",
+   "wd_hits": 1,
+   "wd_ko": "맥 드마르코",
+   "wd_item": "Q14517",
+   "match": true
+  },
+  {
+   "query": "Kendrick Lamar",
+   "expected": "켄드릭 라마",
+   "itunes_id": "368183298",
+   "itunes_name": "Kendrick Lamar",
+   "wd_hits": 1,
+   "wd_ko": "켄드릭 라마",
+   "wd_item": "Q130798",
+   "match": true
+  }
+ ]
+}

@@ -1,7 +1,9 @@
 'use client';
 
 import { useCallback, useEffect, useReducer } from 'react';
+
 import { getLikeBatch, LIKE_BATCH_LIMIT, toggleLike } from '@/lib/api/likes';
+
 import type { LikeStatus, LikeTargetType } from '@/types/social';
 
 /**

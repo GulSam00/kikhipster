@@ -1,9 +1,12 @@
 'use client';
 
 import { Check } from 'lucide-react';
-import { toRounds } from '@/lib/domain/bracket';
+
 import { useBoxSize } from '@/lib/hooks/use-box-size';
+
+import { toRounds } from '@/lib/domain/bracket';
 import type { PoolItem } from '@/lib/domain/pool-item';
+
 import type { Play, PlayRound } from '@/types/tournament';
 
 interface Props {
@@ -57,7 +60,7 @@ export default function FullBracket({ play, items, currentMatchId }: Props) {
           {rounds.map((round) => (
             <p
               key={round.roundNum}
-              className="sticky top-0 w-44 shrink-0 bg-background text-center text-xs font-medium text-muted-foreground"
+              className="bg-background text-muted-foreground sticky top-0 w-44 shrink-0 text-center text-xs font-medium"
             >
               {round.label}
             </p>
@@ -69,7 +72,7 @@ export default function FullBracket({ play, items, currentMatchId }: Props) {
           {area.height > 0 && (
             <svg
               aria-hidden
-              className="pointer-events-none absolute inset-0 stroke-border"
+              className="stroke-border pointer-events-none absolute inset-0"
               width={totalWidth}
               height={area.height}
               fill="none"
@@ -145,10 +148,9 @@ function MatchCell({
 }) {
   return (
     <div
-      className={[
-        'rounded-md border text-xs',
-        isCurrent ? 'border-primary' : 'border-border',
-      ].join(' ')}
+      className={['rounded-md border text-xs', isCurrent ? 'border-primary' : 'border-border'].join(
+        ' ',
+      )}
     >
       {[match.item_a_id, match.item_b_id].map((id, i) => {
         const won = match.winner_id === id;
@@ -158,13 +160,19 @@ function MatchCell({
             key={id}
             className={[
               'flex items-center gap-1 px-2 py-1.5',
-              i === 0 ? 'border-b border-border' : '',
-              won ? 'font-medium text-foreground' : '',
-              lost ? 'text-muted-foreground line-through' : '',
+              i === 0 ? 'border-border border-b' : '',
+              won ? 'text-foreground font-medium' : '',
+              /*
+                진 쪽은 **밝기로만** 구분한다. 예전엔 `line-through` 를 같이 올렸는데, deslop-ignore 09
+                이긴 쪽이 이미 `font-medium` + `text-foreground` + 체크 아이콘 세 가지로
+                표시되므로 네 번째 신호였고, 취소선은 '지워진 것'의 기호지 '진 것'의
+                기호가 아니다 (2026-09-08).
+              */
+              lost ? 'text-muted-foreground' : '',
             ].join(' ')}
           >
             <span className="truncate">{label(id)}</span>
-            {won && <Check className="size-3 shrink-0 text-primary" />}
+            {won && <Check className="text-primary size-3 shrink-0" />}
           </div>
         );
       })}

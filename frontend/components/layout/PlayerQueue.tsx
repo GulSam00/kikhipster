@@ -2,9 +2,12 @@
 
 import { DragDropContext, Draggable, Droppable, type DropResult } from '@hello-pangea/dnd';
 import { ChevronDown, GripVertical, Music2, Volume2, X } from 'lucide-react';
+
 import CoverImage from '@/components/common/CoverImage';
 import { Button } from '@/components/ui/button';
+
 import { cn } from '@/lib/utils';
+
 import { usePlayer } from '@/contexts/PlayerContext';
 
 /**
@@ -68,7 +71,7 @@ export default function PlayerQueue() {
                           >
                             <span
                               {...drag.dragHandleProps}
-                              className="flex size-8 shrink-0 cursor-grab items-center justify-center text-muted-foreground active:cursor-grabbing"
+                              className="text-muted-foreground flex size-8 shrink-0 cursor-grab items-center justify-center active:cursor-grabbing"
                               aria-label={`${track.name} 순서 바꾸기`}
                             >
                               <GripVertical className="size-4" />
@@ -77,9 +80,9 @@ export default function PlayerQueue() {
                             <button
                               type="button"
                               onClick={() => playAt(index)}
-                              className="flex min-w-0 flex-1 cursor-pointer items-center gap-2 rounded-md py-2 text-left outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                              className="focus-visible:ring-ring flex min-w-0 flex-1 cursor-pointer items-center gap-2 rounded-md py-2 text-left outline-none focus-visible:ring-2"
                             >
-                              <span className="w-5 shrink-0 text-center text-xs text-muted-foreground tabular-nums">
+                              <span className="text-muted-foreground w-5 shrink-0 text-center text-xs tabular-nums">
                                 {isCurrent && isPlaying ? (
                                   <Volume2 className="mx-auto size-3.5" />
                                 ) : (
@@ -95,7 +98,7 @@ export default function PlayerQueue() {
                               />
                               <span className="min-w-0 flex-1">
                                 <span className="block truncate text-sm">{track.name}</span>
-                                <span className="block truncate text-xs text-muted-foreground">
+                                <span className="text-muted-foreground block truncate text-xs">
                                   {track.artist}
                                 </span>
                               </span>
@@ -104,7 +107,7 @@ export default function PlayerQueue() {
                             <Button
                               variant="ghost"
                               size="icon-sm"
-                              className="shrink-0 text-muted-foreground hover:text-foreground"
+                              className="text-muted-foreground hover:text-foreground shrink-0"
                               onClick={() => removeAt(index)}
                               aria-label={`${track.name} 재생목록에서 빼기`}
                             >

@@ -1,13 +1,12 @@
-"use client";
+'use client';
 
-import { useCallback, useEffect, useState } from "react";
-import Link from "next/link";
-import { Plus, Search, Trophy } from "lucide-react";
-import { tournamentListPath } from "@/lib/api/tournaments";
-import { useInfiniteList } from "@/lib/hooks/use-infinite-list";
-import InfiniteListFooter from "@/components/common/InfiniteListFooter";
-import TournamentCard from "@/components/tournament/TournamentCard";
-import { Button } from "@/components/ui/button";
+import { Plus, Search, Trophy } from 'lucide-react';
+import Link from 'next/link';
+import { useCallback, useEffect, useState } from 'react';
+
+import InfiniteListFooter from '@/components/common/InfiniteListFooter';
+import TournamentCard from '@/components/tournament/TournamentCard';
+import { Button } from '@/components/ui/button';
 import {
   Empty,
   EmptyContent,
@@ -15,23 +14,28 @@ import {
   EmptyHeader,
   EmptyMedia,
   EmptyTitle,
-} from "@/components/ui/empty";
-import { Input } from "@/components/ui/input";
-import { Skeleton } from "@/components/ui/skeleton";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import type { TournamentSort, TournamentSummary } from "@/types/tournament";
+} from '@/components/ui/empty';
+import { Input } from '@/components/ui/input';
+import { Skeleton } from '@/components/ui/skeleton';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
+
+import { useInfiniteList } from '@/lib/hooks/use-infinite-list';
+
+import { tournamentListPath } from '@/lib/api/tournaments';
+
+import type { TournamentSort, TournamentSummary } from '@/types/tournament';
 
 const SORTS: { value: TournamentSort; label: string }[] = [
-  { value: "recent", label: "최신순" },
-  { value: "popular_all", label: "인기 전체" },
-  { value: "popular_year", label: "인기 올해" },
-  { value: "popular_month", label: "인기 이번 달" },
+  { value: 'recent', label: '최신순' },
+  { value: 'popular_all', label: '인기 전체' },
+  { value: 'popular_year', label: '인기 올해' },
+  { value: 'popular_month', label: '인기 이번 달' },
 ];
 
 export default function TournamentDashboardPage() {
-  const [q, setQ] = useState("");
-  const [debouncedQ, setDebouncedQ] = useState("");
-  const [sort, setSort] = useState<TournamentSort>("recent");
+  const [q, setQ] = useState('');
+  const [debouncedQ, setDebouncedQ] = useState('');
+  const [sort, setSort] = useState<TournamentSort>('recent');
 
   useEffect(() => {
     const t = setTimeout(() => setDebouncedQ(q.trim()), 300);
@@ -39,25 +43,16 @@ export default function TournamentDashboardPage() {
   }, [q]);
 
   const buildUrl = useCallback(
-    (page: { limit: number; offset: number }) =>
-      tournamentListPath(page, { sort, q: debouncedQ }),
+    (page: { limit: number; offset: number }) => tournamentListPath(page, { sort, q: debouncedQ }),
     [sort, debouncedQ],
   );
 
-  const {
-    items,
-    loading,
-    loadingMore,
-    reachedEnd,
-    failed,
-    retry,
-    sentinelRef,
-    limit,
-  } = useInfiniteList<TournamentSummary>({
-    key: `${sort}|${debouncedQ}`,
-    buildUrl,
-    errorMessage: "월드컵 목록을 불러오지 못했습니다",
-  });
+  const { items, loading, loadingMore, reachedEnd, failed, retry, sentinelRef, limit } =
+    useInfiniteList<TournamentSummary>({
+      key: `${sort}|${debouncedQ}`,
+      buildUrl,
+      errorMessage: '월드컵 목록을 불러오지 못했습니다',
+    });
 
   return (
     <div className="mx-auto w-full max-w-6xl px-4 py-8">
@@ -71,8 +66,8 @@ export default function TournamentDashboardPage() {
         </Button>
       </div>
 
-      <div className="mb-3 relative">
-        <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
+      <div className="relative mb-3">
+        <Search className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2" />
         <Input
           value={q}
           onChange={(e) => setQ(e.target.value)}
@@ -108,12 +103,12 @@ export default function TournamentDashboardPage() {
               <Trophy />
             </EmptyMedia>
             <EmptyTitle>
-              {debouncedQ ? "검색 결과가 없습니다" : "아직 월드컵이 없습니다"}
+              {debouncedQ ? '검색 결과가 없습니다' : '아직 월드컵이 없습니다'}
             </EmptyTitle>
             <EmptyDescription>
               {debouncedQ
-                ? "다른 검색어로 찾아보세요."
-                : "좋아하는 곡이나 앨범을 모아 첫 월드컵을 만들어보세요."}
+                ? '다른 검색어로 찾아보세요.'
+                : '좋아하는 곡이나 앨범을 모아 첫 월드컵을 만들어보세요.'}
             </EmptyDescription>
           </EmptyHeader>
           {!debouncedQ && (

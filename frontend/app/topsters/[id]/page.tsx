@@ -1,5 +1,7 @@
 import type { Metadata } from 'next';
+
 import { getTopster } from '@/lib/api/topsters';
+
 import TopsterDetail from './TopsterDetail';
 
 /**
@@ -18,8 +20,7 @@ export async function generateMetadata({
   const { id } = await params;
   try {
     const t = await getTopster(id);
-    const summary =
-      t.description || `${t.user.nickname} 님의 ${t.width}×${t.height} 앨범 탑스터`;
+    const summary = t.description || `${t.user.nickname} 님의 ${t.width}×${t.height} 앨범 탑스터`;
     return {
       title: t.title,
       description: summary,
@@ -31,11 +32,7 @@ export async function generateMetadata({
   }
 }
 
-export default async function TopsterDetailPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+export default async function TopsterDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   return <TopsterDetail id={id} />;
 }

@@ -17,7 +17,7 @@ from models.tournament import (
 )
 from models.user import User
 from routers.comment import comment_counts, purge_comments
-from routers.like import like_counts
+from routers.like import like_counts, purge_likes
 from routers.deps import get_current_user, get_optional_user
 from schemas.tournament import (
     MAX_POOL,
@@ -304,6 +304,7 @@ def delete_tournament(
 
     # 댓글은 FK가 아니라 (target_type, target_id)로 붙어 있어 DB가 대신 지워주지 않는다.
     purge_comments("tournament", tournament.id, db)
+    purge_likes("tournament", str(tournament.id), db)
     db.delete(tournament)
     db.commit()
 
