@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 from typing import Awaitable, Callable
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
@@ -8,6 +9,7 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from database import get_db
+from services import artist_names
 from services.music_cache import (
     get_cached,
     get_cached_one,
@@ -23,6 +25,8 @@ from schemas.music import (
     SearchTracksResponse,
     TrackSearchItem,
 )
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/music", tags=["music"])
 
@@ -191,9 +195,15 @@ async def search_artists(
     q: str = Query(..., min_length=1, description="검색어"),
     market: str = Query("KR", description="마켓 코드 (예: KR, JP, US)"),
     limit: int = Query(20, ge=1, le=50, description="최대 결과 수"),
+    db: Session = Depends(get_db),
 ):
     service = request.app.state.music_service
-    return await service.search_artists(q, market=market, limit=limit)
+    result = await service.search_artists(q, market=market, limit=limit)
+    # 한국어 이름은 **저장된 것만** 붙인다. 검색 한 번에 외부 호출을 N번 하지 않는다 —
+    # 찾아서 저장하는 건 아티스트 상세를 열 때다(`get_artist_detail`).
+    items = result.get("items", [])
+    stored = await run_in_threadpool(artist_names.get_stored, db, [str(i["id"]) for i in items])
+    return {**result, "items": [{**i, "name_ko": stored.get(str(i["id"]))} for i in items]}
 
 
 @router.get("/search/albums", response_model=SearchAlbumsResponse)
@@ -232,15 +242,38 @@ async def search_albums(
 
 @router.get("/artists/{artist_id}", response_model=ArtistDetail)
 async def get_artist_detail(request: Request, artist_id: str, db: Session = Depends(get_db)):
-    """아티스트 상세. 이름·장르는 사실상 불변이라 길게 캐시한다."""
+    """아티스트 상세. 이름·장르는 사실상 불변이라 길게 캐시한다.
+
+    **한국어 이름은 여기서 찾아 저장한다.** 저장된 게 있으면 그대로 쓰고, 없으면 외부(Wikidata →
+    KR 앨범 표기)에서 찾아 `artist_names` 에 적는다. 찾기에 실패해도(외부 장애) 상세 화면은
+    영어 이름으로 정상 응답하고 아무것도 저장하지 않는다 — 다음에 열 때 다시 시도한다.
+    `music_cache` 의 payload 에는 한국어 이름을 섞지 않는다(캐시 30일 vs 이름 영구).
+    """
     service = request.app.state.music_service
-    return await _detail_with_cache(
+    data = await _detail_with_cache(
         db,
         "artist_detail",
         artist_id,
         lambda: service.get_artist_detail(artist_id),
         ArtistDetail,
     )
+    return {**data, "name_ko": await _korean_name(request, db, artist_id)}
+
+
+async def _korean_name(request: Request, db: Session, artist_id: str) -> str | None:
+    stored = await run_in_threadpool(artist_names.get_stored, db, [artist_id])
+    if artist_id in stored:
+        return stored[artist_id]
+    service = request.app.state.music_service
+    try:
+        name_ko, source = await artist_names.resolve_ko_name(
+            service._client, artist_id, service.get_artist_album_artist_names
+        )
+    except Exception:
+        logger.warning("아티스트 한국어 이름 조회 실패: %s", artist_id, exc_info=True)
+        return None
+    await run_in_threadpool(artist_names.save, db, artist_id, name_ko, source)
+    return name_ko
 
 
 @router.get("/artists/{artist_id}/albums", response_model=list[AlbumSummary])
