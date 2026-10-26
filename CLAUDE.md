@@ -19,6 +19,7 @@
 - 작업을 시작하기 전에 `docs/TASKS.md` 를 읽는다. 과제를 끝냈으면 거기서 지우고 `docs/WORKLOG.md` 세션 기록에 남긴다.
 - 커밋 이력 표는 `.claude/hooks/update-changelog.sh` 가 커밋 직후 `docs/WORKLOG.md` 에 자동으로 덧붙인다. 수동으로 채우지 말 것.
 - **정본 문서는 Notion.** 큰 작업이 끝나면 갱신한다: https://app.notion.com/p/coding-sham/kikhipster-3af286f3bd70806597c2c64470a644ed
+- 이슈 관리는 `issues` 스킬(`.claude/skills/issues/SKILL.md`)을 따른다.
 
 ---
 
