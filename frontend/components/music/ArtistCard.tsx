@@ -23,8 +23,11 @@ export default function ArtistCard({ artist }: Props) {
             className="aspect-square w-full rounded-full"
           />
           <div className="w-full min-w-0 text-center">
-            <p className="truncate text-sm font-medium">{artist.name}</p>
-            {artist.genres[0] && (
+            <p className="truncate text-sm font-medium">{artist.name_ko ?? artist.name}</p>
+            {artist.name_ko && (
+              <p className="text-muted-foreground mt-0.5 truncate text-xs">{artist.name}</p>
+            )}
+            {!artist.name_ko && artist.genres[0] && (
               <p className="text-muted-foreground mt-0.5 truncate text-xs">{artist.genres[0]}</p>
             )}
           </div>

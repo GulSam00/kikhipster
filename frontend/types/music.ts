@@ -4,6 +4,8 @@ export interface ArtistSummary {
   image_url: string | null;
   genres: string[];
   popularity: number;
+  /** 한국어 이름. 아티스트 상세를 연 적 있는 아티스트만 채워진다(없으면 영어 이름만 보인다). */
+  name_ko: string | null;
 }
 
 // 백엔드 스키마(ArtistDetail(ArtistSummary): pass)와 동일 — 앨범 목록은

@@ -8,6 +8,15 @@
 
 ## 세션 기록
 
+### 2026-10-22 — 아티스트 한국어 이름 (상세 열 때 찾아 저장)
+
+- PR #3 을 일반 머지 커밋으로 병합(fcb7dad). `feat/artist-korean-names` 에서 구현.
+- 아티스트 상세를 열면 `artist_names` 표(영구, TTL 없음)를 보고, 없으면 ① Wikidata P2850 한국어 라벨 → ② KR 앨범 `artistName` 의 순수 한글 단독 표기 순으로 찾아 저장. 검색 카드는 **저장된 것만** 읽는다(외부 호출 0).
+- 외부 호출 **실패는 저장하지 않는다**(영구히 영어로 남는 것 방지). '없음'은 저장하되 30일 뒤 재시도.
+- 한국어 이름은 `music_cache` payload 에 섞지 않는다(캐시 30일 vs 이름 영구) — 라우트에서 덧붙인다.
+- 실측: 에픽하이·혁오는 앨범 표기 경로, 방탄소년단은 Wikidata 경로로 확인. pytest 74개(신규 12).
+- Docker Desktop 이 WSL 배포판이 멈춘 채 엔진이 안 올라올 때: 프로세스 종료 + `wsl --shutdown` 후 재실행.
+
 ### 2026-10-09 (계속) — 테스트·CI 도입
 
 - **백엔드 pytest 62개.** 진짜 PostgreSQL 을 쓴다 — SQLite 대체는 일부러 안 했다(과거 버그 3건이 전부 "실제 DB 로 돌려 봐야 드러나는" 종류였고
@@ -2488,6 +2497,7 @@ Spotify 연동 백엔드, 프론트 기획(`_workspace/planning.md`), QA 리뷰(
 | 2026-10-10 | fix: CI 첫 실행 실패 두 건 — eval_type_backport 의존성 누락, 홈 정적 prerender | backend, docs, frontend | 커밋 `ec01af2` |
 | 2026-10-10 | docs: CI 첫 실행 실패 원인과 테스트 동시 실행 금지 기록 | docs | 커밋 `311f2b4` |
 | 2026-10-22 | docs: 아티스트 한국어 이름 검증 스크립트와 결과 보관, CI 확인 항목 정리 | _workspace, docs | 커밋 `2d512c6` |
+| 2026-10-22 | feat: 아티스트 한국어 이름 — 상세를 열 때 Wikidata·KR 앨범 표기에서 찾아 artist_names 에 영구 저장 | backend, docs, frontend | 커밋 `282136c` |
 | 2026-10-22 | Merge pull request #3 from GulSam00/feat/play-screen-and-volume | - | 커밋 `fcb7dad` |
 | 2026-10-26 | chore(issues): bootstrap issue tracking | .claude, CLAUDE.md, docs | 커밋 `f313d4d` |
 | 2026-10-27 | chore(issues): 기존 세션에서 나온 할 일 9건 기록 | docs | 커밋 `aa5b936` |
