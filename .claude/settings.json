@@ -13,6 +13,18 @@
           }
         ]
       }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/skills/issues/list-issues.mjs\" || true",
+            "timeout": 10,
+            "statusMessage": "열린 이슈 불러오는 중"
+          }
+        ]
+      }
     ]
   }
 }
