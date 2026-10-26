@@ -2,19 +2,18 @@
 
 > 이 파일이 **할 일의 정본**이다. CLAUDE.md에는 과제를 적지 않는다.
 > 완료된 항목은 여기서 지우고 `docs/WORKLOG.md` 에 기록한다.
-> 최종 갱신: 2026-10-05 (하단 탭바 header 안 갇힘 버그 수정 · 320px 가로 스크롤 3건 통과)
+> 최종 갱신: 2026-10-27 ('이어받을 때' 구간에서 브랜치·해시 제거, 이슈 체계 안내로 교체)
 
 ---
 
-## 다른 PC에서 이어받을 때 (2026-09-08 기준)
-
-**작업 브랜치는 `feat/play-screen-and-volume` 이다.** `origin/main` 은 `84c0fb6` 에 멈춰
-있고 8/30 이후 작업 전부가 이 브랜치에만 있다 — `main` 을 받으면 안 된다.
+## 다른 PC에서 이어받을 때
 
 ```
 git clone https://github.com/GulSam00/kikhipster.git
-cd kikhipster && git checkout feat/play-screen-and-volume
 ```
+
+기본 브랜치(`main`)에서 시작한다. 진행 중인 작업은 열린 PR(`gh pr list`)과 `docs/issues/` 로 이어받는다.
+브랜치명·커밋 해시는 금방 낡으므로 여기에 적지 않는다.
 
 **git 에 안 들어가는 것 3종** — 새 PC에서 직접 만들어야 한다:
 
@@ -27,8 +26,9 @@ cd kikhipster && git checkout feat/play-screen-and-volume
 띄우는 법은 루트에서 `npm run dev` 하나면 된다(DB→마이그레이션→백엔드→프론트).
 Docker Desktop 이 먼저 떠 있어야 한다.
 
-**다음 할 일은 아래 "진행 예정" 의 남은 확인 3건이다(2026-10-05 에 대부분 통과).** 로그인이 필요한 항목은
-사람이 한다. 가로 스크롤 BLOCK 은 전부 통과했다.
+**다음 할 일은 세션을 시작할 때 훅이 보여주는 열린 이슈 목록에서 본다**
+(직접 보려면 `node .claude/skills/issues/list-issues.mjs`). 아래 "진행 예정" 은 아직 이슈로 옮기지 않은 과제다.
+로그인이 필요한 확인 항목은 사람이 한다.
 
 ---
 
