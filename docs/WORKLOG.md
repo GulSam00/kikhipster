@@ -2510,3 +2510,4 @@ Spotify 연동 백엔드, 프론트 기획(`_workspace/planning.md`), QA 리뷰(
 | 2026-10-27 | chore(issues): 기존 세션에서 나온 할 일 9건 기록 | docs | 커밋 `aa5b936` |
 | 2026-11-01 | Merge pull request #8 from GulSam00/docs/claude-md-issue-workflow | - | 커밋 `ce547e2` |
 | 2026-11-12 | test(music): iTunes 대역 픽스처 + /api/music/* 라우터·스토어프론트 테스트 | backend, docs | 커밋 `b21dd33` |
+| 2026-11-12 | fix(music): 앨범 상세 ③단계 검색도 KR→US 스토어프론트로 보낸다 | backend, docs | 커밋 `8619da7` |
