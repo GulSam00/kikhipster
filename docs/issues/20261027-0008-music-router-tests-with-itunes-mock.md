@@ -1,7 +1,7 @@
 ---
 id: 20261027-0008-music-router-tests-with-itunes-mock
 title: `/api/music/*` 라우터 테스트 (iTunes 목, KR→폴백 로직)
-status: todo
+status: doing
 priority: medium
 created: 2026-10-27
 external:
@@ -25,3 +25,4 @@ TASKS.md T3 '테스트 공백'. 백엔드 테스트는 auth·topster·tournament
 ## 로그
 
 - 2026-10-27: TASKS.md T3 에서 옮겨 적음
+- 2026-11-12: 착수
