@@ -17,12 +17,13 @@ TASKS.md T3 '테스트 공백'. 백엔드 테스트는 auth·topster·tournament
 
 ## 완료 조건
 
-- [ ] iTunes 응답을 목으로 대체하는 픽스처 작성
-- [ ] KR 응답에 없는 앨범이 country 없는 재조회로 채워지는 테스트
-- [ ] 캐시 적중 시 iTunes 호출이 0회인 테스트
-- [ ] 검색은 US 스토어프론트로 나가고 lookup 은 KR 로 나가는 테스트
+- [x] iTunes 응답을 목으로 대체하는 픽스처 작성
+- [x] KR 응답에 없는 앨범이 country 없는 재조회로 채워지는 테스트
+- [x] 캐시 적중 시 iTunes 호출이 0회인 테스트
+- [x] 검색은 US 스토어프론트로 나가고 lookup 은 KR 로 나가는 테스트
 
 ## 로그
 
 - 2026-10-27: TASKS.md T3 에서 옮겨 적음
 - 2026-11-12: 착수
+- 2026-11-12: 테스트 21개 작성(test_music_storefront 13·test_music_router 8), 변이 9종 전부 검출. 실 PostgreSQL 미실행(컨테이너에 Docker 데몬 없음) — 전체 pytest 통과 확인 후 done

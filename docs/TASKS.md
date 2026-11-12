@@ -37,9 +37,10 @@ Docker Desktop 이 먼저 떠 있어야 한다.
 ### T3. 설계상 구멍
 
 - [ ] **테스트 공백 (2026-10-09).** 백엔드는 `auth` · `topster` · `tournament`(대진·투표·랭킹) · `comment` · `like`
-  · 설정 검증 · iTunes 순수 함수를 덮는다. **없는 것**: `/api/music/*` 라우터(iTunes 를 목으로 갈아끼워야 한다 —
-  `_lookup_chunked` 의 KR→폴백 로직이 가장 위험하다) · OAuth 콜백 · 컴포넌트/페이지 테스트(프론트는 `lib/domain`
-  순수 함수만) · E2E
+  · 설정 검증 · iTunes 순수 함수를 덮는다. `/api/music/*` 라우터와 스토어프론트 폴백은 2026-11-12 에
+  `tests/test_music_router.py` · `tests/test_music_storefront.py`(iTunes 대역 `tests/fake_itunes.py`)로 덮었다
+  (이슈 20261027-0008 — 실 PostgreSQL 전체 스위트 확인 대기). **없는 것**: OAuth 콜백 · 컴포넌트/페이지 테스트
+  (프론트는 `lib/domain` 순수 함수만) · E2E
 - [ ] **랭킹 집계의 다음 단계는 아직 열려 있다 (2026-08-27).** 파이썬 전수 루프는 SQL 집계로 내렸지만
   여전히 **매 요청 집계**다. 플레이가 수만 건으로 가면 집계 테이블이나 캐시가 필요하다 —
   지금 수준(수십~수천)에서는 인덱스로 충분해 보류한다

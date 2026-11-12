@@ -8,6 +8,13 @@
 
 ## 세션 기록
 
+### 2026-11-12 — `/api/music/*` 라우터 테스트 (이슈 20261027-0008, 브랜치 `issue/20261027-0008-music-router-tests-with-itunes-mock`)
+
+- **서비스를 가짜로 바꾸지 않고 HTTP 한 겹만 바꿨다**(`tests/fake_itunes.py`, `httpx.MockTransport`). 지킬 규칙(KR 먼저 → 폴백, 검색 US)이 전부 `music_api.py` 안에 있어서, `test_artist_names.py` 의 `FakeService` 방식으로는 그 규칙을 시험할 수 없다. 대역은 CLAUDE.md 실측대로 KR `/search` 에 앨범·곡 0건을, KR lookup 에서 KR 스토어에 없는 앨범을 누락한다.
+- 소스를 9가지로 일부러 망가뜨려(폴백 끄기·폴백에 KR·검색 KR·lookup US·이름 lookup country 누락·상세 ①단계에 country·배치 캐시 무시·tombstone 무시·상세 캐시 무시) 매번 1~11개가 빨간불이 되는 것을 확인하고 원복했다.
+- **실 PostgreSQL 로는 못 돌렸다** — 작업 컨테이너에 Docker 데몬이 없었다. 라우터 테스트는 `music_cache` 를 메모리로 바꾼 임시 플러그인(커밋 안 함)으로만 통과를 확인했다. 머지 전에 `pytest` 전체를 한 번 돌려야 한다.
+- 범위 밖 발견 2건을 `later` 로 적었다: 앨범 상세 ③단계 검색이 `country=KR`(`20261112-1548-album-tracks-search-fallback-uses-kr`), 앨범 상세가 `track` 캐시에 스키마가 다른 payload 를 덮어씀(`20261112-1548-album-detail-warms-track-cache-wrong-shape`).
+
 ### 2026-10-22 — 아티스트 한국어 이름 (상세 열 때 찾아 저장)
 
 - PR #3 을 일반 머지 커밋으로 병합(fcb7dad). `feat/artist-korean-names` 에서 구현.
@@ -2502,3 +2509,4 @@ Spotify 연동 백엔드, 프론트 기획(`_workspace/planning.md`), QA 리뷰(
 | 2026-10-26 | chore(issues): bootstrap issue tracking | .claude, CLAUDE.md, docs | 커밋 `f313d4d` |
 | 2026-10-27 | chore(issues): 기존 세션에서 나온 할 일 9건 기록 | docs | 커밋 `aa5b936` |
 | 2026-11-01 | Merge pull request #8 from GulSam00/docs/claude-md-issue-workflow | - | 커밋 `ce547e2` |
+| 2026-11-12 | test(music): iTunes 대역 픽스처 + /api/music/* 라우터·스토어프론트 테스트 | backend, docs | 커밋 `b21dd33` |
