@@ -3,6 +3,7 @@ id: 20261027-0010-api-fetch-token-auto-refresh
 title: `apiFetch` 토큰 만료 시 자동 갱신
 status: later
 priority: medium
+summary: apiFetch 가 401 을 받으면 토큰을 한 번만 갱신하고 원 요청을 재시도하게 한다
 created: 2026-10-27
 external:
 ---

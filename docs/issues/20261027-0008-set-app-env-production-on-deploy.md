@@ -3,6 +3,7 @@ id: 20261027-0008-set-app-env-production-on-deploy
 title: 배포 환경변수에 `APP_ENV=production` 설정
 status: later
 priority: high
+summary: ECS 태스크 정의에 APP_ENV=production 을 넣어 약한 JWT 시크릿이면 기동이 실패하게 한다
 created: 2026-10-27
 external:
 ---

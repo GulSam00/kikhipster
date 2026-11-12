@@ -1,5 +1,5 @@
 // @ts-check
-// SessionStart 훅에서 실행한다: 열린 이슈(done 제외)를 한 줄씩 보여주고, upstream 보다 뒤처졌으면 경고한다.
+// SessionStart 훅에서 실행한다: 열린 이슈(done 제외)를 마크다운 표(설명란 포함)로 보여주고, upstream 보다 뒤처졌으면 경고한다.
 //
 // 지켜야 할 것:
 //  - 어떤 에러가 나도 메시지만 출력하고 exit 0 — 훅 실패가 세션 시작을 막으면 안 된다.
@@ -13,7 +13,7 @@ import { fileURLToPath } from 'node:url';
 
 /** @typedef {'doing' | 'todo' | 'later' | 'done'} Status */
 /** @typedef {'high' | 'medium' | 'low'} Priority */
-/** @typedef {{ id: string, title: string, status: Status, priority: Priority, created: string, external: string }} Issue */
+/** @typedef {{ id: string, title: string, summary: string, status: Status, priority: Priority, created: string, external: string }} Issue */
 /** @typedef {{ file: string, reason: string }} ParseError */
 
 /** @type {readonly Status[]} */
@@ -28,6 +28,10 @@ const PRIORITY_RANK = { high: 0, medium: 1, low: 2 };
 const ID_PATTERN = /^\d{8}-\d{4}-[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}/;
 const FETCH_TIMEOUT_MS = 3000;
+/** 설명란 최대 글자 수. 넘으면 말줄임한다 — 표 한 행이 터미널 몇 줄씩 늘어지지 않게. */
+const SUMMARY_MAX = 90;
+/** 첫 문장이 이보다 짧으면("TASKS.md T3 '테스트 공백'." 같은 출처 표기) 다음 문장을 이어 붙인다. */
+const SUMMARY_MIN = 25;
 
 const here = dirname(fileURLToPath(import.meta.url));
 const projectDir = process.env.CLAUDE_PROJECT_DIR || resolve(here, '..', '..', '..');
@@ -39,9 +43,9 @@ function messageOf(e) {
 }
 
 /**
- * `---` 로 둘러싼 단순 `key: value` frontmatter 만 읽는다(중첩·배열 없음).
+ * `---` 로 둘러싼 단순 `key: value` frontmatter 만 읽는다(중첩·배열 없음). 나머지는 body 로 돌려준다.
  * @param {string} raw
- * @returns {Record<string, string>}
+ * @returns {{ fields: Record<string, string>, body: string }}
  */
 function parseFrontmatter(raw) {
   const text = raw.replace(/^﻿/, '').replace(/\r\n/g, '\n');
@@ -62,7 +66,45 @@ function parseFrontmatter(raw) {
       .replace(/^(["'])(.*)\1$/, '$2');
     fields[key] = value;
   }
-  return fields;
+  return { fields, body: text.slice(end + '\n---'.length) };
+}
+
+/**
+ * `## 맥락` 섹션의 첫 문단에서 설명 한 줄을 뽑는다. 섹션이 없으면 빈 문자열.
+ * 한 문장이 여러 줄에 걸쳐 쓰여 있으므로 줄을 먼저 잇고 나서 문장으로 자른다.
+ * @param {string} body
+ * @returns {string}
+ */
+function summarizeContext(body) {
+  const section = /^##\s*맥락\s*$([\s\S]*?)(?=^##\s|(?![\s\S]))/m.exec(body);
+  if (!section?.[1]) return '';
+  const paragraph = section[1].trim().split(/\n\s*\n/)[0] ?? '';
+  const flat = paragraph
+    .split('\n')
+    .map((l) => l.trim())
+    .join(' ');
+  // 문장 끝 = 마침표·물음표·느낌표 뒤 공백. `TASKS.md` 처럼 공백이 안 따라오는 점은 끝이 아니다.
+  const sentences = flat.split(/(?<=[.?!])\s+/);
+  let out = '';
+  for (const s of sentences) {
+    out = out ? `${out} ${s}` : s;
+    if (out.length >= SUMMARY_MIN) break;
+  }
+  return out;
+}
+
+/**
+ * 표 셀 하나에 안전하게 넣는다: 파이프 이스케이프, 길이 제한, 잘려서 짝이 깨진 백틱 닫기.
+ * @param {string} text
+ * @returns {string}
+ */
+function toCell(text) {
+  let s = text.replace(/\s+/g, ' ').trim();
+  if (s.length > SUMMARY_MAX) {
+    s = `${s.slice(0, SUMMARY_MAX - 1).trimEnd()}…`;
+    if ((s.match(/`/g) ?? []).length % 2 === 1) s = `${s.slice(0, -1)}\`…`;
+  }
+  return s.replace(/\|/g, '\\|') || '-';
 }
 
 /**
@@ -71,7 +113,7 @@ function parseFrontmatter(raw) {
  * @returns {Issue}
  */
 function toIssue(file, raw) {
-  const f = parseFrontmatter(raw);
+  const { fields: f, body } = parseFrontmatter(raw);
   for (const key of ['id', 'title', 'status', 'priority', 'created']) {
     if (!f[key]) throw new Error(`필수 필드 누락: ${key}`);
   }
@@ -86,7 +128,10 @@ function toIssue(file, raw) {
   if (!isPriority(priority)) throw new Error(`priority 값 오류: ${priority} (${PRIORITIES.join('|')})`);
   if (!DATE_PATTERN.test(created)) throw new Error(`created 형식 오류(YYYY-MM-DD): ${created}`);
 
-  return { id, title: /** @type {string} */ (f.title), status, priority, created, external: f.external ?? '' };
+  const title = /** @type {string} */ (f.title);
+  // frontmatter 의 summary 가 있으면 우선한다 — 맥락 첫 문장이 설명으로 부적절할 때 직접 지정하는 자리.
+  const summary = f.summary || summarizeContext(body);
+  return { id, title, summary, status, priority, created, external: f.external ?? '' };
 }
 
 /**
@@ -185,8 +230,11 @@ function main() {
     console.log('열린 이슈 없음 (docs/issues)');
   } else {
     console.log(`열린 이슈 ${open.length}건 (docs/issues, doing→todo→later / high→low):`);
+    console.log('');
+    console.log('| 상태 | 우선순위 | id | 제목 | 설명 |');
+    console.log('|---|---|---|---|---|');
     for (const i of open) {
-      console.log(`[${i.status}][${i.priority}] ${i.id}  ${i.title}`);
+      console.log(`| ${i.status} | ${i.priority} | \`${i.id}\` | ${toCell(i.title)} | ${toCell(i.summary)} |`);
     }
   }
 

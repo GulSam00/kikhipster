@@ -3,6 +3,7 @@ id: 20261027-0013-check-aws-credits-before-t4
 title: AWS 실습 착수 전 크레딧·프리 티어 잔여 확인
 status: later
 priority: medium
+summary: AWS 실습 전 크레딧 잔액·만료일, 프리 티어 남은 기간을 확인하고 Budgets 알림을 건다
 created: 2026-10-27
 external:
 ---

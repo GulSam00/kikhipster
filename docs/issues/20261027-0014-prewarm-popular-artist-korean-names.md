@@ -3,6 +3,7 @@ id: 20261027-0014-prewarm-popular-artist-korean-names
 title: 인기 아티스트 한국어 이름 미리 채우기 (검색 카드용)
 status: later
 priority: low
+summary: 인기 아티스트 한국어 이름을 배치로 미리 채워, 상세를 안 연 아티스트도 검색 카드에서 한국어로 보이게
 created: 2026-10-27
 external:
 ---

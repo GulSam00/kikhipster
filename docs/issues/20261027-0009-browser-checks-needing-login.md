@@ -3,6 +3,7 @@ id: 20261027-0009-browser-checks-needing-login
 title: 로그인이 필요한 브라우저 확인 5건
 status: todo
 priority: medium
+summary: 로그인 상태에서만 보이는 UI 5건(좋아요 수, 댓글 신고, 소유자 삭제, 편집기 빼기, 네비 표시)을 눈으로 확인
 created: 2026-10-27
 external:
 ---

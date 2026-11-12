@@ -3,6 +3,7 @@ id: 20261027-0007-verify-artist-korean-name-ui
 title: 아티스트 상세 화면에서 한국어 이름 표시를 브라우저로 확인
 status: todo
 priority: high
+summary: 아티스트 상세·검색 카드에서 한국어 이름(제목)·영어 이름(부제) 레이아웃을 브라우저로 확인. 320px 포함
 created: 2026-10-27
 external:
 ---

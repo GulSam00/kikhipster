@@ -3,6 +3,7 @@ id: 20261026-2338-migrate-tasks-md-to-issues
 title: docs/TASKS.md 항목을 이슈 파일로 옮길지 결정하고 이전
 status: later
 priority: low
+summary: TASKS.md 와 docs/issues 중 무엇을 할 일의 정본으로 둘지 정하고, 필요하면 항목을 옮긴다
 created: 2026-10-26
 external:
 ---

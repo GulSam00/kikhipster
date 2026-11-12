@@ -18,6 +18,7 @@ id: 20261026-2338-migrate-tasks-md-to-issues
 title: 한 줄 제목
 status: later          # todo | doing | later | done
 priority: low          # high | medium | low
+summary: 무슨 작업인지 한 줄  # 선택. 없으면 '맥락' 첫 문장을 쓴다
 created: 2026-10-26
 external:              # 비워 둠 (외부 트래커 연결용 자리)
 ---
@@ -53,7 +54,9 @@ external:              # 비워 둠 (외부 트래커 연결용 자리)
 node .claude/skills/issues/list-issues.mjs
 ```
 
-`done` 을 뺀 열린 이슈를 status(doing→todo→later), priority(high→low) 순으로 한 줄씩 보여준다.
+`done` 을 뺀 열린 이슈를 status(doing→todo→later), priority(high→low) 순으로 **마크다운 표**(상태·우선순위·id·제목·설명)로 보여준다.
+설명란은 frontmatter `summary` 가 있으면 그것을, 없으면 `## 맥락` 첫 문장(25자 미만이면 다음 문장까지)을 90자에서 잘라 쓴다.
+`맥락` 은 "왜"를 적는 칸이라 "무슨 작업인가"로 안 읽히면 `summary` 를 채운다.
 형식이 깨진 파일은 목록에서 빼고 끝에 "형식 오류"로 따로 알린다. 로컬이 upstream 보다 뒤처졌으면 경고만 하고 pull 은 하지 않는다.
 
 ## 예시

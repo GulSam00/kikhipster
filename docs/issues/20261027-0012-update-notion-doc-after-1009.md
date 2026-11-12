@@ -3,6 +3,7 @@ id: 20261027-0012-update-notion-doc-after-1009
 title: Notion 정본 문서에 10-09 이후 작업 반영
 status: todo
 priority: low
+summary: 10-09 이후 작업 6건(좋아요 정리, JWT 검증, CI, 배포 버그, 한국어 이름, 이슈 체계)을 Notion 정본에 반영
 created: 2026-10-27
 external:
 ---

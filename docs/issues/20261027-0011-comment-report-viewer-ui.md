@@ -3,6 +3,7 @@ id: 20261027-0011-comment-report-viewer-ui
 title: 댓글 신고를 볼 수 있는 화면
 status: later
 priority: low
+summary: 쌓인 댓글 신고를 보고 처리(삭제·기각)하는 API·화면. 관리자 역할 도입 여부부터 결정
 created: 2026-10-27
 external:
 ---

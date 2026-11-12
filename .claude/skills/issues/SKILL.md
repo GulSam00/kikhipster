@@ -13,7 +13,7 @@ description: 이 레포의 이슈/할 일을 파일(docs/issues/*.md)로 관리�
 - 위치: `docs/issues/<id>.md`
 - id: `YYYYMMDD-HHmm-<kebab-slug>` — 현재 시각은 `date +%Y%m%d-%H%M` 로 얻는다. slug 는 영문 소문자·숫자·하이픈만, 3~5단어.
   순번(001…)은 쓰지 않는다 — 머신 간 중앙 시퀀스가 없어 충돌한다.
-- frontmatter: `id`, `title`, `status`(todo|doing|later|done), `priority`(high|medium|low), `created`(YYYY-MM-DD), `external`(비워 둠)
+- frontmatter: `id`, `title`, `status`(todo|doing|later|done), `priority`(high|medium|low), `created`(YYYY-MM-DD), `external`(비워 둠), `summary`(선택 — 목록 표의 설명란. "무슨 작업인가"를 한 줄로. 없으면 `맥락` 첫 문장)
 - 본문 섹션: `## 맥락`, `## 완료 조건`(체크리스트), `## 로그`(날짜별 한 줄)
 - `id` 는 파일명과 같아야 한다. 어긋나면 SessionStart 목록에서 "형식 오류"로 빠진다.
 - **파일을 삭제하지 않는다.** 끝났으면 `status: done`, 접으려면 `later` 로 둔다.
@@ -46,6 +46,6 @@ description: 이 레포의 이슈/할 일을 파일(docs/issues/*.md)로 관리�
 
 ## SessionStart 훅
 
-`.claude/settings.json` 이 세션 시작 때 `list-issues.mjs` 를 실행해 열린 이슈를 출력한다.
+`.claude/settings.json` 이 세션 시작 때 `list-issues.mjs` 를 실행해 열린 이슈를 마크다운 표(설명란 포함)로 출력한다.
 upstream 보다 뒤처져 있으면 경고만 하고 자동 pull 은 하지 않는다. 훅이 실패해도 세션 시작은 막히지 않는다(항상 exit 0).
 스크립트를 고쳤다면 `frontend/node_modules/.bin/tsc -p .claude/skills/issues` (frontend 의 `pnpm install` 이 돼 있어야 한다) 로 타입 체크한다.
