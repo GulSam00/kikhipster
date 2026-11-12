@@ -307,9 +307,15 @@ class ITunesMusicService:
         그대로 두면 K-POP 앨범 상세가 전부 404였다(실제로 그랬다).
         `entity=musicTrack`·`media=music`·다른 country도 전부 확인했지만 안 된다.
 
-        그래서 트랙이 비면 마지막으로 **검색**으로 채운다. 검색 API는 KR 스토어에서도
-        preview_url 을 정상으로 준다. 다만 검색은 앨범 전체를 보장하지 않는다 —
-        위 앨범에서 11곡 중 10곡이 왔다. 없는 것보다 낫다는 판단이다.
+        그래서 트랙이 비면 마지막으로 **검색**으로 채운다. 단 검색은 `country=KR` 이면
+        곡이 0건이라(2026-11-12 재실측) US 스토어프론트로 보낸다 — `_search_album_tracks`.
+        (예전 이 자리의 "검색 API는 KR 스토어에서도 preview_url 을 정상으로 준다"는 틀렸다.)
+        검색은 앨범 전체를 보장하지 않는다 — 위 앨범에서 11곡 중 10곡이 왔다.
+        없는 것보다 낫다는 판단이다.
+
+        2026-11-12 재실측에서는 같은 Armageddon(1773694541)이 ①(country 없음)에서
+        collection 1 + track 10 으로 왔고, ②(`country=KR`)는 결과 0이었다. iTunes 쪽
+        동작이 바뀐 것으로 보이며 ①~③ 순서는 그대로 둔다(③은 ①②가 트랙을 못 줄 때만 탄다).
         """
         # ① country 없이 (= US 스토어). US 앨범은 여기서 트랙까지 다 온다.
         results = (
@@ -409,6 +415,18 @@ class ITunesMusicService:
     async def _search_album_tracks(self, collection: dict, market: str) -> list[dict]:
         """lookup 이 트랙을 안 줄 때 검색으로 수록곡을 긁어 온다.
 
+        **`/search` 이므로 `_search_country()` 를 거친다**(KR → US). 2026-11-12 실측
+        `/search?entity=song&term=aespa Armageddon`, 대상 앨범 collectionId 1773694541:
+
+        | country | 결과 | 대상 앨범과 일치 |
+        |---------|------|------------------|
+        | KR      | 0    | 0                |
+        | US      | 19   | 10 (11곡 중, 전부 preview_url 있음) |
+        | 생략    | 19   | 10               |
+
+        표본 하나 더(`IU Love poem`): KR 0건, US 14건(그중 `Love Poem - EP` 6곡).
+        예전에 여기 `country=market` 을 그대로 넘겨 KR 앨범 상세가 조용히 트랙 0개가 됐다.
+
         `collectionId` 로 거르므로 다른 앨범의 동명 곡이 섞이지는 않는다.
         검색어에서 " - Single" / " - EP" 같은 꼬리는 떼지 않는다 — 실측에서 붙이든
         떼든 같은 곡이 왔고, 떼면 오히려 다른 앨범이 앞자리를 차지하는 경우가 있었다.
@@ -424,7 +442,7 @@ class ITunesMusicService:
                 "term": term,
                 "entity": "song",
                 "media": "music",
-                "country": market,
+                "country": _search_country(market),
                 "limit": 200,
             },
         )

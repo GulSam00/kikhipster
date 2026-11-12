@@ -188,3 +188,26 @@ def test_kr_only_album_is_found_through_market_storefront(itunes):
     assert "country" not in first
     assert second["country"] == "KR" and second["entity"] == "song"
     assert result["album"]["title"] == "Armageddon"
+
+
+def test_album_tracks_search_fallback_goes_to_us_storefront(itunes):
+    """③단계(lookup 이 트랙을 안 줄 때 검색으로 채우기)도 `/search` 라 KR 을 US 로 바꿔야 한다.
+
+    2026-11-12 실측(`/search?entity=song&term=aespa Armageddon`, 대상 collectionId 1773694541):
+    KR 0건 / US 19건 중 10건 일치 / country 생략 19건 중 10건 일치. KR 로 나가면 트랙이 조용히 0개다.
+    """
+    itunes.add(album("1773694541", "Armageddon - The 1st Album", "aespa"), US)
+    # album_songs 를 비워 둔다 → lookup 은 collection 만 주고 트랙 0개 → ③단계로 간다.
+    itunes.search_results = {
+        "song": [
+            track("1773694600", "Supernova", "aespa", "1773694541", number=1),
+            track("1773694601", "Armageddon", "aespa", "1773694541", number=2),
+            track("1766846600", "Supernova (Remix)", "aespa", "1766846514"),  # 다른 앨범
+        ],
+    }
+
+    result = run(itunes.service().get_album_tracks("1773694541", market="KR"))
+
+    (search,) = itunes.calls("/search")
+    assert search["country"] == "US" and search["entity"] == "song"
+    assert [t["id"] for t in result["tracks"]] == ["1773694600", "1773694601"]
