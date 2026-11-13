@@ -2503,3 +2503,4 @@ Spotify 연동 백엔드, 프론트 기획(`_workspace/planning.md`), QA 리뷰(
 | 2026-10-27 | chore(issues): 기존 세션에서 나온 할 일 9건 기록 | docs | 커밋 `aa5b936` |
 | 2026-11-01 | Merge pull request #8 from GulSam00/docs/claude-md-issue-workflow | - | 커밋 `ce547e2` |
 | 2026-11-12 | chore(issues): 열린 이슈 목록을 설명란이 있는 마크다운 표로 출력 | .claude, docs | 커밋 `9d88c6e` |
+| 2026-11-13 | chore(issues): 다국어 지원(영·일·중) 이슈 — iTunes 검색·이름 현지화·스토어별 ID 실측 기록 | docs | 커밋 `d5fee8e` |
