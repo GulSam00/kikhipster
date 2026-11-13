@@ -30,8 +30,10 @@ logger = logging.getLogger(__name__)
 # 같은 함정을 이미 한 번 겪었다 — `get_album_tracks` 가 country 를 안 넘기는 이유가
 # 이것이다(CLAUDE.md 에 기록됨). 그때는 그 호출만 고쳤고, /search 는 그대로 남아 있었다.
 #
-# **ID 는 스토어프론트를 타지 않는다**(위 실측에서 US·JP 의 `collectionId` 가 동일).
-# 그래서 검색만 US 로 돌려도 저장된 탑스터·월드컵의 앨범 ID 와 어긋나지 않는다.
+# US·JP 사이에서는 ID 가 같다(위 실측에서 `collectionId` 동일). 그래서 검색만 US 로 돌려도
+# 저장된 탑스터·월드컵의 앨범 ID 와 어긋나지 않는다. **단 모든 스토어가 그렇지는 않다** —
+# TW 는 자체 판본 ID 를 갖고 TW lookup 에서만 찾힌다(2026-11-13, CLAUDE.md). 검색 스토어를
+# US 밖으로 넓히기 전에 실측할 것.
 _NO_MUSIC_SEARCH_STOREFRONTS = {"KR"}
 _SEARCH_FALLBACK_COUNTRY = "US"
 

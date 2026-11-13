@@ -93,8 +93,13 @@ cd frontend && npm run dev                                      # :3300
   스토어프론트에 매이지 않아 KR 로도 살아남는다 — **그래서 아티스트 검색만 되고 앨범·곡 검색이
   조용히 빈 목록이 되는 모양으로 터진다**(200 OK + `items: []` 라 에러도 안 난다).
   `music_api.py` 의 `_search_country()` 가 `/search` 에 한해 KR→US 로 바꿔 준다. **`/lookup` 에는
-  적용하지 않는다** — lookup 은 KR 로도 정상이다. ID 는 스토어프론트를 타지 않아(US·JP 의
-  `collectionId` 동일) 검색만 US 로 돌려도 저장된 데이터와 어긋나지 않는다.
+  적용하지 않는다** — lookup 은 KR 로도 정상이다. US·JP 사이에서는 ID 가 같아(`collectionId` 동일)
+  검색만 US 로 돌려도 저장된 데이터와 어긋나지 않는다.
+  **단 "ID 는 스토어프론트를 타지 않는다"를 일반 법칙으로 믿지 말 것.** 2026-11-13 실측에서
+  저우제룬 `范特西` 가 TW 에선 `535739206`, HK·JP 에선 `1721454234` 였고, TW ID 는 **TW lookup 에서만**
+  찾힌다(US·JP·HK·country 생략 전부 0건). 지금 폴백(KR → country 생략)으로는 못 찾으므로
+  **검색 스토어프론트를 US 밖으로 넓힐 때는 ID 가 그 스토어 전용인지 먼저 실측한다.**
+  상세는 이슈 `20261113-0641-i18n-en-ja-zh-support`.
 - **`/lookup` 의 `country=KR` 은 반대로 *필요하다* — 이름을 한국어로 주는 유일한 경로다.**
   `Spring Day`→`봄날`, `BTS`→`방탄소년단`, `IU`→`아이유`(`lang=ko_kr` 은 효과 없음).
   그래서 검색은 US, 이름은 KR lookup 인 2단 구조다(`_localized_search_items`).
