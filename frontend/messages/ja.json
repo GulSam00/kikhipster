@@ -21,5 +21,330 @@
   "LocaleSwitcher": {
     "label": "言語",
     "failed": "言語を変更できませんでした"
+  },
+  "Common": {
+    "unknown": "不明",
+    "loading": "読み込み中"
+  },
+  "Play": {
+    "itemsLoadFailed": "候補の情報を読み込めませんでした",
+    "loadFailed": "プレイを読み込めませんでした",
+    "voteFailed": "投票を反映できませんでした",
+    "championshipRate": "優勝率",
+    "championshipFraction": "{count}/{total}回",
+    "winRate": "勝率",
+    "winFraction": "{count}/{total}試合",
+    "viewRanking": "ランキングを見る",
+    "playAgain": "もう一度遊ぶ",
+    "toMatch": "対戦へ",
+    "toBracket": "トーナメント表",
+    "pick": "選ぶ"
+  },
+  "Bracket": {
+    "round": "{roundNum, plural, =1 {決勝} =2 {準決勝} other {ベスト{size}}}",
+    "nextMatch": "次の試合",
+    "champion": "優勝",
+    "progress": "{total}試合中{index}試合目"
+  },
+  "PoolGrid": {
+    "loadMoreFailed": "候補をこれ以上読み込めませんでした",
+    "loadMore": "もっと見る(残り{remaining}件)"
+  },
+  "PoolItem": {
+    "viewAlbum": "{title} のアルバムを見る",
+    "play": "{title} を再生"
+  },
+  "Player": {
+    "collapseQueue": "再生リストを閉じる",
+    "expandQueue": "再生リストを開く",
+    "mute": "ミュート",
+    "unmute": "ミュート解除",
+    "close": "プレーヤーを閉じる",
+    "previous": "前の曲",
+    "next": "次の曲",
+    "play": "再生",
+    "pause": "一時停止",
+    "position": "再生位置",
+    "volume": "音量",
+    "queueTitle": "再生リスト {count}曲",
+    "clearQueue": "すべて削除",
+    "reorderItem": "{title} の順番を変更",
+    "removeItem": "{title} を再生リストから削除",
+    "previewFailed": "試聴を再生できませんでした",
+    "noTrackPreview": "この曲は試聴できません",
+    "noAlbumPreview": "このアルバムは試聴できません",
+    "albumTracksFailed": "アルバムの収録曲を読み込めませんでした",
+    "playItem": "{title} を再生",
+    "previewItem": "{title} を試聴",
+    "pauseItem": "{title} を一時停止"
+  },
+  "Comments": {
+    "loadFailed": "コメントを読み込めませんでした",
+    "createFailed": "コメントを投稿できませんでした",
+    "updateFailed": "コメントを編集できませんでした",
+    "deleteFailed": "コメントを削除できませんでした",
+    "reported": "通報を受け付けました",
+    "reportFailed": "通報できませんでした",
+    "title": "コメント {count}",
+    "anonymous": "匿名",
+    "nickname": "ニックネーム",
+    "placeholder": "コメントを入力...",
+    "content": "コメント内容",
+    "submit": "投稿",
+    "empty": "最初のコメントを書いてみましょう。",
+    "edited": "(編集済み)",
+    "edit": "コメントを編集",
+    "saveEdit": "編集を保存",
+    "cancelEdit": "編集をキャンセル",
+    "delete": "コメントを削除",
+    "report": "コメントを通報",
+    "alreadyReported": "通報済みのコメント",
+    "reportReason": "通報理由",
+    "reasons": {
+      "spam": "スパム・広告",
+      "abuse": "暴言・ヘイト",
+      "sexual": "わいせつ",
+      "etc": "その他"
+    }
+  },
+  "Like": {
+    "loginRequired": "ログインが必要です",
+    "failed": "いいねできませんでした",
+    "like": "{name} にいいね",
+    "unlike": "{name} のいいねを取り消す"
+  },
+  "InfiniteList": {
+    "loadingMore": "さらに読み込み中",
+    "retry": "再読み込み",
+    "end": "すべて読み込みました"
+  },
+  "Stats": {
+    "views": "閲覧",
+    "likes": "いいね",
+    "comments": "コメント"
+  },
+  "Owner": {
+    "edit": "編集",
+    "delete": "削除",
+    "deleting": "削除中",
+    "cancel": "キャンセル",
+    "manage": "「{name}」を管理",
+    "deleted": "「{name}」を削除しました",
+    "deleteFailed": "削除できませんでした",
+    "confirmDelete": "「{name}」を削除しますか?",
+    "irreversible": "{losesOnDelete}元に戻せません。"
+  },
+  "Share": {
+    "label": "共有",
+    "copied": "リンクをコピーしました",
+    "copyFailed": "コピーできませんでした"
+  },
+  "ItemType": {
+    "track": "曲",
+    "album": "アルバム"
+  },
+  "Tournament": {
+    "start": "スタート",
+    "viewRanking": "ランキング",
+    "notEnoughPool": "候補が4つ未満のためプレイできません。",
+    "startFailed": "プレイを開始できませんでした",
+    "size": "トーナメントの規模",
+    "sizeOption": "ベスト{size}",
+    "drawing": "組み合わせ抽選中..."
+  },
+  "TournamentEditor": {
+    "typeStepTitle": "何で対戦しますか?",
+    "trackDesc": "曲ごとに対戦",
+    "albumDesc": "アルバム単位で対戦",
+    "metaStepTitle": "ワールドカップ情報",
+    "metaStepTitleEdit": "ワールドカップ情報を編集",
+    "name": "名前",
+    "namePlaceholderTrack": "私の推し曲ワールドカップ",
+    "namePlaceholderAlbum": "人生のアルバムワールドカップ",
+    "description": "説明",
+    "descriptionPlaceholder": "どんな基準で集めたか書いてください(任意)",
+    "next": "次へ",
+    "back": "戻る",
+    "poolStepTitle": "{type}を追加",
+    "poolSummary": "{count}件追加 · 最小{min} / 最大{max}",
+    "searchTracks": "曲を検索",
+    "findInAlbums": "アルバムから探す",
+    "searchTrackPlaceholder": "曲を検索...",
+    "searchAlbumPlaceholder": "アルバムを検索...",
+    "loadingTracks": "収録曲を読み込み中...",
+    "addAllTracks": "{count}曲をすべて追加",
+    "picked": "追加済み {count}",
+    "saving": "保存中...",
+    "creating": "作成中...",
+    "needMore": "あと{count}件追加してください",
+    "saveWith": "{count}件で保存",
+    "createWith": "{count}件でワールドカップを作成",
+    "removeItem": "{title} を外す",
+    "remove": "外す",
+    "searchFailed": "検索に失敗しました",
+    "poolFull": "最大{max}件まで追加できます",
+    "partiallyAdded": "{count}件だけ追加しました(最大{max}件)",
+    "albumTracksFailed": "アルバムの収録曲を読み込めませんでした",
+    "saveFailed": "保存に失敗しました",
+    "createFailed": "ワールドカップを作成できませんでした"
+  },
+  "TopsterEditor": {
+    "addTab": "アルバム追加",
+    "optionsTab": "オプション",
+    "searchLabel": "アルバム検索",
+    "searchPlaceholder": "アルバム名を入力",
+    "addHint": "検索して選んだアルバムがグリッドの空きマスに順番に入ります。マスをドラッグして並べ替え、クリックすると空にします。",
+    "title": "タイトル",
+    "titlePlaceholder": "例: 2026年上半期ベスト",
+    "description": "説明(任意)",
+    "descriptionPlaceholder": "このチャートについてひとこと",
+    "columns": "横のマス",
+    "rows": "縦のマス",
+    "cellSummary": "{width}×{height} = {count}マス(最大{max}マス)",
+    "gap": "マスの間隔 {gap}px",
+    "backgroundColor": "背景色",
+    "textColor": "文字色",
+    "showTitle": "タイトルを表示",
+    "showAlbumInfo": "アルバム情報を表示",
+    "showNumbering": "番号を表示",
+    "image": "画像",
+    "imageRendering": "作成中...",
+    "removeCell": "削除",
+    "hexValue": "{label}のHEX値",
+    "missingInfo": "情報なし",
+    "missingInfoPlaceholder": "(情報なし)",
+    "searchFailed": "アルバム検索に失敗しました",
+    "gridFull": "空きマスがありません。オプションでグリッドを広げてください",
+    "imageFailed": "画像を作成できませんでした",
+    "titleRequired": "タイトルを入力してください",
+    "saveFailed": "保存に失敗しました。もう一度お試しください。"
+  },
+  "Music": {
+    "trackCount": "{count}曲",
+    "playAll": "すべて再生",
+    "artist": "アーティスト",
+    "topTracks": "人気曲",
+    "albumsAndSingles": "アルバム · シングル"
+  },
+  "Auth": {
+    "processing": "ログイン処理中...",
+    "login": "ログイン",
+    "loginDescription": "SNSアカウントで簡単に始めましょう",
+    "continueWithGoogle": "Googleで続ける",
+    "continueWithKakao": "Kakaoで続ける"
+  },
+  "Error": {
+    "title": "読み込めませんでした",
+    "description": "一時的なエラーの可能性があります。もう一度お試しください。",
+    "retry": "再試行",
+    "loading": "読み込み中..."
+  },
+  "Home": {
+    "recentTopsters": "最新のトップスター",
+    "recentTournaments": "最新のワールドカップ",
+    "more": "もっと見る",
+    "noTopsters": "まだトップスターがありません",
+    "noTopstersDescription": "好きなアルバムで最初のチャートを作ってみましょう。",
+    "firstTopster": "最初のトップスターを作る",
+    "noTournaments": "まだワールドカップがありません",
+    "noTournamentsDescription": "好きな曲やアルバムを集めて、推しを決めましょう。",
+    "firstTournament": "最初のワールドカップを作る"
+  },
+  "Search": {
+    "failed": "検索に失敗しました",
+    "placeholder": "アーティスト、アルバム、曲を検索...",
+    "tabs": {
+      "artists": "アーティスト",
+      "albums": "アルバム",
+      "tracks": "曲"
+    },
+    "searching": "検索中...",
+    "noResults": "検索結果がありません",
+    "noResultsDescription": "別のキーワードで検索してみてください。"
+  },
+  "List": {
+    "sort": {
+      "recent": "新着順",
+      "popular": "人気順",
+      "popular_all": "人気・全期間",
+      "popular_year": "人気・今年",
+      "popular_month": "人気・今月"
+    },
+    "noResults": "検索結果がありません",
+    "noResultsDescription": "別の検索語で探してみてください。",
+    "loadingMore": "さらに読み込み中"
+  },
+  "TopsterList": {
+    "title": "トップスター",
+    "new": "新しいトップスター",
+    "searchPlaceholder": "トップスターのタイトル・説明を検索...",
+    "loadFailed": "トップスター一覧を読み込めませんでした",
+    "empty": "まだトップスターがありません",
+    "emptyDescription": "3×3から5×5まで、好きなサイズでアルバムチャートを作れます。",
+    "first": "最初のトップスターを作る",
+    "losesOnDelete": "コメントも一緒に削除されます。"
+  },
+  "TournamentList": {
+    "title": "音楽ワールドカップ",
+    "new": "作成",
+    "searchPlaceholder": "ワールドカップのタイトル・説明を検索...",
+    "loadFailed": "ワールドカップ一覧を読み込めませんでした",
+    "empty": "まだワールドカップがありません",
+    "emptyDescription": "好きな曲やアルバムを集めて、最初のワールドカップを作ってみましょう。",
+    "first": "最初のワールドカップを作る",
+    "losesOnDelete": "プレイ記録・ランキング・コメントも一緒に削除されます。"
+  },
+  "Profile": {
+    "loadFailed": "プロフィールを読み込めませんでした",
+    "myTopsters": "マイトップスター",
+    "myTournaments": "マイワールドカップ",
+    "createNew": "新規作成",
+    "noMyTopsters": "まだ作成したトップスターがありません",
+    "noMyTournaments": "まだ作成したワールドカップがありません",
+    "notFound": "存在しないユーザーです",
+    "goHome": "ホームへ",
+    "tournaments": "ワールドカップ",
+    "noPublicTopsters": "公開されたトップスターがありません",
+    "noTournaments": "作成したワールドカップがありません"
+  },
+  "TopsterDetail": {
+    "loadFailed": "トップスターを読み込めませんでした",
+    "notFound": "トップスターが見つかりません。",
+    "saveImage": "画像を保存",
+    "updated": "トップスターを更新しました",
+    "notOwner": "自分で作成したトップスターのみ編集できます。",
+    "editHeading": "トップスターを編集",
+    "editSubmit": "変更を保存",
+    "saving": "保存中...",
+    "newHeading": "新しいトップスター",
+    "newSubmit": "トップスターを保存",
+    "metaSummary": "{nickname}さんの{width}×{height}アルバムトップスター",
+    "metaFallbackTitle": "トップスター",
+    "ogKind": "アルバムトップスター"
+  },
+  "TournamentDetail": {
+    "created": "ワールドカップを作成しました",
+    "updated": "ワールドカップを更新しました",
+    "loadFailed": "ワールドカップを読み込めませんでした",
+    "notFound": "ワールドカップが見つかりません。",
+    "notOwner": "自分で作成したワールドカップのみ編集できます。",
+    "candidates": "{type}の候補 {count}",
+    "itemsLoadFailed": "候補の情報を読み込めませんでした。",
+    "metaSummary": "{type}{count}件で競うワールドカップ · プレイ{plays}回",
+    "metaFallbackTitle": "ワールドカップ",
+    "ogKind": "音楽ワールドカップ",
+    "ogSummary": "{type}{count}件 · プレイ{plays}回"
+  },
+  "Ranking": {
+    "new": "新着",
+    "backToTournament": "ワールドカップへ",
+    "title": "{title} ランキング",
+    "basis": "累計{plays}回のプレイに基づく",
+    "empty": "集計できる候補がありません。",
+    "rank": "順位",
+    "championshipRate": "優勝率",
+    "winRate": "勝率",
+    "trend": "推移",
+    "caption": "優勝率 = 優勝回数 / 出場したプレイ数、勝率 = 勝った試合 / 戦った1対1の試合数。プレイごとに候補がランダムに選ばれるため、項目ごとの出場数は異なります。推移は{days}日前の順位との差です。"
   }
 }

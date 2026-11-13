@@ -1,6 +1,7 @@
 'use client';
 
 import { Heart } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
@@ -37,22 +38,23 @@ export default function LikeButton({
   tone = 'prominent',
   className,
 }: Props) {
+  const t = useTranslations('Like');
   const { status, toggle } = useLikeStatus(targetType, targetId);
   const liked = status?.liked ?? false;
 
   async function handleClick() {
     if (!localStorage.getItem('access_token')) {
-      toast.error('로그인이 필요합니다');
+      toast.error(t('loginRequired'));
       return;
     }
     try {
       await toggle();
     } catch {
-      toast.error('좋아요 처리에 실패했습니다');
+      toast.error(t('failed'));
     }
   }
 
-  const label = `${name} 좋아요${liked ? ' 취소' : ''}`;
+  const label = liked ? t('unlike', { name }) : t('like', { name });
 
   if (tone === 'icon') {
     return (

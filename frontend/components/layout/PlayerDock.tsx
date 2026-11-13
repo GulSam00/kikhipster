@@ -12,6 +12,7 @@ import {
   VolumeX,
   X,
 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import Image from 'next/image';
 
 import PlayerQueue from '@/components/layout/PlayerQueue';
@@ -38,6 +39,7 @@ function formatTime(seconds: number) {
  * 가릴 자리를 이 `pb-16` 이 맡기 때문이다 — 예전에 `main` 이 들고 있던 여백이다.
  */
 export default function PlayerDock() {
+  const t = useTranslations('Player');
   const {
     queue,
     currentTrack,
@@ -92,7 +94,7 @@ export default function PlayerDock() {
                 className="text-muted-foreground hover:text-foreground size-10 shrink-0 rounded-full"
                 onClick={() => setQueueOpen(!queueOpen)}
                 aria-expanded={queueOpen}
-                aria-label={queueOpen ? '재생목록 접기' : '재생목록 펼치기'}
+                aria-label={queueOpen ? t('collapseQueue') : t('expandQueue')}
               >
                 <ListMusic />
                 <span className="text-xs tabular-nums">{queue.length}</span>
@@ -108,7 +110,7 @@ export default function PlayerDock() {
                 variant="ghost"
                 className="text-muted-foreground hover:text-foreground size-10 shrink-0 rounded-full sm:hidden"
                 onClick={toggleMute}
-                aria-label={muted ? '음소거 해제' : '음소거'}
+                aria-label={muted ? t('unmute') : t('mute')}
                 aria-pressed={muted}
               >
                 <VolumeIcon />
@@ -119,7 +121,7 @@ export default function PlayerDock() {
                 variant="ghost"
                 className="text-muted-foreground hover:text-foreground hidden size-10 shrink-0 rounded-full sm:flex"
                 onClick={clear}
-                aria-label="재생기 닫기"
+                aria-label={t('close')}
               >
                 <X />
               </Button>
@@ -130,7 +132,7 @@ export default function PlayerDock() {
                 variant="ghost"
                 className="size-10 shrink-0 rounded-full"
                 onClick={prev}
-                aria-label="이전 곡"
+                aria-label={t('previous')}
               >
                 <SkipBack />
               </Button>
@@ -142,7 +144,7 @@ export default function PlayerDock() {
               <Button
                 className="size-11 shrink-0 rounded-full"
                 onClick={toggle}
-                aria-label={isPlaying ? '일시정지' : '재생'}
+                aria-label={isPlaying ? t('pause') : t('play')}
               >
                 {isPlaying ? <Pause /> : <Play />}
               </Button>
@@ -150,7 +152,7 @@ export default function PlayerDock() {
                 variant="ghost"
                 className="size-10 shrink-0 rounded-full"
                 onClick={next}
-                aria-label="다음 곡"
+                aria-label={t('next')}
               >
                 <SkipForward />
               </Button>
@@ -167,7 +169,7 @@ export default function PlayerDock() {
                 max={duration || 30}
                 step={0.1}
                 onValueChange={([v]) => seek(v)}
-                aria-label="재생 위치"
+                aria-label={t('position')}
                 className="min-w-16"
               />
               <span className="text-muted-foreground hidden w-9 shrink-0 text-xs tabular-nums sm:block">
@@ -187,7 +189,7 @@ export default function PlayerDock() {
                   variant="ghost"
                   className="text-muted-foreground hover:text-foreground size-10 shrink-0 rounded-full"
                   onClick={toggleMute}
-                  aria-label={muted ? '음소거 해제' : '음소거'}
+                  aria-label={muted ? t('unmute') : t('mute')}
                   aria-pressed={muted}
                 >
                   <VolumeIcon />
@@ -197,7 +199,7 @@ export default function PlayerDock() {
                   max={1}
                   step={0.01}
                   onValueChange={([v]) => setVolume(v)}
-                  aria-label="볼륨"
+                  aria-label={t('volume')}
                   className="[&_[data-slot=slider-range]]:bg-muted-foreground [&_[data-slot=slider-thumb]]:border-muted-foreground w-20 shrink-0"
                 />
               </div>

@@ -2,6 +2,7 @@
 
 import { DragDropContext, Draggable, Droppable } from '@hello-pangea/dnd';
 import { Download, Plus, X } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import Image from 'next/image';
 import { type ReactNode } from 'react';
 
@@ -62,6 +63,7 @@ export default function TopsterEditor({
   onSubmit,
   extraActions,
 }: Props) {
+  const t = useTranslations('TopsterEditor');
   const {
     title,
     setTitle,
@@ -107,10 +109,10 @@ export default function TopsterEditor({
           <Tabs defaultValue="add" className="flex min-h-0 flex-1 flex-col">
             <TabsList className="w-full">
               <TabsTrigger value="add" className="flex-1">
-                앨범 추가
+                {t('addTab')}
               </TabsTrigger>
               <TabsTrigger value="options" className="flex-1">
-                옵션
+                {t('optionsTab')}
               </TabsTrigger>
             </TabsList>
 
@@ -118,12 +120,12 @@ export default function TopsterEditor({
               value="add"
               className="mt-4 flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto"
             >
-              <Label htmlFor="album-search">앨범 검색</Label>
+              <Label htmlFor="album-search">{t('searchLabel')}</Label>
               <Input
                 id="album-search"
                 value={searchQ}
                 onChange={(e) => setSearchQ(e.target.value)}
-                placeholder="앨범 이름을 입력하세요"
+                placeholder={t('searchPlaceholder')}
                 className="h-10"
               />
               {searchResults.length > 0 ? (
@@ -156,10 +158,7 @@ export default function TopsterEditor({
                   </div>
                 </ScrollArea>
               ) : (
-                <p className="text-muted-foreground text-xs">
-                  검색해서 고른 앨범이 격자의 빈 칸에 차례로 들어갑니다. 칸을 드래그해 순서를
-                  바꾸고, 클릭하면 비웁니다.
-                </p>
+                <p className="text-muted-foreground text-xs">{t('addHint')}</p>
               )}
             </TabsContent>
 
@@ -168,24 +167,24 @@ export default function TopsterEditor({
               className="mt-4 flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto pr-1"
             >
               <div className="grid gap-2">
-                <Label htmlFor="topster-title">제목</Label>
+                <Label htmlFor="topster-title">{t('title')}</Label>
                 <Input
                   id="topster-title"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  placeholder="예: 2026 상반기 베스트"
+                  placeholder={t('titlePlaceholder')}
                   className="h-10"
                   aria-invalid={!!error && !title.trim()}
                 />
               </div>
 
               <div className="grid gap-2">
-                <Label htmlFor="topster-description">설명 (선택)</Label>
+                <Label htmlFor="topster-description">{t('description')}</Label>
                 <Textarea
                   id="topster-description"
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  placeholder="이 차트에 대한 한마디"
+                  placeholder={t('descriptionPlaceholder')}
                   rows={2}
                   className="resize-none"
                 />
@@ -193,7 +192,7 @@ export default function TopsterEditor({
 
               <div className="grid grid-cols-2 gap-3">
                 <div className="grid gap-2">
-                  <Label htmlFor="opt-width">가로 칸</Label>
+                  <Label htmlFor="opt-width">{t('columns')}</Label>
                   <Input
                     id="opt-width"
                     type="number"
@@ -207,7 +206,7 @@ export default function TopsterEditor({
                   />
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="opt-height">세로 칸</Label>
+                  <Label htmlFor="opt-height">{t('rows')}</Label>
                   <Input
                     id="opt-height"
                     type="number"
@@ -222,11 +221,16 @@ export default function TopsterEditor({
                 </div>
               </div>
               <p className="text-muted-foreground -mt-2 text-xs">
-                {options.width}×{options.height} = {cellCount}칸 (최대 {TOPSTER_MAX_CELLS}칸)
+                {t('cellSummary', {
+                  width: options.width,
+                  height: options.height,
+                  count: cellCount,
+                  max: TOPSTER_MAX_CELLS,
+                })}
               </p>
 
               <div className="grid gap-2">
-                <Label htmlFor="opt-gap">칸 간격 {options.cell_gap}px</Label>
+                <Label htmlFor="opt-gap">{t('gap', { gap: options.cell_gap })}</Label>
                 <Input
                   id="opt-gap"
                   type="range"
@@ -240,7 +244,7 @@ export default function TopsterEditor({
 
               <ColorField
                 id="opt-bg"
-                label="배경색"
+                label={t('backgroundColor')}
                 value={options.background_color}
                 onChange={(v) => setOption('background_color', v)}
                 placeholder="#18181b"
@@ -248,7 +252,7 @@ export default function TopsterEditor({
 
               <ColorField
                 id="opt-text"
-                label="글자색"
+                label={t('textColor')}
                 value={options.text_color}
                 onChange={(v) => setOption('text_color', v)}
                 placeholder="#ffffff"
@@ -257,19 +261,19 @@ export default function TopsterEditor({
               <div className="flex flex-col gap-2">
                 <OptionToggle
                   id="opt-show-title"
-                  label="제목 표시"
+                  label={t('showTitle')}
                   checked={options.show_title}
                   onChange={(v) => setOption('show_title', v)}
                 />
                 <OptionToggle
                   id="opt-show-info"
-                  label="앨범 정보 표시"
+                  label={t('showAlbumInfo')}
                   checked={options.show_album_info}
                   onChange={(v) => setOption('show_album_info', v)}
                 />
                 <OptionToggle
                   id="opt-show-num"
-                  label="넘버링 표시"
+                  label={t('showNumbering')}
                   checked={options.show_numbering}
                   onChange={(v) => setOption('show_numbering', v)}
                 />
@@ -292,7 +296,7 @@ export default function TopsterEditor({
               className="h-11"
             >
               <Download />
-              {downloading ? '만드는 중...' : '이미지'}
+              {downloading ? t('imageRendering') : t('image')}
             </Button>
             {extraActions}
           </div>
@@ -369,7 +373,7 @@ export default function TopsterEditor({
                                 {cell.album && (
                                   <div className="absolute inset-0 flex items-center justify-center gap-1 bg-black/60 text-xs text-white opacity-0 transition-opacity group-hover:opacity-100">
                                     <X className="size-3" />
-                                    제거
+                                    {t('removeCell')}
                                   </div>
                                 )}
                               </div>
@@ -447,6 +451,7 @@ function ColorField({
   onChange: (v: string) => void;
   placeholder: string;
 }) {
+  const t = useTranslations('TopsterEditor');
   return (
     <div className="grid gap-2">
       <Label htmlFor={id}>{label}</Label>
@@ -463,7 +468,7 @@ function ColorField({
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
           className="h-10"
-          aria-label={`${label} hex 값`}
+          aria-label={t('hexValue', { label })}
         />
       </div>
     </div>

@@ -1,6 +1,8 @@
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
+import type { AppLocale } from '@/lib/domain/locale';
+
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
@@ -9,10 +11,12 @@ export function cn(...inputs: ClassValue[]) {
  * 백엔드 `created_at` 은 `datetime.utcnow()` 로 만든 naive UTC 문자열이라
  * 타임존 접미사가 없다. 그대로 `new Date()` 에 넘기면 로컬 시각으로 해석돼
  * KST 기준 9시간이 밀린다. 접미사가 없을 때만 `Z` 를 붙여 UTC로 고정한다.
+ *
+ * 표기는 UI 언어를 따른다(`useLocale()`/`getLocale()` 로 받은 값을 넘긴다).
  */
-export function formatDate(iso: string) {
+export function formatDate(iso: string, locale: AppLocale) {
   const normalized = /(?:Z|[+-]\d{2}:?\d{2})$/.test(iso) ? iso : `${iso}Z`;
-  return new Date(normalized).toLocaleDateString('ko-KR', {
+  return new Date(normalized).toLocaleDateString(locale, {
     year: 'numeric',
     month: 'long',
     day: 'numeric',

@@ -1,6 +1,7 @@
 'use client';
 
 import { SearchIcon } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
@@ -24,11 +25,7 @@ import type { AlbumSummary, ArtistSummary, TrackSearchItem } from '@/types/music
 
 type Tab = 'artists' | 'albums' | 'tracks';
 
-const tabs: { key: Tab; label: string }[] = [
-  { key: 'artists', label: '아티스트' },
-  { key: 'albums', label: '앨범' },
-  { key: 'tracks', label: '곡' },
-];
+const tabs: Tab[] = ['artists', 'albums', 'tracks'];
 
 function useDebounce<T>(value: T, ms: number): T {
   const [debounced, setDebounced] = useState(value);
@@ -52,6 +49,7 @@ interface Results {
 }
 
 export default function SearchPage() {
+  const tr = useTranslations('Search');
   const [query, setQuery] = useState('');
   const [tab, setTab] = useState<Tab>('artists');
   const [results, setResults] = useState<Results>({});
@@ -84,7 +82,7 @@ export default function SearchPage() {
     };
     const fail = () => {
       if (cancelled) return;
-      toast.error('검색에 실패했습니다');
+      toast.error(tr('failed'));
       // 실패해도 로딩은 멈춰야 하므로 빈 결과로 마감한다.
       setResults((prev) => ({ ...prev, [tab]: { query: q, items: [] } }));
     };
@@ -112,7 +110,7 @@ export default function SearchPage() {
         <Input
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="아티스트, 앨범, 곡 검색..."
+          placeholder={tr('placeholder')}
           className="h-11 pl-9"
           autoFocus
         />
@@ -120,9 +118,9 @@ export default function SearchPage() {
 
       <Tabs value={tab} onValueChange={(v) => setTab(v as Tab)}>
         <TabsList variant="line" className="mb-2 border-b">
-          {tabs.map(({ key, label }) => (
+          {tabs.map((key) => (
             <TabsTrigger key={key} value={key}>
-              {label}
+              {tr(`tabs.${key}`)}
             </TabsTrigger>
           ))}
         </TabsList>
@@ -130,7 +128,7 @@ export default function SearchPage() {
         {loading && (
           <div className="text-muted-foreground flex items-center gap-2 py-8 text-sm">
             <Spinner />
-            검색 중...
+            {tr('searching')}
           </div>
         )}
 
@@ -176,8 +174,8 @@ export default function SearchPage() {
             <EmptyMedia variant="icon">
               <SearchIcon />
             </EmptyMedia>
-            <EmptyTitle>검색 결과가 없습니다</EmptyTitle>
-            <EmptyDescription>다른 키워드로 검색해보세요.</EmptyDescription>
+            <EmptyTitle>{tr('noResults')}</EmptyTitle>
+            <EmptyDescription>{tr('noResultsDescription')}</EmptyDescription>
           </EmptyHeader>
         </Empty>
       )}

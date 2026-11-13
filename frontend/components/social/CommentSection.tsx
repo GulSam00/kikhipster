@@ -1,6 +1,7 @@
 'use client';
 
 import { Check, Flag, Pencil, Send, Trash2, X } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
@@ -54,12 +55,13 @@ export default function CommentSection({ targetType, targetId }: Props) {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editText, setEditText] = useState('');
   const me = useMe();
+  const t = useTranslations('Comments');
 
   useEffect(() => {
     listComments(targetType, targetId)
       .then(setComments)
-      .catch(() => toast.error('댓글을 불러오지 못했습니다'));
-  }, [targetType, targetId]);
+      .catch(() => toast.error(t('loadFailed')));
+  }, [targetType, targetId, t]);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -75,7 +77,7 @@ export default function CommentSection({ targetType, targetId }: Props) {
       setComments((prev) => [...prev, created]);
       setText('');
     } catch {
-      toast.error('댓글을 등록하지 못했습니다');
+      toast.error(t('createFailed'));
     }
   }
 
@@ -99,7 +101,7 @@ export default function CommentSection({ targetType, targetId }: Props) {
       setComments((prev) => prev.map((c) => (c.id === updated.id ? updated : c)));
       cancelEdit();
     } catch {
-      toast.error('댓글을 수정하지 못했습니다');
+      toast.error(t('updateFailed'));
     }
   }
 
@@ -109,7 +111,7 @@ export default function CommentSection({ targetType, targetId }: Props) {
       setComments((prev) => prev.filter((c) => c.id !== commentId));
       if (editingId === commentId) cancelEdit();
     } catch {
-      toast.error('댓글을 삭제하지 못했습니다');
+      toast.error(t('deleteFailed'));
     }
   }
 
@@ -122,15 +124,17 @@ export default function CommentSection({ targetType, targetId }: Props) {
           c.id === commentId ? { ...c, reported_by_me: true, report_count: c.report_count + 1 } : c,
         ),
       );
-      toast.success('신고를 접수했습니다');
+      toast.success(t('reported'));
     } catch {
-      toast.error('신고하지 못했습니다');
+      toast.error(t('reportFailed'));
     }
   }
 
   return (
     <section>
-      <h2 className="font-heading mb-4 text-lg font-bold">댓글 {comments.length}</h2>
+      <h2 className="font-heading mb-4 text-lg font-bold">
+        {t('title', { count: comments.length })}
+      </h2>
 
       {/*
         예전엔 로그인해야만 이 폼이 나왔다. 이제 비로그인도 쓸 수 있고, 대신 닉네임 칸이
@@ -142,27 +146,27 @@ export default function CommentSection({ targetType, targetId }: Props) {
           <Input
             value={nickname}
             onChange={(e) => setNickname(e.target.value)}
-            placeholder="익명"
+            placeholder={t('anonymous')}
             maxLength={20}
-            aria-label="닉네임"
+            aria-label={t('nickname')}
             className="h-9 sm:w-32"
           />
         )}
         <Input
           value={text}
           onChange={(e) => setText(e.target.value)}
-          placeholder="댓글을 입력하세요..."
-          aria-label="댓글 내용"
+          placeholder={t('placeholder')}
+          aria-label={t('content')}
           className="h-9 sm:flex-1"
         />
         <Button type="submit" size="lg" disabled={!text.trim()}>
           <Send />
-          등록
+          {t('submit')}
         </Button>
       </form>
 
       {comments.length === 0 ? (
-        <p className="text-muted-foreground py-6 text-center text-sm">첫 댓글을 남겨보세요.</p>
+        <p className="text-muted-foreground py-6 text-center text-sm">{t('empty')}</p>
       ) : (
         <div className="flex flex-col gap-2">
           {comments.map((c) => (
@@ -174,7 +178,7 @@ export default function CommentSection({ targetType, targetId }: Props) {
                 <div className="min-w-0 flex-1">
                   <p className="text-muted-foreground mb-0.5 flex items-center gap-1.5 text-xs font-medium">
                     {c.author_nickname}
-                    {c.edited_at && <span>(수정됨)</span>}
+                    {c.edited_at && <span>{t('edited')}</span>}
                   </p>
 
                   {editingId === c.id ? (
@@ -183,7 +187,7 @@ export default function CommentSection({ targetType, targetId }: Props) {
                         value={editText}
                         onChange={(e) => setEditText(e.target.value)}
                         className="h-8"
-                        aria-label="댓글 수정"
+                        aria-label={t('edit')}
                         autoFocus
                         onKeyDown={(e) => {
                           if (e.key === 'Escape') cancelEdit();
@@ -193,7 +197,7 @@ export default function CommentSection({ targetType, targetId }: Props) {
                         type="submit"
                         size="icon-sm"
                         disabled={!editText.trim()}
-                        aria-label="수정 저장"
+                        aria-label={t('saveEdit')}
                       >
                         <Check />
                       </Button>
@@ -202,7 +206,7 @@ export default function CommentSection({ targetType, targetId }: Props) {
                         size="icon-sm"
                         variant="ghost"
                         onClick={cancelEdit}
-                        aria-label="수정 취소"
+                        aria-label={t('cancelEdit')}
                       >
                         <X />
                       </Button>
@@ -219,7 +223,7 @@ export default function CommentSection({ targetType, targetId }: Props) {
                       variant="ghost"
                       className="text-muted-foreground hover:text-foreground"
                       onClick={() => startEdit(c)}
-                      aria-label="댓글 수정"
+                      aria-label={t('edit')}
                     >
                       <Pencil />
                     </Button>
@@ -228,7 +232,7 @@ export default function CommentSection({ targetType, targetId }: Props) {
                       variant="ghost"
                       className="text-muted-foreground hover:text-destructive"
                       onClick={() => remove(c.id)}
-                      aria-label="댓글 삭제"
+                      aria-label={t('delete')}
                     >
                       <Trash2 />
                     </Button>
@@ -249,16 +253,16 @@ export default function CommentSection({ targetType, targetId }: Props) {
                         variant="ghost"
                         className="text-muted-foreground hover:text-foreground shrink-0"
                         disabled={c.reported_by_me}
-                        aria-label={c.reported_by_me ? '신고한 댓글' : '댓글 신고'}
+                        aria-label={c.reported_by_me ? t('alreadyReported') : t('report')}
                       >
                         <Flag />
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuLabel>신고 사유</DropdownMenuLabel>
+                      <DropdownMenuLabel>{t('reportReason')}</DropdownMenuLabel>
                       {REPORT_REASONS.map((r) => (
-                        <DropdownMenuItem key={r.value} onSelect={() => report(c.id, r.value)}>
-                          {r.label}
+                        <DropdownMenuItem key={r} onSelect={() => report(c.id, r)}>
+                          {t(`reasons.${r}`)}
                         </DropdownMenuItem>
                       ))}
                     </DropdownMenuContent>

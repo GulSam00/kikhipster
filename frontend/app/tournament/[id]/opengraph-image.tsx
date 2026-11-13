@@ -1,7 +1,8 @@
+import { getTranslations } from 'next-intl/server';
 import { ImageResponse } from 'next/og';
 
 import { getTournament } from '@/lib/api/tournaments';
-import { fetchPoolItems, ITEM_TYPE_LABEL } from '@/lib/domain/pool-item';
+import { fetchPoolItems } from '@/lib/domain/pool-item';
 import { OG_CONTENT_TYPE, OG_SIZE, OgShell } from '@/lib/render/og';
 
 export const size = OG_SIZE;
@@ -13,8 +14,12 @@ const COVER_COUNT = 9;
 
 export default async function Image({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
+  const [tr, tt] = await Promise.all([
+    getTranslations('TournamentDetail'),
+    getTranslations('ItemType'),
+  ]);
 
-  let title = '음악 월드컵';
+  let title = tr('ogKind');
   let subtitle: string | undefined;
   let covers: string[] = [];
 
@@ -23,7 +28,7 @@ export default async function Image({ params }: { params: Promise<{ id: string }
     title = t.title;
     subtitle =
       t.description ||
-      `${ITEM_TYPE_LABEL[t.item_type]} ${t.item_count}개 · 플레이 ${t.play_count}회`;
+      tr('ogSummary', { type: tt(t.item_type), count: t.item_count, plays: t.play_count });
 
     const items = await fetchPoolItems(t.item_type, t.item_ids.slice(0, COVER_COUNT));
     covers = items.map((i) => i.coverUrl).filter((u): u is string => !!u);
@@ -32,7 +37,7 @@ export default async function Image({ params }: { params: Promise<{ id: string }
   }
 
   return new ImageResponse(
-    <OgShell kind="음악 월드컵" title={title} subtitle={subtitle} covers={covers} />,
+    <OgShell kind={tr('ogKind')} title={title} subtitle={subtitle} covers={covers} />,
     size,
   );
 }

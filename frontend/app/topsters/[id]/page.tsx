@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { getTranslations } from 'next-intl/server';
 
 import { getTopster } from '@/lib/api/topsters';
 
@@ -18,9 +19,12 @@ export async function generateMetadata({
   params: Promise<{ id: string }>;
 }): Promise<Metadata> {
   const { id } = await params;
+  const tr = await getTranslations('TopsterDetail');
   try {
     const t = await getTopster(id);
-    const summary = t.description || `${t.user.nickname} 님의 ${t.width}×${t.height} 앨범 탑스터`;
+    const summary =
+      t.description ||
+      tr('metaSummary', { nickname: t.user.nickname, width: t.width, height: t.height });
     return {
       title: t.title,
       description: summary,
@@ -28,7 +32,7 @@ export async function generateMetadata({
     };
   } catch {
     // 없는 탑스터면 본문이 "찾을 수 없습니다"를 그린다 — 메타에서 터뜨리지 않는다.
-    return { title: '탑스터' };
+    return { title: tr('metaFallbackTitle') };
   }
 }
 

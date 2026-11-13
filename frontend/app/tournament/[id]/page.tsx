@@ -1,5 +1,6 @@
 import { BarChart3 } from 'lucide-react';
 import type { Metadata } from 'next';
+import { getTranslations } from 'next-intl/server';
 import Link from 'next/link';
 
 import DetailActionBar from '@/components/common/DetailActionBar';
@@ -15,7 +16,7 @@ import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 
 import { getTournament, tournamentPath } from '@/lib/api/tournaments';
-import { fetchPoolItems, ITEM_TYPE_LABEL } from '@/lib/domain/pool-item';
+import { fetchPoolItems } from '@/lib/domain/pool-item';
 
 /**
  * 첫 화면에서 서버가 미리 받아 두는 개수. 풀이 최대 512개라 전부 그리면
@@ -34,11 +35,15 @@ export async function generateMetadata({
   params: Promise<{ id: string }>;
 }): Promise<Metadata> {
   const { id } = await params;
+  const [tr, tt] = await Promise.all([
+    getTranslations('TournamentDetail'),
+    getTranslations('ItemType'),
+  ]);
   try {
     const t = await getTournament(id);
     const summary =
       t.description ||
-      `${ITEM_TYPE_LABEL[t.item_type]} ${t.item_count}개로 겨루는 월드컵 · 플레이 ${t.play_count}회`;
+      tr('metaSummary', { type: tt(t.item_type), count: t.item_count, plays: t.play_count });
     return {
       title: t.title,
       description: summary,
@@ -46,7 +51,7 @@ export async function generateMetadata({
     };
   } catch {
     // 없는 월드컵이면 페이지 렌더에서 어차피 에러 경계로 간다 — 메타에서 터뜨리지 않는다.
-    return { title: '월드컵' };
+    return { title: tr('metaFallbackTitle') };
   }
 }
 
@@ -56,7 +61,13 @@ export default async function TournamentDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const tournament = await getTournament(id);
+  const [tournament, t, tt, tw, tl] = await Promise.all([
+    getTournament(id),
+    getTranslations('TournamentDetail'),
+    getTranslations('ItemType'),
+    getTranslations('TournamentList'),
+    getTranslations('Tournament'),
+  ]);
 
   const shownIds = tournament.item_ids.slice(0, POOL_PREVIEW_LIMIT);
   const items = await fetchPoolItems(tournament.item_type, shownIds);
@@ -83,7 +94,7 @@ export default async function TournamentDetailPage({
             editHref={`/tournament/${tournament.id}/edit`}
             deletePath={tournamentPath(tournament.id)}
             name={tournament.title}
-            losesOnDelete="플레이 기록·랭킹·댓글이 함께 지워집니다."
+            losesOnDelete={tw('losesOnDelete')}
             redirectTo="/tournament"
           />
         }
@@ -96,12 +107,10 @@ export default async function TournamentDetailPage({
         썸네일과 후보 그리드는 둘 다 앨범 아트라 그림만으로는 구분되지 않는다.
       */}
       <h2 className="font-heading mb-4 text-lg font-bold">
-        {ITEM_TYPE_LABEL[tournament.item_type]} 후보 {tournament.item_count}
+        {t('candidates', { type: tt(tournament.item_type), count: tournament.item_count })}
       </h2>
       {items.length === 0 ? (
-        <p className="text-muted-foreground py-6 text-center text-sm">
-          후보 정보를 불러오지 못했습니다.
-        </p>
+        <p className="text-muted-foreground py-6 text-center text-sm">{t('itemsLoadFailed')}</p>
       ) : (
         <PoolGrid
           itemType={tournament.item_type}
@@ -123,7 +132,7 @@ export default async function TournamentDetailPage({
               <Button asChild variant="outline" size="lg" className="h-12 px-6">
                 <Link href={`/tournament/${tournament.id}/ranking`}>
                   <BarChart3 />
-                  랭킹보기
+                  {tl('viewRanking')}
                 </Link>
               </Button>
             </>

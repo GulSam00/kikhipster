@@ -1,6 +1,7 @@
 'use client';
 
 import { LayoutGrid, TriangleAlert, Trophy, UserX } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
@@ -29,6 +30,10 @@ import type { TournamentSummary } from '@/types/tournament';
 import type { PublicUser } from '@/types/user';
 
 export default function UserProfilePage() {
+  const t = useTranslations('Profile');
+  const te = useTranslations('Error');
+  const tt = useTranslations('TopsterList');
+  const tw = useTranslations('TournamentList');
   const { userId } = useParams<{ userId: string }>();
   const [user, setUser] = useState<PublicUser | null>(null);
   const [loading, setLoading] = useState(true);
@@ -44,7 +49,7 @@ export default function UserProfilePage() {
         if (err instanceof ApiError && err.status === 404) {
           setNotFound(true);
         } else {
-          toast.error('프로필을 불러오지 못했습니다');
+          toast.error(t('loadFailed'));
           setLoadError(true);
         }
       } finally {
@@ -52,7 +57,7 @@ export default function UserProfilePage() {
       }
     }
     load();
-  }, [userId]);
+  }, [userId, t]);
 
   // 없는 사용자면 목록을 부를 이유가 없다 — user 가 확인된 뒤에만 요청한다.
   const buildTopsters = useCallback(
@@ -67,13 +72,13 @@ export default function UserProfilePage() {
   const topsterList = useInfiniteList<Topster>({
     key: userId ?? '',
     buildUrl: buildTopsters,
-    errorMessage: '탑스터 목록을 불러오지 못했습니다',
+    errorMessage: tt('loadFailed'),
     enabled: !!user,
   });
   const tournamentList = useInfiniteList<TournamentSummary>({
     key: userId ?? '',
     buildUrl: buildTournaments,
-    errorMessage: '월드컵 목록을 불러오지 못했습니다',
+    errorMessage: tw('loadFailed'),
     enabled: !!user,
   });
 
@@ -84,7 +89,7 @@ export default function UserProfilePage() {
     return (
       <div className="text-muted-foreground flex flex-1 items-center justify-center gap-2">
         <Spinner />
-        불러오는 중...
+        {te('loading')}
       </div>
     );
   }
@@ -97,10 +102,10 @@ export default function UserProfilePage() {
             <EmptyMedia variant="icon">
               <TriangleAlert />
             </EmptyMedia>
-            <EmptyTitle>불러오지 못했습니다</EmptyTitle>
+            <EmptyTitle>{te('title')}</EmptyTitle>
           </EmptyHeader>
           <EmptyContent>
-            <Button onClick={() => window.location.reload()}>다시 시도</Button>
+            <Button onClick={() => window.location.reload()}>{te('retry')}</Button>
           </EmptyContent>
         </Empty>
       </div>
@@ -115,11 +120,11 @@ export default function UserProfilePage() {
             <EmptyMedia variant="icon">
               <UserX />
             </EmptyMedia>
-            <EmptyTitle>존재하지 않는 유저입니다</EmptyTitle>
+            <EmptyTitle>{t('notFound')}</EmptyTitle>
           </EmptyHeader>
           <EmptyContent>
             <Button asChild variant="secondary">
-              <Link href="/">홈으로</Link>
+              <Link href="/">{t('goHome')}</Link>
             </Button>
           </EmptyContent>
         </Empty>
@@ -148,7 +153,8 @@ export default function UserProfilePage() {
       <section>
         {/* 총 개수는 서버가 안 주므로, 끝까지 받았을 때만 숫자를 보인다. */}
         <h2 className="font-heading mb-4 text-lg font-bold">
-          탑스터{topsterList.reachedEnd ? ` ${topsters.length}` : ''}
+          {tt('title')}
+          {topsterList.reachedEnd ? ` ${topsters.length}` : ''}
         </h2>
 
         {topsterList.loading ? (
@@ -163,7 +169,7 @@ export default function UserProfilePage() {
               <EmptyMedia variant="icon">
                 <LayoutGrid />
               </EmptyMedia>
-              <EmptyTitle>공개된 탑스터가 없습니다</EmptyTitle>
+              <EmptyTitle>{t('noPublicTopsters')}</EmptyTitle>
             </EmptyHeader>
           </Empty>
         ) : (
@@ -187,7 +193,8 @@ export default function UserProfilePage() {
 
       <section className="mt-10">
         <h2 className="font-heading mb-4 text-lg font-bold">
-          월드컵{tournamentList.reachedEnd ? ` ${tournaments.length}` : ''}
+          {t('tournaments')}
+          {tournamentList.reachedEnd ? ` ${tournaments.length}` : ''}
         </h2>
 
         {tournamentList.loading ? (
@@ -202,7 +209,7 @@ export default function UserProfilePage() {
               <EmptyMedia variant="icon">
                 <Trophy />
               </EmptyMedia>
-              <EmptyTitle>만든 월드컵이 없습니다</EmptyTitle>
+              <EmptyTitle>{t('noTournaments')}</EmptyTitle>
             </EmptyHeader>
           </Empty>
         ) : (

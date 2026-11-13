@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 
 import type { PoolItem } from '@/lib/domain/pool-item';
@@ -49,6 +50,8 @@ export default function TopsterAlbumList({
   linkItems = true,
   showNumbering = false,
 }: Props) {
+  const t = useTranslations('TopsterEditor');
+  const tc = useTranslations('Common');
   // 빈 행도 자리를 지켜야 격자와 줄이 어긋나지 않는다.
   const rows = Array.from({ length: height }, (_, row) =>
     Array.from({ length: width }, (_, col) =>
@@ -89,8 +92,8 @@ export default function TopsterAlbumList({
               const text = album
                 ? `${album.subtitle} – ${album.title}`
                 : album === null
-                  ? '정보 없음'
-                  : '불러오는 중...';
+                  ? t('missingInfo')
+                  : tc('loading');
 
               const inner = (
                 <>

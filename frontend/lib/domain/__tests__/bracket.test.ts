@@ -1,8 +1,13 @@
+import { createTranslator } from 'next-intl';
 import { describe, expect, it } from 'vitest';
 
-import { nextMatch, parentMatch, roundLabel, toRounds } from '@/lib/domain/bracket';
+import { nextMatch, parentMatch, roundMessageValues, toRounds } from '@/lib/domain/bracket';
+import type { AppLocale } from '@/lib/domain/locale';
 
 import type { Play, PlayRound } from '@/types/tournament';
+
+import en from '@/messages/en.json';
+import ko from '@/messages/ko.json';
 
 const round = (
   round_num: number,
@@ -32,20 +37,33 @@ const full = play([
   round(3, 1),
 ]);
 
-describe('roundLabel', () => {
+describe('라운드 이름 (Bracket.round)', () => {
+  const roundLabel = (messages: typeof ko, locale: AppLocale) => {
+    const t = createTranslator({ locale, messages, namespace: 'Bracket' });
+    return (roundNum: number) => t('round', roundMessageValues(roundNum));
+  };
+
   it('1 은 결승, 2 는 준결승, 나머지는 2 의 거듭제곱 강', () => {
-    expect(roundLabel(1)).toBe('결승');
-    expect(roundLabel(2)).toBe('준결승');
-    expect(roundLabel(3)).toBe('8강');
-    expect(roundLabel(5)).toBe('32강');
-    expect(roundLabel(7)).toBe('128강');
+    const label = roundLabel(ko, 'ko');
+    expect(label(1)).toBe('결승');
+    expect(label(2)).toBe('준결승');
+    expect(label(3)).toBe('8강');
+    expect(label(5)).toBe('32강');
+    expect(label(7)).toBe('128강');
+  });
+
+  it('영어도 같은 규칙', () => {
+    const label = roundLabel(en, 'en');
+    expect(label(1)).toBe('Final');
+    expect(label(2)).toBe('Semifinal');
+    expect(label(4)).toBe('Round of 16');
   });
 });
 
 describe('toRounds', () => {
   it('앞 라운드에서 결승 순으로 묶고 경기는 match_num 순으로 정렬한다', () => {
     const rounds = toRounds(full);
-    expect(rounds.map((r) => r.label)).toEqual(['8강', '준결승', '결승']);
+    expect(rounds.map((r) => r.roundNum)).toEqual([3, 2, 1]);
     expect(rounds[0].matches.map((m) => m.match_num)).toEqual([0, 1, 2, 3]);
   });
 

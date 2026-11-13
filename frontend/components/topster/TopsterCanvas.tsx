@@ -1,6 +1,7 @@
 'use client';
 
 import { Music2 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import Image from 'next/image';
 import Link from 'next/link';
 
@@ -36,6 +37,7 @@ interface Props {
  * 세로로 정렬되려면 둘이 같은 행 높이를 알아야 한다.
  */
 export default function TopsterCanvas({ options, title, items, albums, className }: Props) {
+  const tt = useTranslations('ItemType');
   const {
     width,
     height,
@@ -74,7 +76,7 @@ export default function TopsterCanvas({ options, title, items, albums, className
               const album = item ? albums.get(item.album_spotify_id) : undefined;
               if (!item) return <div key={i} className="bg-white/5" />;
 
-              const label = album ? `${album.subtitle} – ${album.title}` : '앨범';
+              const label = album ? `${album.subtitle} – ${album.title}` : tt('album');
               return (
                 <Link
                   key={i}

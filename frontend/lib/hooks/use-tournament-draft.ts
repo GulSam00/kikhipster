@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
@@ -78,6 +79,7 @@ export interface UseTournamentDraftResult {
  */
 export function useTournamentDraft({ initial, onSubmit }: Args): UseTournamentDraftResult {
   useRequireAuth();
+  const tr = useTranslations('TournamentEditor');
 
   const isEdit = initial !== undefined;
   const totalSteps = isEdit ? 2 : 3;
@@ -123,13 +125,13 @@ export function useTournamentDraft({ initial, onSubmit }: Args): UseTournamentDr
           if (alive) setAlbumResults(items);
         }
       } catch {
-        toast.error('검색에 실패했습니다');
+        toast.error(tr('searchFailed'));
       }
     })();
     return () => {
       alive = false;
     };
-  }, [debouncedQ, effectiveMode]);
+  }, [debouncedQ, effectiveMode, tr]);
 
   const inPool = (id: string) => pool.some((p) => p.id === id);
 
@@ -145,11 +147,11 @@ export function useTournamentDraft({ initial, onSubmit }: Args): UseTournamentDr
 
       const room = TOURNAMENT_MAX_POOL - prev.length;
       if (room <= 0) {
-        toast.error(`최대 ${TOURNAMENT_MAX_POOL}개까지만 담을 수 있습니다`);
+        toast.error(tr('poolFull', { max: TOURNAMENT_MAX_POOL }));
         return prev;
       }
       if (fresh.length > room) {
-        toast.warning(`${room}개만 추가했습니다 (최대 ${TOURNAMENT_MAX_POOL}개)`);
+        toast.warning(tr('partiallyAdded', { count: room, max: TOURNAMENT_MAX_POOL }));
         return [...prev, ...fresh.slice(0, room)];
       }
       return [...prev, ...fresh];
@@ -187,7 +189,7 @@ export function useTournamentDraft({ initial, onSubmit }: Args): UseTournamentDr
       }));
       setAlbumTracks((prev) => ({ ...prev, [album.id]: withCover }));
     } catch {
-      toast.error('앨범 수록곡을 불러오지 못했습니다');
+      toast.error(tr('albumTracksFailed'));
       setExpanded(null);
     }
   }
@@ -210,7 +212,7 @@ export function useTournamentDraft({ initial, onSubmit }: Args): UseTournamentDr
       });
       // 성공하면 페이지가 이동시킨다. submitting 을 되돌리지 않는 건 이중 제출을 막기 위함.
     } catch {
-      toast.error(isEdit ? '저장에 실패했습니다' : '월드컵 생성에 실패했습니다');
+      toast.error(isEdit ? tr('saveFailed') : tr('createFailed'));
       setSubmitting(false);
     }
   }

@@ -1,4 +1,6 @@
 import { ArrowLeft, Disc3, Minus, TrendingDown, TrendingUp } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+import { getTranslations } from 'next-intl/server';
 import Link from 'next/link';
 
 import CoverImage from '@/components/common/CoverImage';
@@ -19,7 +21,7 @@ import {
 } from '@/components/ui/table';
 
 import { getRanking } from '@/lib/api/tournaments';
-import { fetchPoolItems, ITEM_TYPE_LABEL } from '@/lib/domain/pool-item';
+import { fetchPoolItems } from '@/lib/domain/pool-item';
 
 function percent(value: number) {
   return `${Math.round(value * 100)}%`;
@@ -27,8 +29,9 @@ function percent(value: number) {
 
 /** 순위 추이 셀. 신규(비교 시점에 표본 없음)는 대시가 아니라 '신규'로 구분한다. */
 function TrendCell({ delta }: { delta: number | null }) {
+  const t = useTranslations('Ranking');
   if (delta === null) {
-    return <span className="text-muted-foreground text-sm">신규</span>;
+    return <span className="text-muted-foreground text-sm">{t('new')}</span>;
   }
   if (delta === 0) {
     return (
@@ -52,43 +55,48 @@ export default async function TournamentRankingPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const ranking = await getRanking(id);
+  const [ranking, t, tt, tp] = await Promise.all([
+    getRanking(id),
+    getTranslations('Ranking'),
+    getTranslations('ItemType'),
+    getTranslations('PoolItem'),
+  ]);
 
   const items = await fetchPoolItems(
     ranking.item_type,
     ranking.items.map((i) => i.item_id),
   );
   const itemMap = Object.fromEntries(items.map((i) => [i.id, i]));
-  const label = ITEM_TYPE_LABEL[ranking.item_type];
+  const label = tt(ranking.item_type);
 
   return (
     <div className="mx-auto w-full max-w-4xl px-4 py-8">
       <Button asChild variant="ghost" size="sm" className="mb-3 -ml-2">
         <Link href={`/tournament/${id}`}>
           <ArrowLeft />
-          월드컵으로
+          {t('backToTournament')}
         </Link>
       </Button>
 
       <div className="mb-1 flex flex-wrap items-center justify-between gap-2">
-        <h1 className="font-heading text-2xl font-bold">{ranking.title} 랭킹</h1>
+        <h1 className="font-heading text-2xl font-bold">{t('title', { title: ranking.title })}</h1>
         <ShareButton path={`/tournament/${id}/ranking`} />
       </div>
       <p className="text-muted-foreground mb-6 text-sm tabular-nums">
-        누적 플레이 {ranking.total_plays}판 기준
+        {t('basis', { plays: ranking.total_plays })}
       </p>
 
       {ranking.items.length === 0 ? (
-        <p className="text-muted-foreground py-10 text-center text-sm">집계할 후보가 없습니다.</p>
+        <p className="text-muted-foreground py-10 text-center text-sm">{t('empty')}</p>
       ) : (
         <Table className="mb-8">
           <TableHeader>
             <TableRow>
-              <TableHead className="w-12">순위</TableHead>
+              <TableHead className="w-12">{t('rank')}</TableHead>
               <TableHead>{label}</TableHead>
-              <TableHead className="text-right">우승 비율</TableHead>
-              <TableHead className="text-right">승률</TableHead>
-              <TableHead className="text-right">추이</TableHead>
+              <TableHead className="text-right">{t('championshipRate')}</TableHead>
+              <TableHead className="text-right">{t('winRate')}</TableHead>
+              <TableHead className="text-right">{t('trend')}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -127,7 +135,7 @@ export default async function TournamentRankingPage({
                             >
                               <Link
                                 href={`/albums/${item.id}`}
-                                aria-label={`${item.title} 앨범 보기`}
+                                aria-label={tp('viewAlbum', { title: item.title })}
                               >
                                 <Disc3 />
                               </Link>
@@ -170,11 +178,7 @@ export default async function TournamentRankingPage({
               );
             })}
           </TableBody>
-          <TableCaption>
-            우승 비율 = 우승 횟수 / 뽑혀 나간 플레이 수, 승률 = 이긴 경기 / 치른 1:1 경기.
-            플레이마다 후보가 무작위로 뽑히므로 항목별 참가 수가 다릅니다. 추이는{' '}
-            {ranking.trend_days}일 전 기준 순위와의 차이입니다.
-          </TableCaption>
+          <TableCaption>{t('caption', { days: ranking.trend_days })}</TableCaption>
         </Table>
       )}
 

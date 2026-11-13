@@ -9,15 +9,16 @@ import type { Play, PlayRound } from '@/types/tournament';
 
 export interface BracketRound {
   roundNum: number;
-  label: string;
   matches: PlayRound[];
 }
 
-/** 남은 경기 수가 아니라 라운드 번호로 이름을 만든다. 2강이 아니라 '결승'으로 보이게. */
-export function roundLabel(roundNum: number): string {
-  if (roundNum === 1) return '결승';
-  if (roundNum === 2) return '준결승';
-  return `${2 ** roundNum}강`;
+/**
+ * 라운드 이름 메시지(`Bracket.round`)에 넘길 값. 남은 경기 수가 아니라 라운드 번호로 이름을
+ * 만든다 — 2강이 아니라 '결승'으로 보이게. 문구 자체는 언어별 메시지 파일에 있고
+ * (`=1` 결승, `=2` 준결승, 나머지 `{size}강`), 여기서는 숫자만 정한다.
+ */
+export function roundMessageValues(roundNum: number): { roundNum: number; size: number } {
+  return { roundNum, size: 2 ** roundNum };
 }
 
 /** 앞 라운드 → 결승 순서로 묶는다. */
@@ -33,7 +34,6 @@ export function toRounds(play: Play): BracketRound[] {
     .sort((a, b) => b[0] - a[0])
     .map(([roundNum, matches]) => ({
       roundNum,
-      label: roundLabel(roundNum),
       matches: [...matches].sort((a, b) => a.match_num - b.match_num),
     }));
 }

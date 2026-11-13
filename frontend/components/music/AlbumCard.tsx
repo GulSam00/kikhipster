@@ -1,4 +1,5 @@
 import { Disc3 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 
 import CoverImage from '@/components/common/CoverImage';
@@ -13,6 +14,7 @@ interface Props {
 }
 
 export default function AlbumCard({ album }: Props) {
+  const t = useTranslations('Music');
   const year = album.release_date?.slice(0, 4) ?? '';
 
   return (
@@ -49,7 +51,7 @@ export default function AlbumCard({ album }: Props) {
           <div className="mt-2 flex flex-col items-start gap-1 sm:flex-row sm:items-center sm:gap-1.5">
             <AlbumTypeBadge type={album.album_type} />
             <p className="text-muted-foreground truncate text-xs">
-              {year} · {album.total_tracks}곡
+              {year} · {t('trackCount', { count: album.total_tracks })}
             </p>
           </div>
         </div>

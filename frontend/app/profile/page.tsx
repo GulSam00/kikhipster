@@ -1,6 +1,7 @@
 'use client';
 
 import { LayoutGrid, Plus, TriangleAlert, Trophy } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
@@ -37,6 +38,10 @@ import type { TournamentSummary } from '@/types/tournament';
 import type { Me } from '@/types/user';
 
 export default function ProfilePage() {
+  const t = useTranslations('Profile');
+  const te = useTranslations('Error');
+  const tt = useTranslations('TopsterList');
+  const tw = useTranslations('TournamentList');
   const router = useRouter();
   const [me, setMe] = useState<Me | null>(null);
   const [loading, setLoading] = useState(true);
@@ -57,14 +62,14 @@ export default function ProfilePage() {
           router.push('/login');
           return;
         }
-        toast.error('프로필을 불러오지 못했습니다');
+        toast.error(t('loadFailed'));
         setLoadError(true);
       } finally {
         setLoading(false);
       }
     }
     load();
-  }, [router]);
+  }, [router, t]);
 
   // 목록은 사용자 확인이 끝난 뒤에 부른다 — 비로그인 상태로 먼저 때리면
   // 로그인 화면으로 넘어가기 전에 401 토스트가 뜬다.
@@ -80,13 +85,13 @@ export default function ProfilePage() {
   const topsterList = useInfiniteList<Topster>({
     key: 'me',
     buildUrl: buildTopsters,
-    errorMessage: '탑스터 목록을 불러오지 못했습니다',
+    errorMessage: tt('loadFailed'),
     enabled: !!me,
   });
   const tournamentList = useInfiniteList<TournamentSummary>({
     key: 'me',
     buildUrl: buildTournaments,
-    errorMessage: '월드컵 목록을 불러오지 못했습니다',
+    errorMessage: tw('loadFailed'),
     enabled: !!me,
   });
 
@@ -97,7 +102,7 @@ export default function ProfilePage() {
     return (
       <div className="text-muted-foreground flex flex-1 items-center justify-center gap-2">
         <Spinner />
-        불러오는 중...
+        {te('loading')}
       </div>
     );
   }
@@ -110,11 +115,11 @@ export default function ProfilePage() {
             <EmptyMedia variant="icon">
               <TriangleAlert />
             </EmptyMedia>
-            <EmptyTitle>불러오지 못했습니다</EmptyTitle>
-            <EmptyDescription>일시적인 오류일 수 있습니다. 다시 시도해주세요.</EmptyDescription>
+            <EmptyTitle>{te('title')}</EmptyTitle>
+            <EmptyDescription>{te('description')}</EmptyDescription>
           </EmptyHeader>
           <EmptyContent>
-            <Button onClick={() => window.location.reload()}>다시 시도</Button>
+            <Button onClick={() => window.location.reload()}>{te('retry')}</Button>
           </EmptyContent>
         </Empty>
       </div>
@@ -146,12 +151,13 @@ export default function ProfilePage() {
         <div className="mb-4 flex items-center justify-between">
           {/* 총 개수는 서버가 안 주므로, 끝까지 받았을 때만 숫자를 보인다. */}
           <h2 className="font-heading text-lg font-bold">
-            내 탑스터{topsterList.reachedEnd ? ` ${topsters.length}` : ''}
+            {t('myTopsters')}
+            {topsterList.reachedEnd ? ` ${topsters.length}` : ''}
           </h2>
           <Button asChild variant="link" size="sm">
             <Link href="/topsters/new">
               <Plus />
-              새로 만들기
+              {t('createNew')}
             </Link>
           </Button>
         </div>
@@ -168,11 +174,11 @@ export default function ProfilePage() {
               <EmptyMedia variant="icon">
                 <LayoutGrid />
               </EmptyMedia>
-              <EmptyTitle>아직 만든 탑스터가 없습니다</EmptyTitle>
+              <EmptyTitle>{t('noMyTopsters')}</EmptyTitle>
             </EmptyHeader>
             <EmptyContent>
               <Button asChild>
-                <Link href="/topsters/new">첫 탑스터 만들기</Link>
+                <Link href="/topsters/new">{tt('first')}</Link>
               </Button>
             </EmptyContent>
           </Empty>
@@ -188,7 +194,7 @@ export default function ProfilePage() {
                     editHref={`/topsters/${t.id}/edit`}
                     deletePath={topsterPath(t.id)}
                     name={t.title}
-                    losesOnDelete="댓글도 함께 지워집니다."
+                    losesOnDelete={tt('losesOnDelete')}
                     // 서버가 이미 지웠으므로 목록만 맞춰준다 — 다시 불러오면 왕복이 한 번 더 는다.
                     onDeleted={() => topsterList.removeItem(t.id)}
                   />
@@ -212,12 +218,13 @@ export default function ProfilePage() {
       <section className="mt-10">
         <div className="mb-4 flex items-center justify-between">
           <h2 className="font-heading text-lg font-bold">
-            내 월드컵{tournamentList.reachedEnd ? ` ${tournaments.length}` : ''}
+            {t('myTournaments')}
+            {tournamentList.reachedEnd ? ` ${tournaments.length}` : ''}
           </h2>
           <Button asChild variant="link" size="sm">
             <Link href="/tournament/new">
               <Plus />
-              새로 만들기
+              {t('createNew')}
             </Link>
           </Button>
         </div>
@@ -234,11 +241,11 @@ export default function ProfilePage() {
               <EmptyMedia variant="icon">
                 <Trophy />
               </EmptyMedia>
-              <EmptyTitle>아직 만든 월드컵이 없습니다</EmptyTitle>
+              <EmptyTitle>{t('noMyTournaments')}</EmptyTitle>
             </EmptyHeader>
             <EmptyContent>
               <Button asChild>
-                <Link href="/tournament/new">첫 월드컵 만들기</Link>
+                <Link href="/tournament/new">{tw('first')}</Link>
               </Button>
             </EmptyContent>
           </Empty>
@@ -254,7 +261,7 @@ export default function ProfilePage() {
                     editHref={`/tournament/${t.id}/edit`}
                     deletePath={tournamentPath(t.id)}
                     name={t.title}
-                    losesOnDelete="플레이 기록·랭킹·댓글이 함께 지워집니다."
+                    losesOnDelete={tw('losesOnDelete')}
                     onDeleted={() => tournamentList.removeItem(t.id)}
                   />
                 }

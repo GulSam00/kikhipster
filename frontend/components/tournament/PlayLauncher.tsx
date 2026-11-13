@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { toast } from 'sonner';
@@ -38,13 +39,14 @@ interface Props {
  * 좋아요(눌렸을 때)뿐이라 상한 안이다.
  */
 export default function PlayLauncher({ tournamentId, availableSizes }: Props) {
+  const t = useTranslations('Tournament');
   const router = useRouter();
   // 가장 큰 강수를 기본값으로 — 풀을 많이 담았으면 그만큼 크게 돌리고 싶을 것이다.
   const [size, setSize] = useState<number>(availableSizes[availableSizes.length - 1] ?? 4);
   const [loading, setLoading] = useState(false);
 
   if (availableSizes.length === 0) {
-    return <p className="text-muted-foreground text-sm">풀이 4개 미만이라 플레이할 수 없습니다.</p>;
+    return <p className="text-muted-foreground text-sm">{t('notEnoughPool')}</p>;
   }
 
   async function start() {
@@ -55,7 +57,7 @@ export default function PlayLauncher({ tournamentId, availableSizes }: Props) {
       const play = await createPlay(tournamentId, size);
       router.push(`/play/${play.id}`);
     } catch {
-      toast.error('플레이를 시작하지 못했습니다');
+      toast.error(t('startFailed'));
       setLoading(false);
     }
   }
@@ -85,7 +87,7 @@ export default function PlayLauncher({ tournamentId, availableSizes }: Props) {
             이 앱은 `dark` 고정이라 이게 없으면 배경이 회색인 채로 남는다
         */}
         <SelectTrigger
-          aria-label="강수"
+          aria-label={t('size')}
           className={cn(
             buttonVariants({ size: 'lg' }),
             'data-[state=open]:bg-primary/80 dark:bg-primary dark:hover:bg-primary/80 [&_svg]:text-primary-foreground/70 h-12 w-full justify-between rounded-r-none border-r-0 data-[size=default]:h-12',
@@ -96,7 +98,7 @@ export default function PlayLauncher({ tournamentId, availableSizes }: Props) {
             **SSR HTML 에는 빈 칸이 나가고** 하이드레이션 직후 "128강"이 들어오며 폭이 튄다.
             값이 controlled state 라 여기서 직접 그리면 서버·클라이언트가 같은 글자를 낸다.
           */}
-          <SelectValue>{size}강</SelectValue>
+          <SelectValue>{t('sizeOption', { size })}</SelectValue>
         </SelectTrigger>
         {/*
           기본값 `position="item-aligned"` 는 네이티브 select 처럼 **트리거를 덮으면서**
@@ -115,7 +117,7 @@ export default function PlayLauncher({ tournamentId, availableSizes }: Props) {
         >
           {availableSizes.map((s) => (
             <SelectItem key={s} value={String(s)} className="py-2">
-              {s}강
+              {t('sizeOption', { size: s })}
             </SelectItem>
           ))}
         </SelectContent>
@@ -127,7 +129,7 @@ export default function PlayLauncher({ tournamentId, availableSizes }: Props) {
         onClick={start}
         disabled={loading}
       >
-        {loading ? '대진 뽑는 중...' : '시작하기'}
+        {loading ? t('drawing') : t('start')}
       </Button>
     </div>
   );

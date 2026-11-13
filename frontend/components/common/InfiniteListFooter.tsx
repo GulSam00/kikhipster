@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import type { ReactNode, RefObject } from 'react';
 
 import { Button } from '@/components/ui/button';
@@ -30,6 +31,7 @@ export default function InfiniteListFooter({
   limit,
   skeleton,
 }: Props) {
+  const t = useTranslations('InfiniteList');
   return (
     <>
       {/* 첫 로딩 중에도 DOM 에 있어야 관찰이 제때 시작된다. */}
@@ -39,7 +41,7 @@ export default function InfiniteListFooter({
         (skeleton ?? (
           <div
             role="status"
-            aria-label="더 불러오는 중"
+            aria-label={t('loadingMore')}
             className="text-muted-foreground mt-4 flex justify-center"
           >
             <Spinner />
@@ -49,13 +51,13 @@ export default function InfiniteListFooter({
       {failed && (
         <div className="mt-6 flex justify-center">
           <Button variant="outline" onClick={retry}>
-            다시 불러오기
+            {t('retry')}
           </Button>
         </div>
       )}
 
       {reachedEnd && loadedCount >= limit && (
-        <p className="text-muted-foreground mt-6 text-center text-sm">모두 불러왔습니다</p>
+        <p className="text-muted-foreground mt-6 text-center text-sm">{t('end')}</p>
       )}
     </>
   );

@@ -1,15 +1,17 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useEffect } from 'react';
 
 import { Spinner } from '@/components/ui/spinner';
 
 function CallbackStatus() {
+  const t = useTranslations('Auth');
   return (
     <div className="text-muted-foreground flex flex-1 items-center justify-center gap-2">
       <Spinner />
-      로그인 처리 중...
+      {t('processing')}
     </div>
   );
 }

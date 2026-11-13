@@ -1,6 +1,7 @@
 'use client';
 
 import { LayoutGrid, Plus, Search } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
 
@@ -27,12 +28,11 @@ import type { Topster, TopsterSort } from '@/types/topster';
 
 // 월드컵 대시보드와 같은 축이되 인기 지표는 '플레이 횟수'가 아니라 '좋아요 수'이고,
 // 기간별(전체·년·월) 구분 없이 최신순/인기순 두 개만 둔다.
-const SORTS: { value: TopsterSort; label: string }[] = [
-  { value: 'recent', label: '최신순' },
-  { value: 'popular', label: '인기순' },
-];
+const SORTS: TopsterSort[] = ['recent', 'popular'];
 
 export default function TopstersPage() {
+  const t = useTranslations('TopsterList');
+  const tl = useTranslations('List');
   const [q, setQ] = useState('');
   const [debouncedQ, setDebouncedQ] = useState('');
   const [sort, setSort] = useState<TopsterSort>('recent');
@@ -51,16 +51,17 @@ export default function TopstersPage() {
     useInfiniteList<Topster>({
       key: `${sort}|${debouncedQ}`,
       buildUrl,
-      errorMessage: '탑스터 목록을 불러오지 못했습니다',
+      errorMessage: t('loadFailed'),
     });
 
   return (
     <div className="mx-auto w-full max-w-6xl px-4 py-8">
       <div className="mb-6 flex items-center justify-between gap-3">
-        <h1 className="font-heading text-2xl font-bold">탑스터</h1>
+        <h1 className="font-heading text-2xl font-bold">{t('title')}</h1>
         <Button asChild size="lg">
           <Link href="/topsters/new">
-            <Plus />새 탑스터
+            <Plus />
+            {t('new')}
           </Link>
         </Button>
       </div>
@@ -70,7 +71,7 @@ export default function TopstersPage() {
         <Input
           value={q}
           onChange={(e) => setQ(e.target.value)}
-          placeholder="탑스터 제목·설명 검색..."
+          placeholder={t('searchPlaceholder')}
           className="h-10 pl-9"
         />
       </div>
@@ -83,8 +84,8 @@ export default function TopstersPage() {
         className="mb-6"
       >
         {SORTS.map((s) => (
-          <ToggleGroupItem key={s.value} value={s.value}>
-            {s.label}
+          <ToggleGroupItem key={s} value={s}>
+            {tl(`sort.${s}`)}
           </ToggleGroupItem>
         ))}
       </ToggleGroup>
@@ -101,19 +102,15 @@ export default function TopstersPage() {
             <EmptyMedia variant="icon">
               <LayoutGrid />
             </EmptyMedia>
-            <EmptyTitle>
-              {debouncedQ ? '검색 결과가 없습니다' : '아직 탑스터가 없습니다'}
-            </EmptyTitle>
+            <EmptyTitle>{debouncedQ ? tl('noResults') : t('empty')}</EmptyTitle>
             <EmptyDescription>
-              {debouncedQ
-                ? '다른 검색어로 찾아보세요.'
-                : '3×3부터 5×5까지, 원하는 크기로 앨범 차트를 만들 수 있습니다.'}
+              {debouncedQ ? tl('noResultsDescription') : t('emptyDescription')}
             </EmptyDescription>
           </EmptyHeader>
           {!debouncedQ && (
             <EmptyContent>
               <Button asChild>
-                <Link href="/topsters/new">첫 탑스터 만들기</Link>
+                <Link href="/topsters/new">{t('first')}</Link>
               </Button>
             </EmptyContent>
           )}
@@ -137,7 +134,7 @@ export default function TopstersPage() {
         skeleton={
           <div
             role="status"
-            aria-label="더 불러오는 중"
+            aria-label={tl('loadingMore')}
             className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5"
           >
             {Array.from({ length: 5 }).map((_, i) => (

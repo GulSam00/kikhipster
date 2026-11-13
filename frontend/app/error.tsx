@@ -1,6 +1,7 @@
 'use client';
 
 import { TriangleAlert } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { useEffect } from 'react';
 
 import { Button } from '@/components/ui/button';
@@ -20,6 +21,7 @@ export default function Error({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  const t = useTranslations('Error');
   useEffect(() => {
     console.error(error);
   }, [error]);
@@ -31,11 +33,11 @@ export default function Error({
           <EmptyMedia variant="icon">
             <TriangleAlert />
           </EmptyMedia>
-          <EmptyTitle>불러오지 못했습니다</EmptyTitle>
-          <EmptyDescription>일시적인 오류일 수 있습니다. 다시 시도해주세요.</EmptyDescription>
+          <EmptyTitle>{t('title')}</EmptyTitle>
+          <EmptyDescription>{t('description')}</EmptyDescription>
         </EmptyHeader>
         <EmptyContent>
-          <Button onClick={reset}>다시 시도</Button>
+          <Button onClick={reset}>{t('retry')}</Button>
         </EmptyContent>
       </Empty>
     </div>

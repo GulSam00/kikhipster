@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { useCallback, useState } from 'react';
 import { toast } from 'sonner';
 
@@ -20,6 +21,7 @@ import { usePlayer } from '@/contexts/PlayerContext';
  * `pendingId` 는 앨범 수록곡을 받아 오는 동안 그 타일만 스피너로 바꾸기 위한 것이다.
  */
 export function usePoolPlayer(itemType: TournamentItemType) {
+  const t = useTranslations('Player');
   const { enqueueAndPlay, toggle, currentTrack, isPlaying } = usePlayer();
   const [pendingId, setPendingId] = useState<string | null>(null);
 
@@ -33,7 +35,7 @@ export function usePoolPlayer(itemType: TournamentItemType) {
         }
         const track = poolItemToQueue(item);
         if (!track) {
-          toast.error('이 곡은 미리듣기를 제공하지 않습니다');
+          toast.error(t('noTrackPreview'));
           return;
         }
         enqueueAndPlay([track]);
@@ -45,17 +47,17 @@ export function usePoolPlayer(itemType: TournamentItemType) {
       try {
         const tracks = await albumQueueTracks(item.id);
         if (tracks.length === 0) {
-          toast.error('이 앨범은 미리듣기를 제공하지 않습니다');
+          toast.error(t('noAlbumPreview'));
           return;
         }
         enqueueAndPlay(tracks);
       } catch {
-        toast.error('앨범 수록곡을 불러오지 못했습니다');
+        toast.error(t('albumTracksFailed'));
       } finally {
         setPendingId(null);
       }
     },
-    [currentTrack?.id, enqueueAndPlay, itemType, pendingId, toggle],
+    [currentTrack?.id, enqueueAndPlay, itemType, pendingId, t, toggle],
   );
 
   return { playItem, pendingId, currentId: currentTrack?.id ?? null, isPlaying };

@@ -50,13 +50,11 @@ export const deleteComment = (type: CommentTargetType, id: string, commentId: st
     headers: guestHeader(),
   });
 
-/** 신고 사유. 관리 화면이 아직 없어 서버는 값을 강제하지 않는다. */
-export const REPORT_REASONS = [
-  { value: 'spam', label: '스팸·광고' },
-  { value: 'abuse', label: '욕설·혐오' },
-  { value: 'sexual', label: '음란물' },
-  { value: 'etc', label: '기타' },
-] as const;
+/**
+ * 신고 사유. 관리 화면이 아직 없어 서버는 값을 강제하지 않는다.
+ * 표시 문구는 메시지 `Comments.reasons.<값>` 에 있다.
+ */
+export const REPORT_REASONS = ['spam', 'abuse', 'sexual', 'etc'] as const;
 
 export const reportComment = (
   type: CommentTargetType,

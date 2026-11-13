@@ -1,6 +1,7 @@
 'use client';
 
 import { Download } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 
@@ -32,6 +33,10 @@ import type { Topster } from '@/types/topster';
  * 서버 fetch 는 메타데이터와 OG 이미지용이다.
  */
 export default function TopsterDetail({ id }: { id: string }) {
+  const t = useTranslations('TopsterDetail');
+  const te = useTranslations('TopsterEditor');
+  const tt = useTranslations('TopsterList');
+  const tc = useTranslations('Common');
   const [topster, setTopster] = useState<Topster | null>(null);
   const [loading, setLoading] = useState(true);
   const [downloading, setDownloading] = useState(false);
@@ -43,11 +48,11 @@ export default function TopsterDetail({ id }: { id: string }) {
       .then(setTopster)
       .catch((err) => {
         if (!(err instanceof ApiError && err.status === 404)) {
-          toast.error('탑스터를 불러오지 못했습니다');
+          toast.error(t('loadFailed'));
         }
       })
       .finally(() => setLoading(false));
-  }, [id]);
+  }, [id, t]);
 
   async function handleDownload() {
     if (!topster) return;
@@ -60,9 +65,10 @@ export default function TopsterDetail({ id }: { id: string }) {
         title: topster.title,
         items: topster.items,
         albums,
+        missingLabel: te('missingInfo'),
       });
     } catch {
-      toast.error('이미지를 만들지 못했습니다');
+      toast.error(te('imageFailed'));
     } finally {
       setDownloading(false);
     }
@@ -72,7 +78,7 @@ export default function TopsterDetail({ id }: { id: string }) {
     return (
       <div className="text-muted-foreground flex flex-1 items-center justify-center gap-2">
         <Spinner />
-        불러오는 중...
+        {tc('loading')}
       </div>
     );
   }
@@ -80,7 +86,7 @@ export default function TopsterDetail({ id }: { id: string }) {
   if (!topster) {
     return (
       <div className="flex flex-1 items-center justify-center">
-        <p className="text-muted-foreground">탑스터를 찾을 수 없습니다.</p>
+        <p className="text-muted-foreground">{t('notFound')}</p>
       </div>
     );
   }
@@ -107,7 +113,7 @@ export default function TopsterDetail({ id }: { id: string }) {
             editHref={`/topsters/${topster.id}/edit`}
             deletePath={topsterPath(topster.id)}
             name={topster.title}
-            losesOnDelete="댓글도 함께 지워집니다."
+            losesOnDelete={tt('losesOnDelete')}
             redirectTo="/topsters"
           />
         }
@@ -131,7 +137,7 @@ export default function TopsterDetail({ id }: { id: string }) {
             className="h-12 w-full px-6 sm:w-auto"
           >
             <Download />
-            {downloading ? '만드는 중...' : '이미지 저장'}
+            {downloading ? te('imageRendering') : t('saveImage')}
           </Button>
         }
         engage={

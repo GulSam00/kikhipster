@@ -1,6 +1,7 @@
 'use client';
 
 import { Pencil, Trash2 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 
 import { Button } from '@/components/ui/button';
@@ -33,6 +34,7 @@ export default function OwnerItemActions({
   losesOnDelete,
   onDeleted,
 }: Props) {
+  const t = useTranslations('Owner');
   // 확인 문구와 동작은 상세 페이지의 삭제(`OwnerActions`)와 공유한다.
   const { confirmDelete, deleting } = useDeleteItem({
     deletePath,
@@ -46,12 +48,12 @@ export default function OwnerItemActions({
       <Button asChild variant="outline" size="sm" className="flex-1">
         <Link href={editHref}>
           <Pencil />
-          수정
+          {t('edit')}
         </Link>
       </Button>
       <Button variant="destructive" size="sm" onClick={confirmDelete} disabled={deleting}>
         <Trash2 />
-        {deleting ? '삭제 중' : '삭제'}
+        {deleting ? t('deleting') : t('delete')}
       </Button>
     </div>
   );

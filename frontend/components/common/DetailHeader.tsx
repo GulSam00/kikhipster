@@ -1,3 +1,4 @@
+import { useLocale } from 'next-intl';
 import Link from 'next/link';
 import type { ReactNode } from 'react';
 
@@ -50,6 +51,7 @@ export default function DetailHeader({
   likeTarget,
   ownerMenu,
 }: Props) {
+  const locale = useLocale();
   return (
     <header className="mb-6">
       <div className="flex items-start justify-between gap-3">
@@ -63,7 +65,7 @@ export default function DetailHeader({
               {authorNickname}
             </Link>
             {' · '}
-            {formatDate(createdAt)}
+            {formatDate(createdAt, locale)}
           </p>
         </div>
         {/* 관리 동작은 제목 높이에 맞춰 오른쪽 끝에. 방문자에게는 이 자리가 비어 있다. */}

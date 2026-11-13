@@ -1,6 +1,7 @@
 'use client';
 
 import { Music2, Pause, Play } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import Image from 'next/image';
 
 import LikeButton from '@/components/social/LikeButton';
@@ -35,6 +36,7 @@ function formatMs(ms: number) {
 }
 
 export default function TrackRow({ track, artist, albumCover, showCover = false }: Props) {
+  const t = useTranslations('Player');
   const { enqueueAndPlay, toggle, currentTrack, isPlaying } = usePlayer();
   const isActive = currentTrack?.id === track.id;
   const playable = !!track.preview_url;
@@ -81,7 +83,7 @@ export default function TrackRow({ track, artist, albumCover, showCover = false 
         <button
           type="button"
           onClick={handlePlay}
-          aria-label={`${track.name} 미리듣기`}
+          aria-label={t('previewItem', { title: track.name })}
           className="focus-visible:ring-ring/50 absolute inset-0 cursor-pointer rounded-lg outline-none focus-visible:ring-3"
         />
       )}

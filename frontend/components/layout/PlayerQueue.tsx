@@ -2,6 +2,7 @@
 
 import { DragDropContext, Draggable, Droppable, type DropResult } from '@hello-pangea/dnd';
 import { ChevronDown, GripVertical, Music2, Volume2, X } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 import CoverImage from '@/components/common/CoverImage';
 import { Button } from '@/components/ui/button';
@@ -22,6 +23,7 @@ import { usePlayer } from '@/contexts/PlayerContext';
  * 한 겹 더 감싸서 그 탐색이 어긋난다.
  */
 export default function PlayerQueue() {
+  const t = useTranslations('Player');
   const { queue, currentIndex, isPlaying, playAt, removeAt, move, clear, setQueueOpen } =
     usePlayer();
 
@@ -34,15 +36,17 @@ export default function PlayerQueue() {
     <div className="border-b">
       <div className="mx-auto flex h-80 max-w-6xl flex-col px-4 py-3 sm:h-96">
         <div className="mb-2 flex items-center gap-2">
-          <p className="flex-1 text-sm font-medium tabular-nums">재생목록 {queue.length}곡</p>
+          <p className="flex-1 text-sm font-medium tabular-nums">
+            {t('queueTitle', { count: queue.length })}
+          </p>
           <Button variant="ghost" size="sm" onClick={clear}>
-            전체 비우기
+            {t('clearQueue')}
           </Button>
           <Button
             variant="ghost"
             size="icon-sm"
             onClick={() => setQueueOpen(false)}
-            aria-label="재생목록 접기"
+            aria-label={t('collapseQueue')}
           >
             <ChevronDown />
           </Button>
@@ -72,7 +76,7 @@ export default function PlayerQueue() {
                             <span
                               {...drag.dragHandleProps}
                               className="text-muted-foreground flex size-8 shrink-0 cursor-grab items-center justify-center active:cursor-grabbing"
-                              aria-label={`${track.name} 순서 바꾸기`}
+                              aria-label={t('reorderItem', { title: track.name })}
                             >
                               <GripVertical className="size-4" />
                             </span>
@@ -109,7 +113,7 @@ export default function PlayerQueue() {
                               size="icon-sm"
                               className="text-muted-foreground hover:text-foreground shrink-0"
                               onClick={() => removeAt(index)}
-                              aria-label={`${track.name} 재생목록에서 빼기`}
+                              aria-label={t('removeItem', { title: track.name })}
                             >
                               <X />
                             </Button>

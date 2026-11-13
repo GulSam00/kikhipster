@@ -93,6 +93,8 @@ interface DrawArgs {
   title: string;
   items: { album_spotify_id: string; position: number }[];
   albums: Map<string, PoolItem | null>;
+  /** 앨범 정보를 못 받은 칸의 목록 문구. 이미지에 그대로 박히므로 UI 언어로 넘긴다. */
+  missingLabel: string;
 }
 
 export async function renderTopsterBlob({
@@ -100,6 +102,7 @@ export async function renderTopsterBlob({
   title,
   items,
   albums,
+  missingLabel,
 }: DrawArgs): Promise<Blob | null> {
   const {
     width,
@@ -218,7 +221,7 @@ export async function renderTopsterBlob({
       let y = gridTop + r * (CELL + gap);
       row.forEach((item) => {
         const album = albums.get(item.album_spotify_id);
-        const label = album ? `${album.subtitle} – ${album.title}` : '정보 없음';
+        const label = album ? `${album.subtitle} – ${album.title}` : missingLabel;
         const text = show_numbering ? `${item.position + 1}. ${label}` : label;
         for (const line of wrapText(ctx, text, avail)) {
           ctx.fillText(line, lx, y + lineH / 2);

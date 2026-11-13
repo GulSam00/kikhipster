@@ -56,8 +56,3 @@ export async function fetchPoolItems(
   }
   return (await getAlbumsByIds(ids)).map(albumToPoolItem);
 }
-
-export const ITEM_TYPE_LABEL: Record<TournamentItemType, string> = {
-  track: '곡',
-  album: '앨범',
-};

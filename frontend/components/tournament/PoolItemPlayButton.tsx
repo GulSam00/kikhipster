@@ -1,6 +1,7 @@
 'use client';
 
 import { Pause, Play } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
@@ -38,6 +39,7 @@ export default function PoolItemPlayButton({
   className,
   iconClassName,
 }: Props) {
+  const t = useTranslations('Player');
   const { playItem, pendingId, currentId, isPlaying } = usePoolPlayer(itemType);
   const playing = currentId === item.id && isPlaying;
 
@@ -51,7 +53,9 @@ export default function PoolItemPlayButton({
       className={className}
       onClick={() => void playItem(item)}
       disabled={pendingId === item.id}
-      aria-label={`${item.title} ${playing ? '일시정지' : '미리듣기'}`}
+      aria-label={
+        playing ? t('pauseItem', { title: item.title }) : t('previewItem', { title: item.title })
+      }
     >
       {pendingId === item.id ? (
         <Spinner className={iconClassName} />

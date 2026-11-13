@@ -1,6 +1,7 @@
 'use client';
 
 import { BarChart3, Play } from 'lucide-react';
+import { useLocale, useTranslations } from 'next-intl';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useState, type ReactNode } from 'react';
@@ -12,7 +13,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 
-import { fetchPoolItems, ITEM_TYPE_LABEL, type PoolItem } from '@/lib/domain/pool-item';
+import { fetchPoolItems, type PoolItem } from '@/lib/domain/pool-item';
 import { formatDate } from '@/lib/utils';
 
 import type { TournamentSummary } from '@/types/tournament';
@@ -30,6 +31,9 @@ interface Props {
  * DESIGN.md § Color budget의 강조 요소 상한을 그대로 넘긴다.
  */
 export default function TournamentCard({ tournament, actions }: Props) {
+  const t = useTranslations('Tournament');
+  const tt = useTranslations('ItemType');
+  const locale = useLocale();
   const [previews, setPreviews] = useState<PoolItem[]>([]);
   const href = `/tournament/${tournament.id}`;
 
@@ -85,12 +89,12 @@ export default function TournamentCard({ tournament, actions }: Props) {
             */}
             <div className="flex items-center gap-1.5">
               <Badge variant="outline" className="text-muted-foreground shrink-0">
-                {ITEM_TYPE_LABEL[tournament.item_type]}
+                {tt(tournament.item_type)}
               </Badge>
               <p className="truncate text-sm font-medium">{tournament.title}</p>
             </div>
             <p className="text-muted-foreground truncate text-xs">
-              {tournament.user.nickname} · {formatDate(tournament.created_at)}
+              {tournament.user.nickname} · {formatDate(tournament.created_at, locale)}
             </p>
             <ItemStats
               className="mt-1"
@@ -109,13 +113,13 @@ export default function TournamentCard({ tournament, actions }: Props) {
           <Button asChild variant="secondary" size="lg" className="flex-1">
             <Link href={href}>
               <Play />
-              시작하기
+              {t('start')}
             </Link>
           </Button>
           <Button asChild variant="outline" size="lg" className="flex-1">
             <Link href={`${href}/ranking`}>
               <BarChart3 />
-              랭킹보기
+              {t('viewRanking')}
             </Link>
           </Button>
           <ShareButton path={href} />

@@ -1,4 +1,5 @@
 import { Disc3, Music2, Pause, Play } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 
 import CoverImage from '@/components/common/CoverImage';
@@ -58,6 +59,7 @@ export default function PoolItemTile({
   loading,
   href,
 }: Props) {
+  const t = useTranslations('PoolItem');
   return (
     <Card size="sm" className={cn('group relative h-full gap-2', className)}>
       <CardContent className="flex flex-col gap-2">
@@ -96,7 +98,7 @@ export default function PoolItemTile({
               className="bg-secondary/90 size-9 rounded-full"
               asChild
             >
-              <Link href={href} aria-label={`${item.title} 앨범 보기`}>
+              <Link href={href} aria-label={t('viewAlbum', { title: item.title })}>
                 <Disc3 />
               </Link>
             </Button>
@@ -108,7 +110,7 @@ export default function PoolItemTile({
               className="bg-secondary/90 size-9 rounded-full"
               onClick={onPlay}
               disabled={loading}
-              aria-label={`${item.title} 재생`}
+              aria-label={t('play', { title: item.title })}
             >
               {loading ? <Spinner /> : playing ? <Pause /> : <Play />}
             </Button>

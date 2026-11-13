@@ -1,6 +1,7 @@
 'use client';
 
 import { ArrowLeft, Check, ChevronDown, Disc3, Music2, Plus, Search, X } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { type ReactNode } from 'react';
@@ -51,6 +52,9 @@ interface Props {
  * 상태 로직은 `useTournamentDraft` 에 있다 — 이 컴포넌트는 UI 렌더링만 한다.
  */
 export default function TournamentEditor({ initial, onSubmit, backHref, extraActions }: Props) {
+  const t = useTranslations('TournamentEditor');
+  const tt = useTranslations('ItemType');
+  const tm = useTranslations('Music');
   const router = useRouter();
   const {
     isEdit,
@@ -88,17 +92,17 @@ export default function TournamentEditor({ initial, onSubmit, backHref, extraAct
         <StepHeader
           step={1}
           total={totalSteps}
-          title="무엇으로 겨룰까요?"
+          title={t('typeStepTitle')}
           onBack={() => router.push(backHref)}
         />
 
         <div className="grid grid-cols-2 gap-3">
           {(
             [
-              { value: 'track', label: '곡', desc: '노래 하나하나로 대결', Icon: Music2 },
-              { value: 'album', label: '앨범', desc: '앨범 단위로 대결', Icon: Disc3 },
+              { value: 'track', Icon: Music2 },
+              { value: 'album', Icon: Disc3 },
             ] as const
-          ).map(({ value, label, desc, Icon }) => (
+          ).map(({ value, Icon }) => (
             <button
               key={value}
               type="button"
@@ -108,8 +112,10 @@ export default function TournamentEditor({ initial, onSubmit, backHref, extraAct
               <Card className="hover:bg-accent h-full transition-colors">
                 <CardContent className="flex flex-col gap-1">
                   <Icon className="text-muted-foreground mb-1 size-6" />
-                  <p className="text-lg font-bold">{label}</p>
-                  <p className="text-muted-foreground text-xs">{desc}</p>
+                  <p className="text-lg font-bold">{tt(value)}</p>
+                  <p className="text-muted-foreground text-xs">
+                    {value === 'track' ? t('trackDesc') : t('albumDesc')}
+                  </p>
                 </CardContent>
               </Card>
             </button>
@@ -126,30 +132,32 @@ export default function TournamentEditor({ initial, onSubmit, backHref, extraAct
         <StepHeader
           step={isEdit ? 1 : 2}
           total={totalSteps}
-          title={isEdit ? '월드컵 정보 수정' : '월드컵 정보'}
+          title={isEdit ? t('metaStepTitleEdit') : t('metaStepTitle')}
           onBack={() => (isEdit ? router.push(backHref) : setStep('type'))}
         />
 
         <div className="mb-6 flex flex-col gap-4">
           <div className="grid gap-2">
-            <Label htmlFor="wc-title">이름</Label>
+            <Label htmlFor="wc-title">{t('name')}</Label>
             <Input
               id="wc-title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder={itemType === 'album' ? '내 인생 앨범 월드컵' : '내 최애곡 월드컵'}
+              placeholder={
+                itemType === 'album' ? t('namePlaceholderAlbum') : t('namePlaceholderTrack')
+              }
               maxLength={100}
               className="h-10"
             />
           </div>
 
           <div className="grid gap-2">
-            <Label htmlFor="wc-desc">설명</Label>
+            <Label htmlFor="wc-desc">{t('description')}</Label>
             <Textarea
               id="wc-desc"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="어떤 기준으로 모았는지 적어주세요 (선택)"
+              placeholder={t('descriptionPlaceholder')}
               maxLength={500}
               rows={4}
             />
@@ -163,7 +171,7 @@ export default function TournamentEditor({ initial, onSubmit, backHref, extraAct
           disabled={!title.trim()}
           onClick={() => setStep('pool')}
         >
-          다음
+          {t('next')}
         </Button>
       </div>
     );
@@ -175,19 +183,23 @@ export default function TournamentEditor({ initial, onSubmit, backHref, extraAct
       <StepHeader
         step={isEdit ? 2 : 3}
         total={totalSteps}
-        title={`${itemType === 'album' ? '앨범' : '곡'} 담기`}
+        title={t('poolStepTitle', { type: tt(itemType) })}
         onBack={() => setStep('meta')}
       />
 
       <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
         <p className="text-muted-foreground text-sm tabular-nums">
-          {pool.length}개 담김 · 최소 {TOURNAMENT_MIN_POOL} / 최대 {TOURNAMENT_MAX_POOL}
+          {t('poolSummary', {
+            count: pool.length,
+            min: TOURNAMENT_MIN_POOL,
+            max: TOURNAMENT_MAX_POOL,
+          })}
         </p>
         {itemType === 'track' && (
           <Tabs value={searchMode} onValueChange={(v) => setSearchMode(v as SearchMode)}>
             <TabsList>
-              <TabsTrigger value="track">곡 검색</TabsTrigger>
-              <TabsTrigger value="album">앨범에서 찾기</TabsTrigger>
+              <TabsTrigger value="track">{t('searchTracks')}</TabsTrigger>
+              <TabsTrigger value="album">{t('findInAlbums')}</TabsTrigger>
             </TabsList>
           </Tabs>
         )}
@@ -198,7 +210,9 @@ export default function TournamentEditor({ initial, onSubmit, backHref, extraAct
         <Input
           value={q}
           onChange={(e) => setQ(e.target.value)}
-          placeholder={effectiveMode === 'album' ? '앨범 검색...' : '곡 검색...'}
+          placeholder={
+            effectiveMode === 'album' ? t('searchAlbumPlaceholder') : t('searchTrackPlaceholder')
+          }
           className="h-10 pl-9"
         />
       </div>
@@ -249,7 +263,7 @@ export default function TournamentEditor({ initial, onSubmit, backHref, extraAct
                       <span className="min-w-0 flex-1">
                         <span className="block truncate text-sm">{a.title}</span>
                         <span className="text-muted-foreground block truncate text-xs">
-                          {a.artist_name} · {a.total_tracks}곡
+                          {a.artist_name} · {tm('trackCount', { count: a.total_tracks })}
                         </span>
                       </span>
                       <ChevronDown
@@ -265,7 +279,7 @@ export default function TournamentEditor({ initial, onSubmit, backHref, extraAct
                     <div className="mb-1 ml-4 border-l pl-2">
                       {!tracks ? (
                         <p className="text-muted-foreground py-3 text-center text-xs">
-                          수록곡 불러오는 중...
+                          {t('loadingTracks')}
                         </p>
                       ) : (
                         <>
@@ -276,7 +290,7 @@ export default function TournamentEditor({ initial, onSubmit, backHref, extraAct
                               onClick={() => addItems(tracks.map(trackToPoolItem))}
                             >
                               <Plus />
-                              {tracks.length}곡 전체 추가
+                              {t('addAllTracks', { count: tracks.length })}
                             </Button>
                           </div>
                           {tracks.map((t) => (
@@ -302,7 +316,9 @@ export default function TournamentEditor({ initial, onSubmit, backHref, extraAct
       {pool.length > 0 && (
         <>
           <Separator className="mb-3" />
-          <p className="mb-2 text-sm font-medium tabular-nums">담긴 목록 {pool.length}</p>
+          <p className="mb-2 text-sm font-medium tabular-nums">
+            {t('picked', { count: pool.length })}
+          </p>
           {/* 상세 페이지의 후보 그리드(PoolItemTile)와 같은 모양으로 맞춘다 — 담기 전과 후가
               같아 보여야 무엇이 담겼는지 알아보기 쉽다. 커버는 이미 메모리에 있어 추가 요청이 없다. */}
           <div className="mb-4 grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-6">
@@ -322,13 +338,13 @@ export default function TournamentEditor({ initial, onSubmit, backHref, extraAct
         >
           {submitting
             ? isEdit
-              ? '저장 중...'
-              : '만드는 중...'
+              ? t('saving')
+              : t('creating')
             : pool.length < TOURNAMENT_MIN_POOL
-              ? `${TOURNAMENT_MIN_POOL - pool.length}개 더 담아주세요`
+              ? t('needMore', { count: TOURNAMENT_MIN_POOL - pool.length })
               : isEdit
-                ? `${pool.length}개로 저장`
-                : `${pool.length}개로 월드컵 만들기`}
+                ? t('saveWith', { count: pool.length })
+                : t('createWith', { count: pool.length })}
         </Button>
         {extraActions}
       </div>
@@ -347,11 +363,12 @@ function StepHeader({
   title: string;
   onBack: () => void;
 }) {
+  const t = useTranslations('TournamentEditor');
   return (
     <>
       <Button variant="ghost" size="sm" className="mb-3 -ml-2" onClick={onBack}>
         <ArrowLeft />
-        이전
+        {t('back')}
       </Button>
       <p className="text-muted-foreground mb-1 text-xs tabular-nums">
         {step} / {total}
@@ -381,11 +398,12 @@ function PickedTile({
   itemType: TournamentItemType;
   onRemove: () => void;
 }) {
+  const t = useTranslations('TournamentEditor');
   return (
     <button
       type="button"
       onClick={onRemove}
-      aria-label={`${item.title} 빼기`}
+      aria-label={t('removeItem', { title: item.title })}
       className="group focus-visible:ring-ring/50 relative block w-full cursor-pointer rounded-xl text-left outline-none focus-visible:ring-3"
     >
       <PoolItemTile item={item} itemType={itemType} />
@@ -395,7 +413,7 @@ function PickedTile({
       */}
       <span className="absolute inset-0 flex items-center justify-center gap-1 rounded-xl bg-black/60 text-sm font-medium text-white opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100">
         <X className="size-4" />
-        빼기
+        {t('remove')}
       </span>
     </button>
   );

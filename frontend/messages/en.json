@@ -21,5 +21,330 @@
   "LocaleSwitcher": {
     "label": "Language",
     "failed": "Couldn't change the language"
+  },
+  "Common": {
+    "unknown": "Unknown",
+    "loading": "Loading"
+  },
+  "Play": {
+    "itemsLoadFailed": "Couldn't load the contenders",
+    "loadFailed": "Couldn't load this play",
+    "voteFailed": "Couldn't record your vote",
+    "championshipRate": "Win rate (overall)",
+    "championshipFraction": "{count}/{total} plays",
+    "winRate": "Match win rate",
+    "winFraction": "{count}/{total} matches",
+    "viewRanking": "View ranking",
+    "playAgain": "Play again",
+    "toMatch": "Back to match",
+    "toBracket": "Bracket",
+    "pick": "Pick"
+  },
+  "Bracket": {
+    "round": "{roundNum, plural, =1 {Final} =2 {Semifinal} other {Round of {size}}}",
+    "nextMatch": "Next match",
+    "champion": "Champion",
+    "progress": "Match {index} of {total}"
+  },
+  "PoolGrid": {
+    "loadMoreFailed": "Couldn't load more contenders",
+    "loadMore": "Show more ({remaining} left)"
+  },
+  "PoolItem": {
+    "viewAlbum": "View album {title}",
+    "play": "Play {title}"
+  },
+  "Player": {
+    "collapseQueue": "Collapse queue",
+    "expandQueue": "Expand queue",
+    "mute": "Mute",
+    "unmute": "Unmute",
+    "close": "Close player",
+    "previous": "Previous track",
+    "next": "Next track",
+    "play": "Play",
+    "pause": "Pause",
+    "position": "Playback position",
+    "volume": "Volume",
+    "queueTitle": "{count, plural, one {Queue · # track} other {Queue · # tracks}}",
+    "clearQueue": "Clear all",
+    "reorderItem": "Reorder {title}",
+    "removeItem": "Remove {title} from queue",
+    "previewFailed": "Couldn't play the preview",
+    "noTrackPreview": "No preview is available for this track",
+    "noAlbumPreview": "No previews are available for this album",
+    "albumTracksFailed": "Couldn't load the album's tracks",
+    "playItem": "Play {title}",
+    "previewItem": "Preview {title}",
+    "pauseItem": "Pause {title}"
+  },
+  "Comments": {
+    "loadFailed": "Couldn't load comments",
+    "createFailed": "Couldn't post your comment",
+    "updateFailed": "Couldn't update the comment",
+    "deleteFailed": "Couldn't delete the comment",
+    "reported": "Report submitted",
+    "reportFailed": "Couldn't submit the report",
+    "title": "Comments {count}",
+    "anonymous": "Anonymous",
+    "nickname": "Nickname",
+    "placeholder": "Write a comment...",
+    "content": "Comment",
+    "submit": "Post",
+    "empty": "Be the first to comment.",
+    "edited": "(edited)",
+    "edit": "Edit comment",
+    "saveEdit": "Save changes",
+    "cancelEdit": "Cancel editing",
+    "delete": "Delete comment",
+    "report": "Report comment",
+    "alreadyReported": "Already reported",
+    "reportReason": "Reason for report",
+    "reasons": {
+      "spam": "Spam / ads",
+      "abuse": "Abuse / hate",
+      "sexual": "Sexual content",
+      "etc": "Other"
+    }
+  },
+  "Like": {
+    "loginRequired": "Please log in first",
+    "failed": "Couldn't update your like",
+    "like": "Like {name}",
+    "unlike": "Unlike {name}"
+  },
+  "InfiniteList": {
+    "loadingMore": "Loading more",
+    "retry": "Try again",
+    "end": "You've reached the end"
+  },
+  "Stats": {
+    "views": "Views",
+    "likes": "Likes",
+    "comments": "Comments"
+  },
+  "Owner": {
+    "edit": "Edit",
+    "delete": "Delete",
+    "deleting": "Deleting",
+    "cancel": "Cancel",
+    "manage": "Manage ''{name}''",
+    "deleted": "Deleted ''{name}''",
+    "deleteFailed": "Couldn't delete it",
+    "confirmDelete": "Delete ''{name}''?",
+    "irreversible": "{losesOnDelete} This can't be undone."
+  },
+  "Share": {
+    "label": "Share",
+    "copied": "Link copied",
+    "copyFailed": "Couldn't copy the link"
+  },
+  "ItemType": {
+    "track": "Songs",
+    "album": "Albums"
+  },
+  "Tournament": {
+    "start": "Start",
+    "viewRanking": "Ranking",
+    "notEnoughPool": "Needs at least 4 contenders to play.",
+    "startFailed": "Couldn't start the play",
+    "size": "Bracket size",
+    "sizeOption": "Top {size}",
+    "drawing": "Drawing bracket..."
+  },
+  "TournamentEditor": {
+    "typeStepTitle": "What will compete?",
+    "trackDesc": "Song vs. song",
+    "albumDesc": "Album vs. album",
+    "metaStepTitle": "World Cup details",
+    "metaStepTitleEdit": "Edit World Cup details",
+    "name": "Name",
+    "namePlaceholderTrack": "My all-time favorite songs",
+    "namePlaceholderAlbum": "Albums that shaped me",
+    "description": "Description",
+    "descriptionPlaceholder": "How did you pick these? (optional)",
+    "next": "Next",
+    "back": "Back",
+    "poolStepTitle": "Add {type}",
+    "poolSummary": "{count} added · min {min} / max {max}",
+    "searchTracks": "Search songs",
+    "findInAlbums": "Browse albums",
+    "searchTrackPlaceholder": "Search songs...",
+    "searchAlbumPlaceholder": "Search albums...",
+    "loadingTracks": "Loading tracks...",
+    "addAllTracks": "{count, plural, one {Add # track} other {Add all # tracks}}",
+    "picked": "Added {count}",
+    "saving": "Saving...",
+    "creating": "Creating...",
+    "needMore": "Add {count} more",
+    "saveWith": "Save with {count}",
+    "createWith": "Create with {count}",
+    "removeItem": "Remove {title}",
+    "remove": "Remove",
+    "searchFailed": "Search failed",
+    "poolFull": "You can add up to {max}",
+    "partiallyAdded": "Only {count} were added (max {max})",
+    "albumTracksFailed": "Couldn't load the album's tracks",
+    "saveFailed": "Couldn't save",
+    "createFailed": "Couldn't create the World Cup"
+  },
+  "TopsterEditor": {
+    "addTab": "Add albums",
+    "optionsTab": "Options",
+    "searchLabel": "Search albums",
+    "searchPlaceholder": "Enter an album name",
+    "addHint": "Albums you pick fill the empty cells in order. Drag a cell to reorder it, or click it to clear it.",
+    "title": "Title",
+    "titlePlaceholder": "e.g. Best of 2026 H1",
+    "description": "Description (optional)",
+    "descriptionPlaceholder": "A few words about this chart",
+    "columns": "Columns",
+    "rows": "Rows",
+    "cellSummary": "{width}×{height} = {count} cells (max {max})",
+    "gap": "Cell gap {gap}px",
+    "backgroundColor": "Background color",
+    "textColor": "Text color",
+    "showTitle": "Show title",
+    "showAlbumInfo": "Show album info",
+    "showNumbering": "Show numbers",
+    "image": "Image",
+    "imageRendering": "Rendering...",
+    "removeCell": "Remove",
+    "hexValue": "{label} hex value",
+    "missingInfo": "No info",
+    "missingInfoPlaceholder": "(No info)",
+    "searchFailed": "Album search failed",
+    "gridFull": "No empty cells left. Enlarge the grid in Options",
+    "imageFailed": "Couldn't create the image",
+    "titleRequired": "Please enter a title",
+    "saveFailed": "Couldn't save. Please try again."
+  },
+  "Music": {
+    "trackCount": "{count, plural, one {# track} other {# tracks}}",
+    "playAll": "Play all",
+    "artist": "Artist",
+    "topTracks": "Popular tracks",
+    "albumsAndSingles": "Albums · Singles"
+  },
+  "Auth": {
+    "processing": "Signing you in...",
+    "login": "Log in",
+    "loginDescription": "Get started with your social account",
+    "continueWithGoogle": "Continue with Google",
+    "continueWithKakao": "Continue with Kakao"
+  },
+  "Error": {
+    "title": "Couldn't load this page",
+    "description": "This may be a temporary problem. Please try again.",
+    "retry": "Try again",
+    "loading": "Loading..."
+  },
+  "Home": {
+    "recentTopsters": "Recent topsters",
+    "recentTournaments": "Recent World Cups",
+    "more": "See more",
+    "noTopsters": "No topsters yet",
+    "noTopstersDescription": "Make your first chart from albums you love.",
+    "firstTopster": "Create your first topster",
+    "noTournaments": "No World Cups yet",
+    "noTournamentsDescription": "Gather songs or albums you love and crown your favorite.",
+    "firstTournament": "Create your first World Cup"
+  },
+  "Search": {
+    "failed": "Search failed",
+    "placeholder": "Search artists, albums, songs...",
+    "tabs": {
+      "artists": "Artists",
+      "albums": "Albums",
+      "tracks": "Songs"
+    },
+    "searching": "Searching...",
+    "noResults": "No results",
+    "noResultsDescription": "Try a different keyword."
+  },
+  "List": {
+    "sort": {
+      "recent": "Newest",
+      "popular": "Popular",
+      "popular_all": "Popular · all time",
+      "popular_year": "Popular · this year",
+      "popular_month": "Popular · this month"
+    },
+    "noResults": "No results",
+    "noResultsDescription": "Try a different search.",
+    "loadingMore": "Loading more"
+  },
+  "TopsterList": {
+    "title": "Topsters",
+    "new": "New topster",
+    "searchPlaceholder": "Search topster titles and descriptions...",
+    "loadFailed": "Couldn't load topsters",
+    "empty": "No topsters yet",
+    "emptyDescription": "Make an album chart in any size from 3×3 to 5×5.",
+    "first": "Create your first topster",
+    "losesOnDelete": "Its comments will be deleted too."
+  },
+  "TournamentList": {
+    "title": "Music World Cup",
+    "new": "Create",
+    "searchPlaceholder": "Search World Cup titles and descriptions...",
+    "loadFailed": "Couldn't load World Cups",
+    "empty": "No World Cups yet",
+    "emptyDescription": "Gather songs or albums you love and make your first World Cup.",
+    "first": "Create your first World Cup",
+    "losesOnDelete": "Its play history, ranking, and comments will be deleted too."
+  },
+  "Profile": {
+    "loadFailed": "Couldn't load the profile",
+    "myTopsters": "My topsters",
+    "myTournaments": "My World Cups",
+    "createNew": "Create new",
+    "noMyTopsters": "You haven't made any topsters yet",
+    "noMyTournaments": "You haven't made any World Cups yet",
+    "notFound": "This user doesn't exist",
+    "goHome": "Go home",
+    "tournaments": "World Cups",
+    "noPublicTopsters": "No public topsters",
+    "noTournaments": "No World Cups yet"
+  },
+  "TopsterDetail": {
+    "loadFailed": "Couldn't load the topster",
+    "notFound": "Topster not found.",
+    "saveImage": "Save image",
+    "updated": "Topster updated",
+    "notOwner": "You can only edit topsters you made.",
+    "editHeading": "Edit topster",
+    "editSubmit": "Save changes",
+    "saving": "Saving...",
+    "newHeading": "New topster",
+    "newSubmit": "Save topster",
+    "metaSummary": "{nickname}'s {width}×{height} album topster",
+    "metaFallbackTitle": "Topster",
+    "ogKind": "Album topster"
+  },
+  "TournamentDetail": {
+    "created": "World Cup created",
+    "updated": "World Cup updated",
+    "loadFailed": "Couldn't load the World Cup",
+    "notFound": "World Cup not found.",
+    "notOwner": "You can only edit World Cups you made.",
+    "candidates": "{type} · {count} contenders",
+    "itemsLoadFailed": "Couldn't load the contenders.",
+    "metaSummary": "A World Cup of {count} {type} · played {plays} times",
+    "metaFallbackTitle": "World Cup",
+    "ogKind": "Music World Cup",
+    "ogSummary": "{count} {type} · {plays} plays"
+  },
+  "Ranking": {
+    "new": "New",
+    "backToTournament": "Back to World Cup",
+    "title": "{title} ranking",
+    "basis": "Based on {plays} plays",
+    "empty": "No contenders to rank yet.",
+    "rank": "Rank",
+    "championshipRate": "Win rate (overall)",
+    "winRate": "Match win rate",
+    "trend": "Trend",
+    "caption": "Win rate (overall) = titles won / plays it was drawn into. Match win rate = matches won / 1:1 matches played. Contenders are drawn at random each play, so entry counts differ. Trend is the change from the rank {days} days ago."
   }
 }

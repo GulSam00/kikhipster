@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { useCallback, useState } from 'react';
 import { toast } from 'sonner';
 
@@ -24,6 +25,7 @@ interface Options {
  * 상세로 옮기면서 없앴다.)
  */
 export function useDeleteItem({ deletePath, name, losesOnDelete, onDeleted }: Options) {
+  const t = useTranslations('Owner');
   const [deleting, setDeleting] = useState(false);
 
   const confirmDelete = useCallback(() => {
@@ -31,23 +33,23 @@ export function useDeleteItem({ deletePath, name, losesOnDelete, onDeleted }: Op
       setDeleting(true);
       try {
         await apiFetch(deletePath, { method: 'DELETE' });
-        toast.success(`'${name}' 을(를) 삭제했습니다`);
+        toast.success(t('deleted', { name }));
         onDeleted();
       } catch {
-        toast.error('삭제에 실패했습니다');
+        toast.error(t('deleteFailed'));
         setDeleting(false);
       }
     }
 
     // 토스트는 저절로 사라지므로 방치하면 '취소'와 같은 결과가 된다 — 안전한 쪽이 기본값이다.
-    toast.warning(`'${name}' 을(를) 삭제할까요?`, {
+    toast.warning(t('confirmDelete', { name }), {
       id: deletePath,
-      description: `${losesOnDelete} 되돌릴 수 없습니다.`,
+      description: t('irreversible', { losesOnDelete }),
       duration: 10000,
-      action: { label: '삭제', onClick: () => void doDelete() },
-      cancel: { label: '취소', onClick: () => toast.dismiss(deletePath) },
+      action: { label: t('delete'), onClick: () => void doDelete() },
+      cancel: { label: t('cancel'), onClick: () => toast.dismiss(deletePath) },
     });
-  }, [deletePath, name, losesOnDelete, onDeleted]);
+  }, [deletePath, name, losesOnDelete, onDeleted, t]);
 
   return { confirmDelete, deleting };
 }

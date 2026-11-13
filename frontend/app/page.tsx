@@ -1,4 +1,5 @@
 import { LayoutGrid, Trophy } from 'lucide-react';
+import { getTranslations } from 'next-intl/server';
 import Link from 'next/link';
 
 import TopsterCard from '@/components/topster/TopsterCard';
@@ -28,18 +29,19 @@ const TOURNAMENT_COUNT = 6;
 export const dynamic = 'force-dynamic';
 
 export default async function HomePage() {
-  const [topsters, tournaments] = await Promise.all([
+  const [topsters, tournaments, t] = await Promise.all([
     listTopsters(TOPSTER_COUNT),
     listTournaments('recent', TOURNAMENT_COUNT),
+    getTranslations('Home'),
   ]);
 
   return (
     <div className="mx-auto w-full max-w-6xl px-4 py-8">
       <section className="mb-10">
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="font-heading text-lg font-bold">최근 탑스터</h2>
+          <h2 className="font-heading text-lg font-bold">{t('recentTopsters')}</h2>
           <Button asChild variant="link" size="sm">
-            <Link href="/topsters">더보기</Link>
+            <Link href="/topsters">{t('more')}</Link>
           </Button>
         </div>
 
@@ -49,12 +51,12 @@ export default async function HomePage() {
               <EmptyMedia variant="icon">
                 <LayoutGrid />
               </EmptyMedia>
-              <EmptyTitle>아직 탑스터가 없습니다</EmptyTitle>
-              <EmptyDescription>좋아하는 앨범으로 첫 차트를 만들어보세요.</EmptyDescription>
+              <EmptyTitle>{t('noTopsters')}</EmptyTitle>
+              <EmptyDescription>{t('noTopstersDescription')}</EmptyDescription>
             </EmptyHeader>
             <EmptyContent>
               <Button asChild>
-                <Link href="/topsters/new">첫 탑스터 만들기</Link>
+                <Link href="/topsters/new">{t('firstTopster')}</Link>
               </Button>
             </EmptyContent>
           </Empty>
@@ -69,9 +71,9 @@ export default async function HomePage() {
 
       <section>
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="font-heading text-lg font-bold">최근 월드컵</h2>
+          <h2 className="font-heading text-lg font-bold">{t('recentTournaments')}</h2>
           <Button asChild variant="link" size="sm">
-            <Link href="/tournament">더보기</Link>
+            <Link href="/tournament">{t('more')}</Link>
           </Button>
         </div>
 
@@ -81,12 +83,12 @@ export default async function HomePage() {
               <EmptyMedia variant="icon">
                 <Trophy />
               </EmptyMedia>
-              <EmptyTitle>아직 월드컵이 없습니다</EmptyTitle>
-              <EmptyDescription>좋아하는 곡이나 앨범을 모아 최애를 가려보세요.</EmptyDescription>
+              <EmptyTitle>{t('noTournaments')}</EmptyTitle>
+              <EmptyDescription>{t('noTournamentsDescription')}</EmptyDescription>
             </EmptyHeader>
             <EmptyContent>
               <Button asChild>
-                <Link href="/tournament/new">첫 월드컵 만들기</Link>
+                <Link href="/tournament/new">{t('firstTournament')}</Link>
               </Button>
             </EmptyContent>
           </Empty>

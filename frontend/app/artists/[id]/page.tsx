@@ -1,4 +1,5 @@
 import { Mic2 } from 'lucide-react';
+import { getTranslations } from 'next-intl/server';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
 
@@ -45,10 +46,11 @@ async function getAlbums(id: string): Promise<AlbumSummary[]> {
 
 export default async function ArtistPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const [artist, topTracks, albums] = await Promise.all([
+  const [artist, topTracks, albums, t] = await Promise.all([
     getArtist(id),
     getTopTracks(id),
     getAlbums(id),
+    getTranslations('Music'),
   ]);
 
   if (!artist) notFound();
@@ -58,7 +60,12 @@ export default async function ArtistPage({ params }: { params: Promise<{ id: str
       <div className="mb-8 flex flex-col items-start gap-6 sm:flex-row sm:items-end">
         <div className="bg-muted relative size-32 shrink-0 overflow-hidden rounded-full">
           {artist.image_url ? (
-            <Image src={artist.image_url} alt={artist.name_ko ?? artist.name} fill className="object-cover" />
+            <Image
+              src={artist.image_url}
+              alt={artist.name_ko ?? artist.name}
+              fill
+              className="object-cover"
+            />
           ) : (
             <div className="text-muted-foreground flex size-full items-center justify-center">
               <Mic2 className="size-10" />
@@ -66,7 +73,7 @@ export default async function ArtistPage({ params }: { params: Promise<{ id: str
           )}
         </div>
         <div className="min-w-0">
-          <p className="text-muted-foreground mb-1 text-xs">아티스트</p>
+          <p className="text-muted-foreground mb-1 text-xs">{t('artist')}</p>
           <h1 className="font-heading mb-2 text-3xl font-bold">{artist.name_ko ?? artist.name}</h1>
           {artist.name_ko && <p className="text-muted-foreground mb-2 text-sm">{artist.name}</p>}
           <div className="text-muted-foreground mb-3 flex flex-wrap items-center gap-2 text-sm">
@@ -76,7 +83,11 @@ export default async function ArtistPage({ params }: { params: Promise<{ id: str
               </Badge>
             ))}
           </div>
-          <LikeButton targetType="artist" targetId={artist.id} name={artist.name_ko ?? artist.name} />
+          <LikeButton
+            targetType="artist"
+            targetId={artist.id}
+            name={artist.name_ko ?? artist.name}
+          />
         </div>
       </div>
 
@@ -84,7 +95,7 @@ export default async function ArtistPage({ params }: { params: Promise<{ id: str
 
       {topTracks.length > 0 && (
         <section className="mb-8">
-          <h2 className="font-heading mb-3 text-lg font-bold">인기 트랙</h2>
+          <h2 className="font-heading mb-3 text-lg font-bold">{t('topTracks')}</h2>
           <div className="flex flex-col">
             {topTracks.map((t, i) => (
               <TrackRow
@@ -107,7 +118,7 @@ export default async function ArtistPage({ params }: { params: Promise<{ id: str
 
       {albums.length > 0 && (
         <section>
-          <h2 className="font-heading mb-3 text-lg font-bold">앨범 · 싱글</h2>
+          <h2 className="font-heading mb-3 text-lg font-bold">{t('albumsAndSingles')}</h2>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6">
             {albums.map((a) => (
               <AlbumCard key={a.id} album={a} />

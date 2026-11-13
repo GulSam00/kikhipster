@@ -1,3 +1,4 @@
+import { createTranslator } from 'next-intl';
 import { describe, expect, it } from 'vitest';
 
 import en from '@/messages/en.json';
@@ -50,6 +51,7 @@ function argNames(message: string): string[] {
 const base = flatten(ko);
 
 describe.each([
+  ['ko', ko],
   ['en', en],
   ['ja', ja],
 ] as const)('%s 메시지', (_, messages) => {
@@ -64,6 +66,32 @@ describe.each([
   it('빈 문자열이 없다', () => {
     const empty = [...target].filter(([, v]) => v.trim() === '').map(([k]) => k);
     expect(empty).toEqual([]);
+  });
+
+  it('모든 메시지가 ICU 로 포맷되고 인자가 빠짐없이 채워진다', () => {
+    // `'{name}'` 처럼 작은따옴표를 홑으로 쓰면 ICU 가 중괄호를 문자 그대로 내보낸다 —
+    // 그런 메시지는 `{` 가 남는다. 작은따옴표 자체를 보이려면 `''` 로 쓴다.
+    const broken: string[] = [];
+    for (const [key, message] of target) {
+      const values = Object.fromEntries(argNames(message).map((n) => [n, 1]));
+      const t = createTranslator({
+        locale: 'en',
+        messages: { m: message },
+        // 기본 onError 는 콘솔에만 찍고 대체 문자열을 돌려줘서 깨진 메시지가 통과한다.
+        onError: (error) => {
+          throw error;
+        },
+      });
+      let out: string;
+      try {
+        out = t('m', values);
+      } catch {
+        broken.push(key);
+        continue;
+      }
+      if (out.includes('{') || out.includes('}')) broken.push(key);
+    }
+    expect(broken).toEqual([]);
   });
 
   it('같은 키의 ICU 인자 이름이 ko 와 같다', () => {

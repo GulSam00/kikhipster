@@ -1,4 +1,5 @@
 import { Eye, Heart, MessageCircle } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import type { ReactNode } from 'react';
 
 import { cn } from '@/lib/utils';
@@ -22,10 +23,11 @@ interface Props {
  * 자릿수에 따라 좌우로 흔들리지 않는다.
  */
 export default function ItemStats({ viewCount, likeCount, commentCount, className }: Props) {
+  const t = useTranslations('Stats');
   const stats = [
-    { icon: Eye, label: '조회', value: viewCount },
-    { icon: Heart, label: '좋아요', value: likeCount },
-    { icon: MessageCircle, label: '댓글', value: commentCount },
+    { icon: Eye, label: t('views'), value: viewCount },
+    { icon: Heart, label: t('likes'), value: likeCount },
+    { icon: MessageCircle, label: t('comments'), value: commentCount },
   ];
 
   return (

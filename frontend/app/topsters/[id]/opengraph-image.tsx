@@ -1,3 +1,4 @@
+import { getTranslations } from 'next-intl/server';
 import { ImageResponse } from 'next/og';
 
 import { getAlbumsByIds } from '@/lib/api/music';
@@ -13,15 +14,18 @@ const COVER_COUNT = 9;
 
 export default async function Image({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
+  const tr = await getTranslations('TopsterDetail');
 
-  let title = '탑스터';
+  let title = tr('metaFallbackTitle');
   let subtitle: string | undefined;
   let covers: string[] = [];
 
   try {
     const t = await getTopster(id);
     title = t.title;
-    subtitle = t.description || `${t.user.nickname} 님의 ${t.width}×${t.height} 앨범 탑스터`;
+    subtitle =
+      t.description ||
+      tr('metaSummary', { nickname: t.user.nickname, width: t.width, height: t.height });
 
     // 격자 순서대로 앞에서부터 채운다 — 사용자가 위에 둔 앨범이 먼저 보이는 게 맞다.
     const ids = [...t.items]
@@ -38,7 +42,7 @@ export default async function Image({ params }: { params: Promise<{ id: string }
   }
 
   return new ImageResponse(
-    <OgShell kind="앨범 탑스터" title={title} subtitle={subtitle} covers={covers} />,
+    <OgShell kind={tr('ogKind')} title={title} subtitle={subtitle} covers={covers} />,
     size,
   );
 }

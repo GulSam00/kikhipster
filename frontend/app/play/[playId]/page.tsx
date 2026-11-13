@@ -2,6 +2,7 @@
 
 import { BarChart3, GitBranch, Swords, Trophy } from 'lucide-react';
 import { animate } from 'motion/react';
+import { useTranslations } from 'next-intl';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
@@ -24,7 +25,7 @@ import { useReducedMotion } from '@/lib/hooks/use-reduced-motion';
 
 import { getPlay, voteRound } from '@/lib/api/plays';
 import { getRanking } from '@/lib/api/tournaments';
-import { nextMatch, roundLabel } from '@/lib/domain/bracket';
+import { nextMatch, roundMessageValues } from '@/lib/domain/bracket';
 import { fetchPoolItems, type PoolItem } from '@/lib/domain/pool-item';
 
 import type { Play, PlayRound, TournamentRankingItem } from '@/types/tournament';
@@ -62,6 +63,8 @@ const COVER_PLAY_BUTTON =
 const COVER_PLAY_ICON = 'size-6 sm:size-7';
 
 export default function PlayPage() {
+  const t = useTranslations('Play');
+  const tc = useTranslations('Common');
   const router = useRouter();
   const { playId } = useParams<{ playId: string }>();
 
@@ -76,17 +79,20 @@ export default function PlayPage() {
   const [winnerStats, setWinnerStats] = useState<TournamentRankingItem | null>(null);
   const reduced = useReducedMotion();
 
-  const loadItems = useCallback(async (p: Play) => {
-    const ids = Array.from(new Set(p.rounds.flatMap((r) => [r.item_a_id, r.item_b_id])));
-    if (ids.length === 0) return;
-    try {
-      const fetched = await fetchPoolItems(p.item_type, ids);
-      setItems(Object.fromEntries(fetched.map((i) => [i.id, i])));
-    } catch {
-      // 메타데이터는 부가 정보다. 실패해도 대진 진행 자체는 막지 않는다.
-      toast.error('후보 정보를 불러오지 못했습니다');
-    }
-  }, []);
+  const loadItems = useCallback(
+    async (p: Play) => {
+      const ids = Array.from(new Set(p.rounds.flatMap((r) => [r.item_a_id, r.item_b_id])));
+      if (ids.length === 0) return;
+      try {
+        const fetched = await fetchPoolItems(p.item_type, ids);
+        setItems(Object.fromEntries(fetched.map((i) => [i.id, i])));
+      } catch {
+        // 메타데이터는 부가 정보다. 실패해도 대진 진행 자체는 막지 않는다.
+        toast.error(t('itemsLoadFailed'));
+      }
+    },
+    [t],
+  );
 
   useEffect(() => {
     (async () => {
@@ -95,13 +101,13 @@ export default function PlayPage() {
         setPlay(p);
         await loadItems(p);
       } catch {
-        toast.error('플레이를 불러오지 못했습니다');
+        toast.error(t('loadFailed'));
         router.push('/tournament');
       } finally {
         setLoading(false);
       }
     })();
-  }, [playId, router, loadItems]);
+  }, [playId, router, loadItems, t]);
 
   /**
    * 판이 끝나면 우승 항목의 누적 성적을 받아 온다.
@@ -148,7 +154,7 @@ export default function PlayPage() {
       await loadItems(updated);
     } catch {
       setJustPicked(null);
-      toast.error('투표를 반영하지 못했습니다');
+      toast.error(t('voteFailed'));
     } finally {
       setVoting(false);
     }
@@ -212,7 +218,7 @@ export default function PlayPage() {
           )}
         </div>
 
-        <h2 className="font-heading mb-1 text-2xl font-bold">{winner?.title ?? '알 수 없음'}</h2>
+        <h2 className="font-heading mb-1 text-2xl font-bold">{winner?.title ?? tc('unknown')}</h2>
         <p className="text-muted-foreground mb-6">{winner?.subtitle}</p>
 
         {/*
@@ -223,23 +229,29 @@ export default function PlayPage() {
           <div className="mb-8 grid grid-cols-2 gap-3">
             <Card>
               <CardContent className="flex flex-col gap-0.5 py-1">
-                <p className="text-muted-foreground text-xs">우승 비율</p>
+                <p className="text-muted-foreground text-xs">{t('championshipRate')}</p>
                 <p className="text-xl font-bold tabular-nums">
                   {Math.round(winnerStats.championship_rate * 100)}%
                 </p>
                 <p className="text-muted-foreground text-xs tabular-nums">
-                  {winnerStats.championship_count}/{winnerStats.play_count}판
+                  {t('championshipFraction', {
+                    count: winnerStats.championship_count,
+                    total: winnerStats.play_count,
+                  })}
                 </p>
               </CardContent>
             </Card>
             <Card>
               <CardContent className="flex flex-col gap-0.5 py-1">
-                <p className="text-muted-foreground text-xs">승률</p>
+                <p className="text-muted-foreground text-xs">{t('winRate')}</p>
                 <p className="text-xl font-bold tabular-nums">
                   {Math.round(winnerStats.match_win_rate * 100)}%
                 </p>
                 <p className="text-muted-foreground text-xs tabular-nums">
-                  {winnerStats.match_win_count}/{winnerStats.match_count}경기
+                  {t('winFraction', {
+                    count: winnerStats.match_win_count,
+                    total: winnerStats.match_count,
+                  })}
                 </p>
               </CardContent>
             </Card>
@@ -251,11 +263,11 @@ export default function PlayPage() {
           <Button asChild variant="secondary" size="lg" className="h-11 rounded-full">
             <Link href={`/tournament/${play.tournament_id}/ranking`}>
               <BarChart3 />
-              랭킹 보기
+              {t('viewRanking')}
             </Link>
           </Button>
           <Button asChild variant="outline" size="lg" className="h-11 rounded-full">
-            <Link href={`/tournament/${play.tournament_id}`}>다시 하기</Link>
+            <Link href={`/tournament/${play.tournament_id}`}>{t('playAgain')}</Link>
           </Button>
         </div>
 
@@ -298,7 +310,7 @@ export default function PlayPage() {
           className="shrink-0"
         >
           {showBracket ? <Swords /> : <GitBranch />}
-          {showBracket ? '대결로' : '대진표'}
+          {showBracket ? t('toMatch') : t('toBracket')}
         </Button>
       </div>
 
@@ -350,6 +362,9 @@ function PlayMatch({
    * 개뿐이라 배경 대진표도 이때부터 실제로 읽힌다.
    */
   const isFinal = match.round_num === 1;
+  const t = useTranslations('Play');
+  const tb = useTranslations('Bracket');
+  const tc = useTranslations('Common');
   const reduced = useReducedMotion();
   const cardRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
@@ -427,7 +442,7 @@ function PlayMatch({
     뺐다 — 판이 끝나 간다는 건 제목과 배경 대진표('우승' 자리)가 이미 말하고 있어서,
     같은 말을 문장으로 한 번 더 하는 것이 거슬렸다.
   */
-  const title = roundLabel(match.round_num);
+  const title = tb('round', roundMessageValues(match.round_num));
 
   return (
     <div className="relative flex flex-1 flex-col justify-center">
@@ -559,7 +574,7 @@ function PlayMatch({
                           isFinal ? 'text-base sm:text-lg' : 'text-sm sm:text-base',
                         ].join(' ')}
                       >
-                        {item?.title ?? '알 수 없음'}
+                        {item?.title ?? tc('unknown')}
                       </p>
                       <p className="text-muted-foreground truncate text-xs">{item?.subtitle}</p>
                     </div>
@@ -574,7 +589,7 @@ function PlayMatch({
                       onClick={() => onVote(itemId, match.id)}
                       disabled={voting}
                     >
-                      선택
+                      {t('pick')}
                     </Button>
                   </CardContent>
                 </Card>

@@ -1,6 +1,7 @@
 'use client';
 
 import type { DropResult } from '@hello-pangea/dnd';
+import { useTranslations } from 'next-intl';
 import { useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 
@@ -80,6 +81,7 @@ export interface UseTopsterDraftResult {
  * 내용을 채운다.
  */
 export function useTopsterDraft({ initial, onSubmit }: Args): UseTopsterDraftResult {
+  const tr = useTranslations('TopsterEditor');
   useRequireAuth();
 
   const [title, setTitle] = useState(initial?.title ?? '');
@@ -119,11 +121,11 @@ export function useTopsterDraft({ initial, onSubmit }: Args): UseTopsterDraftRes
       try {
         setSearchResults(await searchAlbums(q, 10));
       } catch {
-        toast.error('앨범 검색에 실패했습니다');
+        toast.error(tr('searchFailed'));
       }
     }, 300);
     return () => clearTimeout(t);
-  }, [searchQ]);
+  }, [searchQ, tr]);
 
   const placed = useMemo(
     () =>
@@ -158,7 +160,7 @@ export function useTopsterDraft({ initial, onSubmit }: Args): UseTopsterDraftRes
 
   function placeAlbum(album: AlbumSummary) {
     if (placed.length >= cellCount) {
-      toast.error('빈 칸이 없습니다. 옵션에서 격자를 넓혀보세요');
+      toast.error(tr('gridFull'));
       return;
     }
     // 빈 칸은 반드시 **업데이터 안에서** 찾는다. 렌더 시점의 grid 로 찾으면 한 배치 안에서
@@ -187,9 +189,15 @@ export function useTopsterDraft({ initial, onSubmit }: Args): UseTopsterDraftRes
   async function handleDownload() {
     setDownloading(true);
     try {
-      await downloadTopsterImage({ options, title, items: placed, albums });
+      await downloadTopsterImage({
+        options,
+        title,
+        items: placed,
+        albums,
+        missingLabel: tr('missingInfo'),
+      });
     } catch {
-      toast.error('이미지를 만들지 못했습니다');
+      toast.error(tr('imageFailed'));
     } finally {
       setDownloading(false);
     }
@@ -197,7 +205,7 @@ export function useTopsterDraft({ initial, onSubmit }: Args): UseTopsterDraftRes
 
   async function handleSave() {
     if (!title.trim()) {
-      setError('제목을 입력해주세요');
+      setError(tr('titleRequired'));
       return;
     }
     setSaving(true);
@@ -205,7 +213,7 @@ export function useTopsterDraft({ initial, onSubmit }: Args): UseTopsterDraftRes
     try {
       await onSubmit({ title, description, ...options, items: placed });
     } catch {
-      setError('저장에 실패했습니다. 다시 시도해주세요.');
+      setError(tr('saveFailed'));
     } finally {
       setSaving(false);
     }

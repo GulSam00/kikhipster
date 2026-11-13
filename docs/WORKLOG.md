@@ -2506,3 +2506,4 @@ Spotify 연동 백엔드, 프론트 기획(`_workspace/planning.md`), QA 리뷰(
 | 2026-11-13 | chore(issues): 다국어 지원(영·일·중) 이슈 — iTunes 검색·이름 현지화·스토어별 ID 실측 기록 | docs | 커밋 `d5fee8e` |
 | 2026-11-13 | chore(issues): 다국어 범위 확정(ko/en/ja, UI+이름) 및 하위 이슈 3건 분할 | CLAUDE.md, backend, docs | 커밋 `1ac66a9` |
 | 2026-11-13 | chore(issues): UI 다국어 — 언어 선택 방식 쿠키로 결정 | docs | 커밋 `05a40d2` |
+| 2026-11-13 | feat(i18n): next-intl 도입 — 쿠키 기반 locale 해석, 언어 전환 UI, 음악 API locale 전달 | docs, frontend | 커밋 `255d0b7` |

@@ -1,5 +1,7 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
+
 import SplitFlapText from '@/components/reactbits/SplitFlapText';
 
 interface Props {
@@ -26,6 +28,7 @@ interface Props {
  * 양쪽) — 이 화면의 다른 연출들과 달리 `useReducedMotion` 을 따로 걸지 않아도 된다.
  */
 export default function FlapCounter({ index, total }: Props) {
+  const t = useTranslations('Bracket');
   return (
     <SplitFlapText
       text={`${index}/${total}`}
@@ -43,7 +46,7 @@ export default function FlapCounter({ index, total }: Props) {
       gap={3}
       /* § Radius 의 `rounded-md`(8px)와 같은 값을 토큰에서 그대로 가져온다. */
       tileRadius="var(--radius-md)"
-      aria-label={`${total}경기 중 ${index}번째`}
+      aria-label={t('progress', { index, total })}
     />
   );
 }

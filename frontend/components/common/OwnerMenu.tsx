@@ -1,6 +1,7 @@
 'use client';
 
 import { MoreHorizontal, Pencil, Trash2 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useCallback } from 'react';
@@ -52,6 +53,7 @@ export default function OwnerMenu({
   losesOnDelete,
   redirectTo,
 }: Props) {
+  const t = useTranslations('Owner');
   const me = useMe();
   const router = useRouter();
 
@@ -81,7 +83,7 @@ export default function OwnerMenu({
         <Button
           variant="ghost"
           size="icon-lg"
-          aria-label={`'${name}' 관리`}
+          aria-label={t('manage', { name })}
           className="relative shrink-0 after:absolute after:-inset-1 after:content-['']"
         >
           <MoreHorizontal />
@@ -91,13 +93,13 @@ export default function OwnerMenu({
         <DropdownMenuItem asChild>
           <Link href={editHref}>
             <Pencil />
-            수정
+            {t('edit')}
           </Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem variant="destructive" onSelect={confirmDelete} disabled={deleting}>
           <Trash2 />
-          {deleting ? '삭제 중' : '삭제'}
+          {deleting ? t('deleting') : t('delete')}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

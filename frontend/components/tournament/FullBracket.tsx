@@ -1,10 +1,11 @@
 'use client';
 
 import { Check } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 import { useBoxSize } from '@/lib/hooks/use-box-size';
 
-import { toRounds } from '@/lib/domain/bracket';
+import { roundMessageValues, toRounds } from '@/lib/domain/bracket';
 import type { PoolItem } from '@/lib/domain/pool-item';
 
 import type { Play, PlayRound } from '@/types/tournament';
@@ -47,8 +48,10 @@ function centerY(i: number, n: number, height: number): number {
  * 이 경우를 명시한다.
  */
 export default function FullBracket({ play, items, currentMatchId }: Props) {
+  const tb = useTranslations('Bracket');
+  const tc = useTranslations('Common');
   const rounds = toRounds(play);
-  const label = (id: string) => items[id]?.title ?? '알 수 없음';
+  const label = (id: string) => items[id]?.title ?? tc('unknown');
   const [areaRef, area] = useBoxSize<HTMLDivElement>();
 
   const totalWidth = rounds.length * COL_WIDTH + Math.max(rounds.length - 1, 0) * COL_GAP;
@@ -62,7 +65,7 @@ export default function FullBracket({ play, items, currentMatchId }: Props) {
               key={round.roundNum}
               className="bg-background text-muted-foreground sticky top-0 w-44 shrink-0 text-center text-xs font-medium"
             >
-              {round.label}
+              {tb('round', roundMessageValues(round.roundNum))}
             </p>
           ))}
         </div>

@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 
@@ -97,6 +98,13 @@ function readStoredMuted() {
 
 export function PlayerProvider({ children }: { children: React.ReactNode }) {
   const audioRef = useRef<HTMLAudioElement>(null);
+  const t = useTranslations('Player');
+  // 재생 effect 는 URL 하나에만 반응해야 한다(아래 설명). `t` 를 의존성에 넣으면 언어를
+  // 바꾸는 순간 듣던 곡이 처음부터 다시 재생되므로 ref 로 최신 값만 읽는다.
+  const tRef = useRef(t);
+  useEffect(() => {
+    tRef.current = t;
+  }, [t]);
   const [queue, setQueue] = useState<QueueTrack[]>([]);
   const [currentIndex, setCurrentIndex] = useState(-1);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -187,7 +195,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
       // 사용자 제스처에서 시작하므로 브라우저 autoplay 차단에는 안 걸리지만,
       // 네트워크·CORS 로 실패할 수 있다. 조용히 멈추면 고장으로 보인다.
       setIsPlaying(false);
-      toast.error('미리듣기를 재생하지 못했습니다');
+      toast.error(tRef.current('previewFailed'));
     });
   }, [currentUrl]);
 

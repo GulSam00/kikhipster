@@ -1,6 +1,7 @@
 'use client';
 
 import { Play } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { useState, type ComponentProps, type MouseEvent } from 'react';
 import { toast } from 'sonner';
 
@@ -49,6 +50,7 @@ export default function AlbumPlayButton({
   variant,
   className,
 }: Props) {
+  const t = useTranslations('Player');
   const { enqueueAndPlay } = usePlayer();
   const [loading, setLoading] = useState(false);
 
@@ -62,12 +64,12 @@ export default function AlbumPlayButton({
     try {
       const queue = tracks ?? (await albumQueueTracks(albumId));
       if (queue.length === 0) {
-        toast.error('이 앨범은 미리듣기를 제공하지 않습니다');
+        toast.error(t('noAlbumPreview'));
         return;
       }
       enqueueAndPlay(queue);
     } catch {
-      toast.error('앨범 수록곡을 불러오지 못했습니다');
+      toast.error(t('albumTracksFailed'));
     } finally {
       setLoading(false);
     }
@@ -80,7 +82,7 @@ export default function AlbumPlayButton({
       className={cn(label ? undefined : 'size-9 rounded-full', className)}
       onClick={handleClick}
       disabled={loading}
-      aria-label={label ? undefined : `${albumTitle} 재생`}
+      aria-label={label ? undefined : t('playItem', { title: albumTitle })}
     >
       {loading ? <Spinner /> : <Play />}
       {label}

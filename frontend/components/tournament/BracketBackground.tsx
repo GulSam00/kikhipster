@@ -1,5 +1,7 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
+
 import { parentMatch } from '@/lib/domain/bracket';
 import type { PoolItem } from '@/lib/domain/pool-item';
 
@@ -24,6 +26,7 @@ interface Props {
  * 알아볼 수 없을 만큼 줄여야 한다(§ Mobile 예외 조항).
  */
 export default function BracketBackground({ play, match, items, justPicked }: Props) {
+  const t = useTranslations('Bracket');
   const parent = parentMatch(play, match);
   const label = (id: string) => items[id]?.title ?? '…';
 
@@ -79,7 +82,7 @@ export default function BracketBackground({ play, match, items, justPicked }: Pr
         */}
         <div className="flex flex-1 justify-start">
           <div className="border-border w-full truncate rounded-md border border-dashed px-3 py-2 text-xs opacity-60">
-            {parent ? '다음 경기' : '우승'}
+            {parent ? t('nextMatch') : t('champion')}
           </div>
         </div>
       </div>

@@ -1,4 +1,5 @@
 import { Disc3 } from 'lucide-react';
+import { getTranslations } from 'next-intl/server';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
 
@@ -26,7 +27,7 @@ async function getAlbum(id: string): Promise<AlbumWithTracks | null> {
 
 export default async function AlbumPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const data = await getAlbum(id);
+  const [data, t] = await Promise.all([getAlbum(id), getTranslations('Music')]);
 
   if (!data) notFound();
 
@@ -56,7 +57,7 @@ export default async function AlbumPage({ params }: { params: Promise<{ id: stri
           <h1 className="font-heading mb-1 text-3xl font-bold">{album.title}</h1>
           <p className="text-foreground/80 mb-1">{album.artist_name}</p>
           <p className="text-muted-foreground mb-3 text-sm">
-            {year} · {album.total_tracks}곡
+            {year} · {t('trackCount', { count: album.total_tracks })}
           </p>
           <div className="flex items-center gap-2">
             {queue.length > 0 && (
@@ -64,7 +65,7 @@ export default async function AlbumPage({ params }: { params: Promise<{ id: stri
                 albumId={album.id}
                 albumTitle={album.title}
                 tracks={queue}
-                label="전체 재생"
+                label={t('playAll')}
               />
             )}
             <LikeButton targetType="album" targetId={album.id} name={album.title} />

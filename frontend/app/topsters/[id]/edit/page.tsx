@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
@@ -17,6 +18,9 @@ import type { PoolItem } from '@/lib/domain/pool-item';
 import type { Topster, TopsterCreateBody } from '@/types/topster';
 
 export default function EditTopsterPage() {
+  const t = useTranslations('TopsterDetail');
+  const te = useTranslations('TopsterEditor');
+  const tc = useTranslations('Common');
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const me = useMe();
@@ -31,11 +35,11 @@ export default function EditTopsterPage() {
       .then(setTopster)
       .catch((err) => {
         if (!(err instanceof ApiError && (err.status === 404 || err.status === 403))) {
-          toast.error('탑스터를 불러오지 못했습니다');
+          toast.error(t('loadFailed'));
         }
       })
       .finally(() => setLoading(false));
-  }, [id]);
+  }, [id, t]);
 
   // 커버·제목이 다 도착해야 에디터를 띄운다. 먼저 띄우면 에디터가 빈 배치로 state를
   // 잡아버려 나중에 온 앨범이 반영되지 않는다.
@@ -54,7 +58,7 @@ export default function EditTopsterPage() {
       // 통째로 빠져 사용자가 모르는 사이에 앨범이 지워진다.
       placements[it.position] = albums.get(it.album_spotify_id) ?? {
         id: it.album_spotify_id,
-        title: '(정보 없음)',
+        title: te('missingInfoPlaceholder'),
         subtitle: '',
         coverUrl: null,
       };
@@ -75,11 +79,11 @@ export default function EditTopsterPage() {
       },
       placements,
     };
-  }, [topster, ready, albums]);
+  }, [topster, ready, albums, te]);
 
   async function save(body: TopsterCreateBody) {
     await updateTopster(id, body);
-    toast.success('탑스터를 수정했습니다');
+    toast.success(t('updated'));
     router.push(`/topsters/${id}`);
   }
 
@@ -87,7 +91,7 @@ export default function EditTopsterPage() {
     return (
       <div className="text-muted-foreground flex flex-1 items-center justify-center gap-2">
         <Spinner />
-        불러오는 중...
+        {tc('loading')}
       </div>
     );
   }
@@ -95,7 +99,7 @@ export default function EditTopsterPage() {
   if (!topster) {
     return (
       <div className="flex flex-1 items-center justify-center">
-        <p className="text-muted-foreground">탑스터를 찾을 수 없습니다.</p>
+        <p className="text-muted-foreground">{t('notFound')}</p>
       </div>
     );
   }
@@ -104,7 +108,7 @@ export default function EditTopsterPage() {
   if (me !== undefined && me?.id !== topster.user.id) {
     return (
       <div className="flex flex-1 items-center justify-center">
-        <p className="text-muted-foreground">내가 만든 탑스터만 수정할 수 있습니다.</p>
+        <p className="text-muted-foreground">{t('notOwner')}</p>
       </div>
     );
   }
@@ -113,9 +117,9 @@ export default function EditTopsterPage() {
 
   return (
     <TopsterEditor
-      heading="탑스터 수정"
-      submitLabel="수정 저장"
-      savingLabel="저장 중..."
+      heading={t('editHeading')}
+      submitLabel={t('editSubmit')}
+      savingLabel={t('saving')}
       initial={initial}
       onSubmit={save}
     />

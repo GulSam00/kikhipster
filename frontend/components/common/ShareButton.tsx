@@ -1,6 +1,7 @@
 'use client';
 
 import { Share2 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
@@ -24,15 +25,18 @@ interface Props {
  * `navigator.clipboard`는 보안 컨텍스트(https 또는 localhost)에서만 존재하므로,
  * 없을 때는 실패로 처리하고 토스트에 URL을 직접 띄워 수동 복사할 수 있게 한다.
  */
-export default function ShareButton({ path, label = '공유', iconOnly, className }: Props) {
+export default function ShareButton({ path, label: labelProp, iconOnly, className }: Props) {
+  const t = useTranslations('Share');
+  const label = labelProp ?? t('label');
+
   async function copy() {
     const url = `${window.location.origin}${path}`;
     try {
       if (!navigator.clipboard) throw new Error('clipboard unavailable');
       await navigator.clipboard.writeText(url);
-      toast.success('링크를 복사했습니다');
+      toast.success(t('copied'));
     } catch {
-      toast.error('복사에 실패했습니다', { description: url });
+      toast.error(t('copyFailed'), { description: url });
     }
   }
 

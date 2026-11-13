@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { toast } from 'sonner';
 
@@ -38,6 +39,8 @@ interface Props {
 }
 
 export default function PoolGrid({ itemType, allIds, initialItems, initialRequested }: Props) {
+  const t = useTranslations('PoolGrid');
+  const tc = useTranslations('Common');
   const [items, setItems] = useState<PoolItem[]>(initialItems);
   const [loading, setLoading] = useState(false);
   const [requested, setRequested] = useState(initialRequested);
@@ -55,7 +58,7 @@ export default function PoolGrid({ itemType, allIds, initialItems, initialReques
       setItems((prev) => [...prev, ...fetched]);
       setRequested((n) => n + next.length);
     } catch {
-      toast.error('후보를 더 불러오지 못했습니다');
+      toast.error(t('loadMoreFailed'));
     } finally {
       setLoading(false);
     }
@@ -82,7 +85,7 @@ export default function PoolGrid({ itemType, allIds, initialItems, initialReques
         <div className="mt-4 flex justify-center">
           <Button variant="outline" onClick={loadMore} disabled={loading}>
             {loading ? <Spinner /> : null}
-            {loading ? '불러오는 중' : `더 보기 (남은 ${remaining}개)`}
+            {loading ? tc('loading') : t('loadMore', { remaining })}
           </Button>
         </div>
       )}
