@@ -19,14 +19,17 @@ external:
 
 ## 결정할 것 (착수 전, 사용자)
 
-- [ ] 언어 선택 방식 — (a) URL prefix `/en/...` `/ja/...`(SEO·공유 링크에 언어가 남는다, 라우트 구조가 `app/[locale]/` 로 바뀐다)
-      (b) 쿠키 + 상단 언어 전환(라우트 그대로, 공유 링크는 받는 사람 언어로 열린다) (c) `Accept-Language` 만.
-      기본 언어는 한국어 유지.
+- [x] 언어 선택 방식 — **(b) 쿠키 + 언어 전환 UI** (2026-11-13 사용자 결정).
+      - 라우트는 그대로 둔다(`app/[locale]/` 로 옮기지 않는다 — next-intl 의 "without i18n routing" 구성).
+      - 우선순위: 쿠키 → 쿠키가 없으면 `Accept-Language` 에서 ko/en/ja 중 첫 일치 → 없으면 `ko`.
+      - 버린 선택지: (a) URL prefix — 라우트 전체 이전 비용 대비 SEO 이득이 이 프로젝트 목적(AWS 실습)에 작다. (c) 는 사용자가 못 바꾼다.
+      - **주의:** 쿠키를 읽으면 그 페이지는 정적 prerender 가 안 되고 동적 렌더가 된다. 홈은 과거 "정적 prerender" 배포 버그가
+        났던 자리다(WORKLOG 참조) — `pnpm build` 출력에서 각 라우트가 ○(static)/ƒ(dynamic) 중 무엇이 됐는지 확인하고, 바뀐 것을 로그에 적는다.
 
 ## 완료 조건
 
 - [ ] `pnpm add next-intl`(npm install 금지 — CLAUDE.md) 후 ko/en/ja 메시지 파일과 locale 해석 미들웨어
-- [ ] 결정한 방식으로 언어 전환 UI (shadcn 프리미티브 위에서, DESIGN.md 토큰)
+- [ ] 쿠키를 쓰는 언어 전환 UI(Navbar, 모바일 하단 탭 포함 어디서든 닿게) (shadcn 프리미티브 위에서, DESIGN.md 토큰)
 - [ ] 기존 하드코딩 문자열을 메시지 키로 이전. 누락 키는 빌드/테스트에서 잡히게(ko 를 기준 스키마로 en·ja 키 일치 검사)
 - [ ] 백엔드 `/api/music/*` 호출에 locale 을 싣는 공통 경로(`lib/api/client.ts`) — 값의 형식은 `ko|en|ja`
 - [ ] `<html lang>` 이 locale 을 따른다
@@ -35,3 +38,4 @@ external:
 ## 로그
 
 - 2026-11-13: 상위 이슈에서 분할
+- 2026-11-13: 언어 선택 방식 (b) 쿠키로 결정
