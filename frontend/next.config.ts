@@ -1,4 +1,10 @@
 import type { NextConfig } from 'next';
+import createNextIntlPlugin from 'next-intl/plugin';
+
+/**
+ * next-intl 의 요청 설정 파일. i18n 라우팅 없이(쿠키 기반) 쓰므로 미들웨어는 없다 — `i18n/request.ts` 참조.
+ */
+const withNextIntl = createNextIntlPlugin('./i18n/request.ts');
 
 const nextConfig: NextConfig = {
   images: {
@@ -9,4 +15,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+export default withNextIntl(nextConfig);

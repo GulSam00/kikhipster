@@ -1,0 +1,25 @@
+{
+  "Site": {
+    "description": "音楽トップスター、推しワールドカップ、アーティスト探索サービス"
+  },
+  "Nav": {
+    "search": "検索",
+    "topsters": "トップスター",
+    "tournament": "推しワールドカップ",
+    "profile": "プロフィール",
+    "login": "ログイン",
+    "logout": "ログアウト",
+    "tabs": {
+      "home": "ホーム",
+      "search": "検索",
+      "topsters": "チャート",
+      "tournament": "W杯",
+      "profile": "マイページ",
+      "login": "ログイン"
+    }
+  },
+  "LocaleSwitcher": {
+    "label": "言語",
+    "failed": "言語を変更できませんでした"
+  }
+}

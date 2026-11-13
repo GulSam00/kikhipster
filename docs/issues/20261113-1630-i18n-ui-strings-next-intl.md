@@ -1,7 +1,7 @@
 ---
 id: 20261113-1630-i18n-ui-strings-next-intl
 title: UI 문자열 다국어 기반 도입 (한국어·영어·일본어)
-status: todo
+status: doing
 priority: medium
 summary: next-intl 로 UI 문자열을 ko/en/ja 메시지 파일로 빼고, 언어 선택 방식을 정해 프론트·백엔드에 locale 을 흘린다
 created: 2026-11-13
@@ -39,3 +39,4 @@ external:
 
 - 2026-11-13: 상위 이슈에서 분할
 - 2026-11-13: 언어 선택 방식 (b) 쿠키로 결정
+- 2026-11-13: 착수

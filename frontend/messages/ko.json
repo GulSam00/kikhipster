@@ -1,0 +1,25 @@
+{
+  "Site": {
+    "description": "음악 탑스터, 이상형 월드컵, 아티스트 탐색 서비스"
+  },
+  "Nav": {
+    "search": "검색",
+    "topsters": "탑스터",
+    "tournament": "이상형 월드컵",
+    "profile": "프로필",
+    "login": "로그인",
+    "logout": "로그아웃",
+    "tabs": {
+      "home": "홈",
+      "search": "검색",
+      "topsters": "탑스터",
+      "tournament": "월드컵",
+      "profile": "프로필",
+      "login": "로그인"
+    }
+  },
+  "LocaleSwitcher": {
+    "label": "언어",
+    "failed": "언어를 바꾸지 못했습니다"
+  }
+}

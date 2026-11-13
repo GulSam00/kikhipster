@@ -1,0 +1,25 @@
+{
+  "Site": {
+    "description": "Music topsters, song World Cups, and artist discovery"
+  },
+  "Nav": {
+    "search": "Search",
+    "topsters": "Topsters",
+    "tournament": "World Cup",
+    "profile": "Profile",
+    "login": "Log in",
+    "logout": "Log out",
+    "tabs": {
+      "home": "Home",
+      "search": "Search",
+      "topsters": "Topsters",
+      "tournament": "World Cup",
+      "profile": "Profile",
+      "login": "Log in"
+    }
+  },
+  "LocaleSwitcher": {
+    "label": "Language",
+    "failed": "Couldn't change the language"
+  }
+}

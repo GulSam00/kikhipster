@@ -1,10 +1,12 @@
 'use client';
 
 import { Home, LayoutGrid, LogOut, Search, Trophy, User, type LucideIcon } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useSyncExternalStore } from 'react';
 
+import LocaleSwitcher from '@/components/layout/LocaleSwitcher';
 import { Button } from '@/components/ui/button';
 
 import { clearMeCache } from '@/lib/hooks/use-me';
@@ -12,17 +14,22 @@ import { clearMeCache } from '@/lib/hooks/use-me';
 import { cn } from '@/lib/utils';
 
 /**
- * `shortLabel` 은 모바일 하단 탭에서만 쓰는 줄인 이름이다.
+ * 모바일 하단 탭은 상단 바와 다른 메시지(`Nav.tabs.*`)를 쓴다 — 줄인 이름이 필요해서다.
  *
  * 하단 탭은 `flex-1` 5분할이라 320px 에서 한 칸이 64px 인데, `text-xs`(12px) 기준
  * '이상형 월드컵'은 약 78px 로 칸을 넘긴다. 넘치면 가로 스크롤이 생기고 그건
  * DESIGN.md § Mobile responsiveness 의 BLOCK 사안이라, 좁은 화면에서만 '월드컵'으로 줄인다.
  * 상단 바에는 자리가 넉넉하므로 전체 이름을 그대로 쓴다.
+ *
+ * en·ja 도 같은 기준(`text-xs` 로 64px 안)으로 골랐다. 일본어는 한 글자가 약 12px 라
+ * 6자짜리 'トップスター'·'プロフィール' 은 넘치므로 탭에서는 'チャート'·'マイページ' 로 줄인다.
  */
-const navLinks: { href: string; label: string; shortLabel?: string; icon: LucideIcon }[] = [
-  { href: '/search', label: '검색', icon: Search },
-  { href: '/topsters', label: '탑스터', icon: LayoutGrid },
-  { href: '/tournament', label: '이상형 월드컵', shortLabel: '월드컵', icon: Trophy },
+type NavKey = 'search' | 'topsters' | 'tournament';
+
+const navLinks: { href: string; key: NavKey; icon: LucideIcon }[] = [
+  { href: '/search', key: 'search', icon: Search },
+  { href: '/topsters', key: 'topsters', icon: LayoutGrid },
+  { href: '/tournament', key: 'tournament', icon: Trophy },
 ];
 
 /** 로그아웃처럼 같은 탭에서 토큰을 지울 때 쓴다 — `storage` 이벤트는 **다른 탭**에서만 온다. */
@@ -41,6 +48,7 @@ export default function Navbar() {
   // `usePathname()` 때문에 이 컴포넌트가 이동마다 다시 렌더되므로, 로그인 콜백이 토큰을 쓰고
   // 이동한 직후에도 스냅샷이 다시 읽힌다. `useState` + `useEffect` 가 아닌 이유는
   // `react-hooks/set-state-in-effect` 와 `use-reduced-motion.ts` 의 설명을 참고.
+  const t = useTranslations('Nav');
   const pathname = usePathname();
   const router = useRouter();
   const isLoggedIn = useSyncExternalStore(
@@ -60,10 +68,10 @@ export default function Navbar() {
   }
 
   const mobileTabs = [
-    { href: '/', label: '홈', icon: Home },
-    ...navLinks.map(({ href, label, shortLabel, icon }) => ({
+    { href: '/', label: t('tabs.home'), icon: Home },
+    ...navLinks.map(({ href, key, icon }) => ({
       href,
-      label: shortLabel ?? label,
+      label: t(`tabs.${key}`),
       icon,
     })),
   ];
@@ -80,7 +88,7 @@ export default function Navbar() {
           </Link>
 
           <ul className="hidden items-center gap-1 sm:flex">
-            {navLinks.map(({ href, label }) => (
+            {navLinks.map(({ href, key }) => (
               <li key={href}>
                 <Button
                   asChild
@@ -88,13 +96,14 @@ export default function Navbar() {
                   size="sm"
                   className={cn(pathname.startsWith(href) && 'bg-muted text-foreground')}
                 >
-                  <Link href={href}>{label}</Link>
+                  <Link href={href}>{t(key)}</Link>
                 </Button>
               </li>
             ))}
           </ul>
 
           <div className="ml-auto flex items-center gap-1">
+            <LocaleSwitcher />
             {isLoggedIn ? (
               <>
                 <Button
@@ -103,15 +112,20 @@ export default function Navbar() {
                   size="sm"
                   className={cn(pathname.startsWith('/profile') && 'bg-muted text-foreground')}
                 >
-                  <Link href="/profile">프로필</Link>
+                  <Link href="/profile">{t('profile')}</Link>
                 </Button>
-                <Button variant="ghost" size="icon-sm" onClick={handleLogout} aria-label="로그아웃">
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
+                  onClick={handleLogout}
+                  aria-label={t('logout')}
+                >
                   <LogOut />
                 </Button>
               </>
             ) : (
               <Button asChild size="sm">
-                <Link href="/login">로그인</Link>
+                <Link href="/login">{t('login')}</Link>
               </Button>
             )}
           </div>
@@ -150,7 +164,7 @@ export default function Navbar() {
           )}
         >
           <User className="size-4" />
-          {isLoggedIn ? '프로필' : '로그인'}
+          {isLoggedIn ? t('tabs.profile') : t('tabs.login')}
         </Link>
       </nav>
     </>
