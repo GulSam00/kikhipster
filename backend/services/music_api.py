@@ -316,6 +316,33 @@ class ITunesMusicService:
         2026-11-12 재실측에서는 같은 Armageddon(1773694541)이 ①(country 없음)에서
         collection 1 + track 10 으로 왔고, ②(`country=KR`)는 결과 0이었다. iTunes 쪽
         동작이 바뀐 것으로 보이며 ①~③ 순서는 그대로 둔다(③은 ①②가 트랙을 못 줄 때만 탄다).
+
+        **2026-11-19 재실측 — 동작이 바뀐 게 아니라 ID 가 다른 앨범이었다.** aespa 는 같은
+        앨범이 스토어프론트마다 **다른 collectionId** 를 가진다(아티스트 lookup
+        `entity=album` 을 KR/country 없음으로 비교: aespa 69 vs 79건 중 43건이 KR 에만 있다).
+        Armageddon 은 KR 판 `1745285216`, 그 밖 판 `1773694541` 이다. 08-28 표의 KR 앨범은
+        KR 판이었을 것으로 보이고(재현이 그대로 된다), 11-12 는 그 밖 판을 잰 것이다.
+        모든 요청 `entity=song&limit=200`, 수치는 collection + track:
+
+        | 앨범 (collectionId) | ① country 없음 | ② `country=KR` |
+        |---------------------|----------------|----------------|
+        | aespa Armageddon KR판 (1745285216) | 결과 0 | 1 + **0** |
+        | aespa Whiplash KR판 (1772644600)   | 결과 0 | 1 + **0** |
+        | aespa iScreaM Vol.26 (1890393604)  | 결과 0 | 1 + **0** |
+        | IU Believe in Love (1577664507)    | 결과 0 | 1 + **0** |
+        | aespa Armageddon 그 밖 판 (1773694541) | 1 + 10 | 결과 0 |
+        | aespa LEMONADE (1893742002)        | 1 + 12 | 결과 0 |
+        | IU Palette (1229073300)            | 1 + 10 | 1 + 0 |
+        | NewJeans Get Up (1695951888)       | 1 + 6  | 1 + 0 |
+        | ZICO TELEVISION (1804661544)       | 1 + 5  | 1 + 0 |
+        | 대조군 Thriller (269572838)        | 1 + 9  | 1 + 0 |
+
+        - ② 는 여전히 필요하다 — KR 전용 ID 의 collection 을 주는 유일한 단계다(빼면 404).
+        - `entity=song` 에 `country=KR` 을 붙이면 트랙은 **어느 앨범이든 0** 이다(위 10건 전부).
+        - KR 전용 ID 는 ③ 검색으로도 트랙이 안 채워진다 — US 검색 결과는 그 밖 판 ID 로 와서
+          `collectionId` 필터에 걸리지 않는다(`aespa Armageddon - The 1st Album`: 18건 중
+          1745285216 0건 / 1773694541 10건, country 생략도 같다). 즉 지금은 KR 전용 ID 의
+          앨범 상세가 트랙 0개로 열린다.
         """
         # ① country 없이 (= US 스토어). US 앨범은 여기서 트랙까지 다 온다.
         results = (

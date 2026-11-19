@@ -180,7 +180,10 @@ def test_album_tracks_page_survives_name_lookup_failure(itunes):
 def test_kr_only_album_is_found_through_market_storefront(itunes):
     """US lookup 에 collection 이 없으면 사용자 스토어프론트(KR)로 한 번 더 묻는다."""
     itunes.add(album("1600000001", "Armageddon", "aespa"), KR)
-    # 실측: KR 앨범은 country 없는 entity=song 에서 결과 0 — US 카탈로그에 넣지 않는다.
+    # 실측(2026-11-19 재확인): KR 스토어 전용 ID(예: aespa Armageddon KR판 1745285216,
+    # IU Believe in Love 1577664507)는 country 없는 entity=song 에서 결과 0, country=KR 에서
+    # collection 1 + track 0 — 그래서 US 카탈로그에 넣지 않는다. 같은 앨범의 그 밖 판
+    # ID(1773694541)는 반대로 country 없음에서만 트랙까지 온다(ID 가 다른 별개 레코드).
 
     result = run(itunes.service().get_album_tracks("1600000001", market="KR"))
 
