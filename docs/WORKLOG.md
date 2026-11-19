@@ -2511,3 +2511,4 @@ Spotify 연동 백엔드, 프론트 기획(`_workspace/planning.md`), QA 리뷰(
 | 2026-11-01 | Merge pull request #8 from GulSam00/docs/claude-md-issue-workflow | - | 커밋 `ce547e2` |
 | 2026-11-12 | test(music): iTunes 대역 픽스처 + /api/music/* 라우터·스토어프론트 테스트 | backend, docs | 커밋 `b21dd33` |
 | 2026-11-12 | fix(music): 앨범 상세 ③단계 검색도 KR→US 스토어프론트로 보낸다 | backend, docs | 커밋 `8619da7` |
+| 2026-11-19 | docs(music): 앨범 상세 lookup ①② 재실측 — KR판/그 밖 판 collectionId 차이로 정정 | backend, docs | 커밋 `c23632c` |
