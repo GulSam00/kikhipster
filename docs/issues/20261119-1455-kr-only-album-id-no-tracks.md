@@ -1,8 +1,9 @@
 ---
 id: 20261119-1455-kr-only-album-id-no-tracks
 title: KR 스토어 전용 collectionId 앨범 상세가 트랙 0개로 열림 — ③ 검색이 그 밖 판 ID 로만 옴
-status: later
-priority: medium
+status: todo
+priority: high
+summary: KR 판 ID 앨범 상세가 트랙 0개 — 이전 1548 수정(③ US 검색)으로도 안 풀린다. 고칠 방향(이름 매칭 vs 그 밖 판 ID 통일) 실측 비교부터
 created: 2026-11-19
 external:
 ---
@@ -30,3 +31,4 @@ collectionId 를 갖는 경우가 있다(Armageddon: KR 판 `1745285216`, 그 �
 ## 로그
 
 - 2026-11-19: 이슈 20261112-1607 재실측 중 발견, later 로 기록
+- 2026-11-19: todo/high 로 승격(사용자). 1548 의 ③ US 검색 수정은 KR 판 ID 에 효과 없음이 확인됨 — 검색 결과가 그 밖 판 ID 로만 와 collectionId 필터를 못 통과한다(메인 세션 재확인: 1745285216 ①0건 ②collection1+track0, 1773694541 ①1+10 ②0건)
