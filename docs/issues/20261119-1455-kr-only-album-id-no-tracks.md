@@ -1,7 +1,7 @@
 ---
 id: 20261119-1455-kr-only-album-id-no-tracks
 title: KR 스토어 전용 collectionId 앨범 상세가 트랙 0개로 열림 — ③ 검색이 그 밖 판 ID 로만 옴
-status: doing
+status: done
 priority: high
 summary: KR 판 ID 앨범 상세가 트랙 0개 — 이전 1548 수정(③ US 검색)으로도 안 풀린다. 고칠 방향(이름 매칭 vs 그 밖 판 ID 통일) 실측 비교부터
 created: 2026-11-19
@@ -134,3 +134,5 @@ B 는 권하지 않는다 — 한국어 이름을 잃고(0/534), KR 전용 콘�
 - 2026-11-23: 사용자 결정 — A 2단(A-1 필터 확장, A-2 아티스트 목록 매칭) + 0곡 결과 캐시 금지, B 안 함, 합작 매칭 안 함. 구현 착수
 - 2026-11-23: 구현 — `music_api.py` 에 순수 함수 `normalize_collection_name`·`pick_sibling_edition`·`editions_from_tracks`(artistId 일치 필수, trackCount 차이 ≤2, trackCount→releaseDate→입력 순). ③ `_search_album_tracks` 는 collectionId 일치 곡이 없으면 같은 검색 응답에서 그 밖 판 곡을 받음(A-1, 추가 호출 0), 그래도 0곡이면 `_sibling_tracks_from_artist`(A-2: `lookup entity=album` country 없음 → `lookup entity=song` country 없음, +2회). 응답 `album` 은 KR 판 그대로. `routers/music.py` `_detail_with_cache` 에 `cacheable` 인자를 두고 `album_tracks` 만 0곡이면 저장 안 함(기존 0곡 행은 그대로). `get_album_tracks`·`_search_album_tracks` docstring 의 "③ US 로 KR 상세 0곡을 고쳤다" 취지 서술을 바로잡음 → 조건 2·3 체크
 - 2026-11-23: 회귀 테스트 — storefront 에 A-1·A-2(+2회 정확히)·trackCount 근접 판 선택(Whiplash)·차이 3 이상 거절(ENEMY)·합작 artistId 불일치·같은 ID 우선·정규화/선택 순수 함수, router 에 0곡 미캐시·빌려 온 결과 캐시. 수정 전 코드에서 storefront 4건·router 2건 실패 확인, 수정 후 Python 3.9.25 로 storefront+helpers 52 passed, router(메모리 캐시 플러그인) 10 passed. 실 PostgreSQL 은 미검증(PR CI 에서)
+- 2026-11-23: 실제 iTunes 로 서비스 함수 직접 호출(간격 3.6초, 403 0회). A-1 로 채워짐: Armageddon 1745285216 → 1773694541 10곡, Whiplash 1772644600 → 1772214980 6곡, iScreaM Vol.26 1890393604 → 2곡, Whiplash (English Version) 1802766472 → 1803314734 **1곡**(KR 판 3곡, US 검색엔 1곡 판만 있고 차이 2 라 허용 규칙에 걸림 — 타이틀곡 자체라 오매칭은 아니지만 2곡 모자람). 0곡: K-POP ScreaM 2(합작, 의도대로 미매칭), Dirty Work (Remixes)·Breakthrough 는 A-2 가 판을 찾았지만 그 판도 country 없는 lookup 에서 트랙 0 → later 이슈 20261123-1433 으로 기록
+- 2026-11-23: 완료(status done). 실제 PostgreSQL 위 라우터·캐시 검증은 PR CI 로 넘어간다(이 세션엔 Docker 없음). 기존 DB 의 0곡 `album_tracks` 행은 지우지 않았다 — 30일 TTL 이 지나기 전까지 그 앨범은 0곡 캐시가 그대로 나간다
