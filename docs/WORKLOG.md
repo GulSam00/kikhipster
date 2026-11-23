@@ -2514,3 +2514,4 @@ Spotify 연동 백엔드, 프론트 기획(`_workspace/planning.md`), QA 리뷰(
 | 2026-11-19 | docs(music): 앨범 상세 lookup ①② 재실측 — KR판/그 밖 판 collectionId 차이로 정정 | backend, docs | 커밋 `c23632c` |
 | 2026-11-19 | chore(issues): KR 판 ID 트랙 0개 이슈를 todo/high 로 승격 | docs | 커밋 `ea3342b` |
 | 2026-11-20 | docs(issues): KR 전용 앨범 ID 트랙 0개 — 사용자 경로 확인과 A/B 방향 실측 비교 | docs | 커밋 `712b373` |
+| 2026-11-23 | fix(music): KR 판 앨범 ID 상세가 트랙 0개로 열리던 문제 — 같은 앨범의 그 밖 판에서 트랙을 빌려 온다 | backend, docs | 커밋 `8435828` |
