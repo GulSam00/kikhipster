@@ -4,10 +4,11 @@
 - 저장된 탑스터의 커버(`/albums?ids=`)는 KR 에 없는 앨범도 채운다.
 - 캐시에 맞으면 iTunes 를 **0회** 부른다 — '없음'(tombstone)도 마찬가지.
 - 검색은 US 로 나가고, 이름은 KR lookup 으로 바꿔 돌려준다. 두 번째 검색부터 lookup 은 캐시가 받는다.
+- 앨범 상세의 트랙 0개 결과는 캐시하지 않는다 — 다음 요청에서 다시 시도한다.
 """
 from __future__ import annotations
 
-from fake_itunes import KR, US, album, track
+from fake_itunes import KR, US, album, artist, track
 
 IU_ALBUM = "1500000001"
 BEATLES = "1441164426"  # KR 스토어에 없는 앨범
@@ -81,6 +82,49 @@ def test_album_detail_cache_hit_makes_zero_itunes_calls(fake_itunes):
 
     second = client.get(f"/api/music/albums/{IU_ALBUM}/tracks")
     assert second.json() == first.json()
+    assert fake.requests == []
+
+
+KR_ONLY = "1745285216"  # KR 판 ID — ② 에서만 collection 이 잡히고 트랙은 어디서도 안 온다
+SIBLING = "1773694541"  # 같은 앨범의 그 밖 판
+AESPA = "1540251304"
+
+
+def _seed_kr_only(fake, with_sibling: bool) -> None:
+    name = "Armageddon - The 1st Album"
+    fake.add(album(KR_ONLY, name, "aespa", track_count=1, artist_id=AESPA), KR)
+    fake.add(artist(AESPA, "aespa"), US)
+    if with_sibling:
+        fake.add(album(SIBLING, name, "aespa", track_count=1, artist_id=AESPA), US)
+        fake.album_songs[SIBLING] = [
+            track("1773694600", "Supernova", "aespa", SIBLING, artist_id=AESPA,
+                  collection_name=name, track_count=1),
+        ]
+
+
+def test_album_detail_with_zero_tracks_is_not_cached(fake_itunes):
+    fake, client = fake_itunes
+    _seed_kr_only(fake, with_sibling=False)
+
+    first = client.get(f"/api/music/albums/{KR_ONLY}/tracks")
+    assert first.status_code == 200 and first.json()["tracks"] == []
+    fake.reset_calls()
+
+    second = client.get(f"/api/music/albums/{KR_ONLY}/tracks")
+    assert second.json()["tracks"] == []
+    assert len(fake.requests) > 0  # 0곡은 저장되지 않아 다시 iTunes 에 묻는다
+
+
+def test_album_detail_borrowed_from_sibling_is_cached_under_kr_id(fake_itunes):
+    fake, client = fake_itunes
+    _seed_kr_only(fake, with_sibling=True)
+
+    first = client.get(f"/api/music/albums/{KR_ONLY}/tracks").json()
+    assert first["album"]["id"] == KR_ONLY
+    assert [t["name"] for t in first["tracks"]] == ["Supernova"]
+    fake.reset_calls()
+
+    assert client.get(f"/api/music/albums/{KR_ONLY}/tracks").json() == first
     assert fake.requests == []
 
 

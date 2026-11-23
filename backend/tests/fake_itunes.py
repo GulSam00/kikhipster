@@ -10,6 +10,8 @@
 - `/lookup?country=KR` 은 이름을 한국어로 주지만 **KR 스토어에 없는 앨범은 통째로 빠진다.**
 - `/lookup` 에 country 가 없으면 US 스토어다.
 - `entity=song` + `country=KR` 은 collection 만 주고 트랙은 0개다.
+- `entity=album` 은 아티스트 ID 를 받아 아티스트 레코드 + 그 스토어프론트의 앨범들을 준다.
+  같은 앨범이 스토어프론트마다 **다른 collectionId** 일 수 있다(KR 판 / 그 밖 판) — 각 스토어에 따로 넣는다.
 """
 from __future__ import annotations
 
@@ -21,17 +23,31 @@ KR = "KR"
 US = None  # country 파라미터를 생략한 요청 = US 스토어프론트
 
 
-def album(album_id: str, name: str, artist: str, track_count: int = 10) -> dict:
-    return {
+def album(
+    album_id: str,
+    name: str,
+    artist: str,
+    track_count: int = 10,
+    artist_id: str | None = None,
+    release_date: str = "2020-01-01T00:00:00Z",
+) -> dict:
+    record = {
         "wrapperType": "collection",
         "collectionType": "Album",
         "collectionId": int(album_id),
         "collectionName": name,
         "artistName": artist,
         "artworkUrl100": f"https://is1.mzstatic.com/image/thumb/{album_id}/100x100bb.jpg",
-        "releaseDate": "2020-01-01T00:00:00Z",
+        "releaseDate": release_date,
         "trackCount": track_count,
     }
+    if artist_id:
+        record["artistId"] = int(artist_id)
+    return record
+
+
+def artist(artist_id: str, name: str) -> dict:
+    return {"wrapperType": "artist", "artistType": "Artist", "artistId": int(artist_id), "artistName": name}
 
 
 def track(
@@ -41,15 +57,20 @@ def track(
     album_id: str,
     number: int = 1,
     preview: str | None = "auto",
+    artist_id: str | None = None,
+    collection_name: str | None = None,
+    track_count: int | None = None,
+    release_date: str | None = None,
 ) -> dict:
-    return {
+    """iTunes 곡 레코드. 실제 곡 레코드도 소속 앨범의 `collectionName`·`trackCount` 를 함께 싣는다."""
+    record = {
         "wrapperType": "track",
         "kind": "song",
         "trackId": int(track_id),
         "trackName": name,
         "artistName": artist,
         "collectionId": int(album_id),
-        "collectionName": f"album {album_id}",
+        "collectionName": collection_name or f"album {album_id}",
         "artworkUrl100": f"https://is1.mzstatic.com/image/thumb/{album_id}/100x100bb.jpg",
         "trackNumber": number,
         "trackTimeMillis": 200_000,
@@ -58,9 +79,18 @@ def track(
             f"https://audio.example/{track_id}.m4a" if preview == "auto" else preview
         ),
     }
+    if artist_id:
+        record["artistId"] = int(artist_id)
+    if track_count is not None:
+        record["trackCount"] = track_count
+    if release_date:
+        record["releaseDate"] = release_date
+    return record
 
 
 def _record_id(r: dict) -> str:
+    if r["wrapperType"] == "artist":
+        return str(r["artistId"])
     return str(r["trackId"] if r["wrapperType"] == "track" else r["collectionId"])
 
 
@@ -132,5 +162,17 @@ class FakeITunes:
                 out.append(store[i])
                 if country is None:  # entity=song + country=KR 은 트랙이 0개로 잘린다
                     out.extend(self.album_songs.get(i, []))
+            return out
+        if entity == "album":
+            # 아티스트 ID → 아티스트 레코드 + 그 스토어프론트에 있는 그 아티스트의 앨범들.
+            out = []
+            for i in ids:
+                if i not in store or store[i]["wrapperType"] != "artist":
+                    continue
+                out.append(store[i])
+                out.extend(
+                    r for r in store.values()
+                    if r["wrapperType"] == "collection" and str(r.get("artistId", "")) == i
+                )
             return out
         return []

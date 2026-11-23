@@ -122,8 +122,8 @@ B 는 권하지 않는다 — 한국어 이름을 잃고(0/534), KR 전용 콘�
 ## 완료 조건
 
 - [x] KR 전용 ID 가 실제 사용자 경로(아티스트 상세 앨범 목록 등)로 들어오는지 확인
-- [ ] 트랙을 채울 방법 결정(예: 이름·아티스트로 그 밖 판 collectionId 를 찾아 그 ID 로 lookup) — 실측 근거와 함께
-- [ ] `tests/test_music_storefront.py` 에 회귀 테스트
+- [x] 트랙을 채울 방법 결정(예: 이름·아티스트로 그 밖 판 collectionId 를 찾아 그 ID 로 lookup) — 실측 근거와 함께
+- [x] `tests/test_music_storefront.py` 에 회귀 테스트
 
 ## 로그
 
@@ -131,3 +131,6 @@ B 는 권하지 않는다 — 한국어 이름을 잃고(0/534), KR 전용 콘�
 - 2026-11-19: todo/high 로 승격(사용자). 1548 의 ③ US 검색 수정은 KR 판 ID 에 효과 없음이 확인됨 — 검색 결과가 그 밖 판 ID 로만 와 collectionId 필터를 못 통과한다(메인 세션 재확인: 1745285216 ①0건 ②collection1+track0, 1773694541 ①1+10 ②0건)
 - 2026-11-20: 착수(실측·방향 비교까지)
 - 2026-11-20: 실측(225회, 403 13회 회복). KR 전용 ID 의 실경로는 아티스트 상세 앨범 카드뿐(검색·탑스터·월드컵은 US 검색 ID) → 조건 1 체크. 14팀 KR 앨범 705건 중 291건(41%)이 KR 전용, 표본 28/28 트랙 0. A(③ 필터를 artistId+이름으로 넓힘, 추가 호출 0) 23/28, 아티스트 목록 폴백까지 26/28. B 는 KR 이름 0/534·KR 전용 43/291 소실로 비권장. 조건 2 는 후보 비교 완료, 사용자 결정 대기
+- 2026-11-23: 사용자 결정 — A 2단(A-1 필터 확장, A-2 아티스트 목록 매칭) + 0곡 결과 캐시 금지, B 안 함, 합작 매칭 안 함. 구현 착수
+- 2026-11-23: 구현 — `music_api.py` 에 순수 함수 `normalize_collection_name`·`pick_sibling_edition`·`editions_from_tracks`(artistId 일치 필수, trackCount 차이 ≤2, trackCount→releaseDate→입력 순). ③ `_search_album_tracks` 는 collectionId 일치 곡이 없으면 같은 검색 응답에서 그 밖 판 곡을 받음(A-1, 추가 호출 0), 그래도 0곡이면 `_sibling_tracks_from_artist`(A-2: `lookup entity=album` country 없음 → `lookup entity=song` country 없음, +2회). 응답 `album` 은 KR 판 그대로. `routers/music.py` `_detail_with_cache` 에 `cacheable` 인자를 두고 `album_tracks` 만 0곡이면 저장 안 함(기존 0곡 행은 그대로). `get_album_tracks`·`_search_album_tracks` docstring 의 "③ US 로 KR 상세 0곡을 고쳤다" 취지 서술을 바로잡음 → 조건 2·3 체크
+- 2026-11-23: 회귀 테스트 — storefront 에 A-1·A-2(+2회 정확히)·trackCount 근접 판 선택(Whiplash)·차이 3 이상 거절(ENEMY)·합작 artistId 불일치·같은 ID 우선·정규화/선택 순수 함수, router 에 0곡 미캐시·빌려 온 결과 캐시. 수정 전 코드에서 storefront 4건·router 2건 실패 확인, 수정 후 Python 3.9.25 로 storefront+helpers 52 passed, router(메모리 캐시 플러그인) 10 passed. 실 PostgreSQL 은 미검증(PR CI 에서)
