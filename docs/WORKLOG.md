@@ -8,6 +8,20 @@
 
 ## 세션 기록
 
+### 2026-11-23 — KR 판 앨범 ID 상세 트랙 0개 (이슈 20261119-1455, 브랜치 `issue/20261119-1455-kr-only-album-id-no-tracks`)
+
+- 사용자 결정대로 **A 2단**: ③ 검색 응답에서 collectionId 일치 곡이 없으면 같은 artistId + 정규화 이름 + trackCount ±2 판의 곡(A-1, 추가 호출 0) → 그래도 0곡이면 아티스트 목록(country 없음) 매칭 + `entity=song`(A-2, +2회). 응답 `album` 은 KR 판 ID·이름 그대로. 합작(artistId 불일치) 매칭 안 함. `album_tracks` 는 0곡이면 캐시 안 함(기존 0곡 행은 그대로 — TTL 30일 동안 남는다).
+- 실제 iTunes 확인: A-1 로 Armageddon·Whiplash·iScreaM Vol.26 가 채워졌다. **A-2 는 판을 찾아도 그 판이 country 없는 lookup 에서 트랙 0**(Breakthrough 는 JP 에서만 곡이 옴) — 표본 기준 A-2 단독 성공 0건. later 이슈 `20261123-1433-sibling-edition-tracks-other-storefront`.
+- Whiplash (English Version) KR 3곡 판은 US 검색에 1곡 판만 있어 1곡으로 채워진다(차이 2 라 허용). 테스트는 두 판이 다 있을 때 3곡 판을 고르는지만 본다.
+- Python 3.9.25(uv) 로 storefront+helpers 52 passed, 라우터는 메모리 캐시 플러그인으로 10 passed. **실 PostgreSQL 미검증** — Docker 없음, PR CI 에서.
+
+### 2026-11-12 — `/api/music/*` 라우터 테스트 (이슈 20261027-0008, 브랜치 `issue/20261027-0008-music-router-tests-with-itunes-mock`)
+
+- **서비스를 가짜로 바꾸지 않고 HTTP 한 겹만 바꿨다**(`tests/fake_itunes.py`, `httpx.MockTransport`). 지킬 규칙(KR 먼저 → 폴백, 검색 US)이 전부 `music_api.py` 안에 있어서, `test_artist_names.py` 의 `FakeService` 방식으로는 그 규칙을 시험할 수 없다. 대역은 CLAUDE.md 실측대로 KR `/search` 에 앨범·곡 0건을, KR lookup 에서 KR 스토어에 없는 앨범을 누락한다.
+- 소스를 9가지로 일부러 망가뜨려(폴백 끄기·폴백에 KR·검색 KR·lookup US·이름 lookup country 누락·상세 ①단계에 country·배치 캐시 무시·tombstone 무시·상세 캐시 무시) 매번 1~11개가 빨간불이 되는 것을 확인하고 원복했다.
+- **실 PostgreSQL 로는 못 돌렸다** — 작업 컨테이너에 Docker 데몬이 없었다. 라우터 테스트는 `music_cache` 를 메모리로 바꾼 임시 플러그인(커밋 안 함)으로만 통과를 확인했다. 머지 전에 `pytest` 전체를 한 번 돌려야 한다.
+- 범위 밖 발견 2건을 `later` 로 적었다: 앨범 상세 ③단계 검색이 `country=KR`(`20261112-1548-album-tracks-search-fallback-uses-kr`), 앨범 상세가 `track` 캐시에 스키마가 다른 payload 를 덮어씀(`20261112-1548-album-detail-warms-track-cache-wrong-shape`).
+
 ### 2026-10-22 — 아티스트 한국어 이름 (상세 열 때 찾아 저장)
 
 - PR #3 을 일반 머지 커밋으로 병합(fcb7dad). `feat/artist-korean-names` 에서 구현.
@@ -2501,3 +2515,12 @@ Spotify 연동 백엔드, 프론트 기획(`_workspace/planning.md`), QA 리뷰(
 | 2026-10-22 | Merge pull request #3 from GulSam00/feat/play-screen-and-volume | - | 커밋 `fcb7dad` |
 | 2026-10-26 | chore(issues): bootstrap issue tracking | .claude, CLAUDE.md, docs | 커밋 `f313d4d` |
 | 2026-10-27 | chore(issues): 기존 세션에서 나온 할 일 9건 기록 | docs | 커밋 `aa5b936` |
+| 2026-11-01 | Merge pull request #8 from GulSam00/docs/claude-md-issue-workflow | - | 커밋 `ce547e2` |
+| 2026-11-12 | test(music): iTunes 대역 픽스처 + /api/music/* 라우터·스토어프론트 테스트 | backend, docs | 커밋 `b21dd33` |
+| 2026-11-12 | fix(music): 앨범 상세 ③단계 검색도 KR→US 스토어프론트로 보낸다 | backend, docs | 커밋 `8619da7` |
+| 2026-11-19 | docs(music): 앨범 상세 lookup ①② 재실측 — KR판/그 밖 판 collectionId 차이로 정정 | backend, docs | 커밋 `c23632c` |
+| 2026-11-19 | chore(issues): KR 판 ID 트랙 0개 이슈를 todo/high 로 승격 | docs | 커밋 `ea3342b` |
+| 2026-11-20 | docs(issues): KR 전용 앨범 ID 트랙 0개 — 사용자 경로 확인과 A/B 방향 실측 비교 | docs | 커밋 `712b373` |
+| 2026-11-23 | fix(music): KR 판 앨범 ID 상세가 트랙 0개로 열리던 문제 — 같은 앨범의 그 밖 판에서 트랙을 빌려 온다 | backend, docs | 커밋 `8435828` |
+| 2026-11-23 | docs(issues): KR 판 트랙 0개 이슈 완료 — 실제 iTunes 확인 결과, A-2 다른 스토어 트랙 later 이슈 | docs | 커밋 `e401598` |
+| 2026-11-23 | ci: backend 잡을 ubuntu-24.04 로 고정 — ubuntu-latest(26.04)에 Python 3.9 빌드 없음 | .github | 커밋 `b19516c` |

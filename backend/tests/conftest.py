@@ -124,3 +124,19 @@ def make_user(db):
         return user, {"Authorization": f"Bearer {create_access_token(str(user.id))}"}
 
     return _make
+
+
+@pytest.fixture()
+def fake_itunes(client):
+    """iTunes 를 `tests/fake_itunes.py` 의 대역으로 바꾼 앱. `(fake, client)` 를 돌려준다.
+
+    진짜 `ITunesMusicService` 를 쓰고 HTTP 만 `httpx.MockTransport` 로 가로챈다 — 서비스 안의
+    스토어프론트 규칙(KR 먼저 → 폴백, 검색은 US)까지 시험하기 위해서다. 실제 네트워크로는 나가지 않는다.
+    """
+    from fake_itunes import FakeITunes
+    from main import app
+
+    fake = FakeITunes()
+    app.state.music_service = fake.service()
+    yield fake, client
+    del app.state.music_service

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import logging
-from typing import Awaitable, Callable
+from typing import Awaitable, Callable, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from fastapi.concurrency import run_in_threadpool
@@ -111,6 +111,7 @@ async def _detail_with_cache(
     key: str,
     fetch: Callable[[], Awaitable[dict]],
     model: type[BaseModel],
+    cacheable: Optional[Callable[[dict], bool]] = None,
 ) -> dict:
     """단건 조회 경로의 캐시 래퍼. 배치 경로와 같은 테이블을 쓰되 item_type 으로 갈린다.
 
@@ -119,6 +120,9 @@ async def _detail_with_cache(
     캐시를 스키마로 한 번 검증하는 이유는 배치 경로와 같다 — 매핑이나 스키마가 바뀌면
     예전 payload가 더는 안 맞고, 그대로 돌려주면 직렬화에서 500이 난다. 검증에 실패하면
     미스로 취급해 다시 받아오고 덮어쓴다.
+
+    `cacheable` 이 주어지면 그 판정이 거짓인 결과는 **저장하지 않고** 돌려주기만 한다 —
+    다음 요청에서 다시 시도되게 하려는 것이다(지금은 앨범 상세의 0곡 결과만 해당).
     """
     cached = await run_in_threadpool(get_cached_one, db, item_type, key)
     if cached is not None:
@@ -129,7 +133,8 @@ async def _detail_with_cache(
             pass
 
     data = await fetch()
-    await run_in_threadpool(put_cached_one, db, item_type, key, data)
+    if cacheable is None or cacheable(data):
+        await run_in_threadpool(put_cached_one, db, item_type, key, data)
     return data
 
 
@@ -319,7 +324,13 @@ async def get_album_tracks(
     market: str = Query("KR", description="마켓 코드"),
     db: Session = Depends(get_db),
 ):
-    """앨범 상세 + 트랙 목록. 발매된 앨범의 트랙 구성은 바뀌지 않아 길게 캐시한다."""
+    """앨범 상세 + 트랙 목록. 발매된 앨범의 트랙 구성은 바뀌지 않아 길게 캐시한다.
+
+    **트랙 0개 결과는 캐시하지 않는다**(이슈 20261119-1455). 0곡은 "이 앨범은 원래 곡이 없다"가
+    아니라 "이번엔 어느 판에서도 못 찾았다"는 뜻이라, 30일 TTL 로 남기면 고쳐진 뒤에도 그 앨범은
+    한 달 내내 빈 상세로 열린다(KR 판 ID 가 실제로 그랬다). 다음 요청에서 다시 시도한다.
+    예전에 저장된 0곡 행은 그대로 둔다 — TTL 이 지나면 사라진다.
+    """
     service = request.app.state.music_service
     result = await _detail_with_cache(
         db,
@@ -327,6 +338,7 @@ async def get_album_tracks(
         f"{album_id}:{market}",
         lambda: service.get_album_tracks(album_id, market=market),
         AlbumWithTracks,
+        cacheable=lambda data: bool(data.get("tracks")),
     )
     await _warm_item_cache(db, "track", result.get("tracks", []))
     return result

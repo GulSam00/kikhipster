@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import logging
 import re
+import unicodedata
+from datetime import datetime
 
 import httpx
 from fastapi import HTTPException
@@ -99,6 +101,117 @@ def _album_type(title: str, track_count: int) -> str:
     if _ALBUM_EP_MID.search(title or ""):
         return "ep"
     return "single" if track_count <= 1 else "album"
+
+
+# ── KR 판 ↔ 그 밖 판 매칭 (이슈 20261119-1455) ──────────────────────────────────
+#
+# 같은 앨범이 스토어프론트마다 **다른 collectionId** 를 갖는 경우가 흔하다(aespa Armageddon:
+# KR 판 1745285216, 그 밖 판 1773694541). KR 판 ID 는 iTunes 어디서도 트랙을 안 준다 —
+# `entity=song` 은 country 없이는 결과 0, `country=KR` 이면 collection 만. 그래서 앨범 상세는
+# 같은 앨범의 그 밖 판을 찾아 **트랙만** 빌려 온다. 찾는 키는 2026-11-20 실측(표본 28건)에서
+# 정한 "같은 artistId + 정규화한 collectionName" 이고, 판이 여럿이면 trackCount → releaseDate 로
+# 하나만 고른다. trackCount 가 크게 다르면 같은 이름의 다른 발매물(싱글 1곡 vs 9곡 앨범,
+# Whiplash KR 3곡 판 vs 1곡 판)이라 거절한다.
+#
+# **합작은 매칭하지 않는다.** `K-POP ScreaM 2` 는 KR 판 artistId(NCT 127 & aespa)와 US 판
+# artistId(aespa & NCT 127)가 대표 아티스트 순서 때문에 달랐다. 이름만으로 넓히면 동명
+# 다른 앨범을 집어 오는 오매칭이 늘어서, artistId 가 다르면 그냥 못 찾은 것으로 둔다.
+SIBLING_MAX_TRACK_COUNT_DIFF = 2
+
+
+def normalize_collection_name(name: str | None) -> str:
+    """판 매칭용 앨범 이름 정규화 — NFKC, ` - EP`/` - Single` 꼬리 제거, 소문자, 공백 축약.
+
+    꼬리를 떼는 이유: 같은 미니앨범이 한 판은 `Whiplash - The 5th Mini Album`, 다른 판은
+    `... - EP` 처럼 표기가 갈린다. NFKC 는 전각 문자·호환 문자(`＆` 등) 차이를 지운다.
+    """
+    s = unicodedata.normalize("NFKC", name or "")
+    s = _SINGLE_EP_SUFFIX.sub("", s)
+    return " ".join(s.lower().split())
+
+
+def _record_artist_id(record: dict) -> str:
+    """레코드의 대표 아티스트 ID. 곡 레코드는 앨범 아티스트(`collectionArtistId`)가 따로 있으면 그쪽."""
+    value = record.get("collectionArtistId") or record.get("artistId")
+    return str(value) if value else ""
+
+
+def _parse_release_date(value: str | None) -> datetime | None:
+    if not value:
+        return None
+    try:
+        return datetime.strptime(value[:10], "%Y-%m-%d")
+    except ValueError:
+        return None
+
+
+def pick_sibling_edition(target: dict, candidates: list[dict]) -> dict | None:
+    """`target`(KR 판 collection 레코드)과 같은 앨범의 다른 판을 `candidates` 에서 하나 고른다.
+
+    후보는 collection 모양의 dict(`collectionId`·`artistId`·`collectionName`·`trackCount`·
+    `releaseDate`)다. 조건:
+    1. collectionId 가 target 과 다르고
+    2. 대표 artistId 가 **같고**(둘 다 있어야 한다 — 합작·Various Artists 는 여기서 빠진다)
+    3. 정규화한 collectionName 이 같고
+    4. trackCount 차이가 `SIBLING_MAX_TRACK_COUNT_DIFF` 이하
+    남은 것 중 trackCount 차이가 작은 것 → releaseDate 가 가까운 것 → 입력 순서.
+    """
+    target_id = str(target.get("collectionId", ""))
+    artist_id = _record_artist_id(target)
+    name = normalize_collection_name(target.get("collectionName"))
+    if not artist_id or not name:
+        return None
+
+    target_count = target.get("trackCount") or 0
+    target_date = _parse_release_date(target.get("releaseDate"))
+
+    ranked = []
+    for order, c in enumerate(candidates):
+        if str(c.get("collectionId", "")) in ("", target_id):
+            continue
+        if _record_artist_id(c) != artist_id:
+            continue
+        if normalize_collection_name(c.get("collectionName")) != name:
+            continue
+        count_diff = abs((c.get("trackCount") or 0) - target_count)
+        if count_diff > SIBLING_MAX_TRACK_COUNT_DIFF:
+            continue
+        c_date = _parse_release_date(c.get("releaseDate"))
+        date_diff = (
+            abs((c_date - target_date).days) if c_date and target_date else float("inf")
+        )
+        ranked.append((count_diff, date_diff, order, c))
+
+    if not ranked:
+        return None
+    ranked.sort(key=lambda r: r[:3])
+    return ranked[0][3]
+
+
+def editions_from_tracks(tracks: list[dict], artist_id: str) -> list[dict]:
+    """곡 레코드 목록을 소속 앨범(판)별로 묶어 `pick_sibling_edition` 의 후보 모양으로 만든다.
+
+    곡 레코드에도 소속 앨범의 `collectionName`·`trackCount` 가 실려 있다. 판의 artistId 는
+    그 판의 곡 중 하나라도 `artist_id` 면 그것으로 본다 — 피처링 곡은 곡 아티스트가 달라질 수
+    있어서다. releaseDate 는 곡들 중 가장 늦은 날짜(선공개 싱글이 앞서 나오는 경우를 감안).
+    """
+    by_collection: dict[str, dict] = {}
+    for t in tracks:
+        cid = str(t.get("collectionId", ""))
+        if not cid:
+            continue
+        edition = by_collection.setdefault(cid, {
+            "collectionId": cid,
+            "artistId": _record_artist_id(t),
+            "collectionName": t.get("collectionName", ""),
+            "trackCount": t.get("trackCount") or 0,
+            "releaseDate": t.get("releaseDate") or "",
+        })
+        if _record_artist_id(t) == artist_id:
+            edition["artistId"] = artist_id
+        if (t.get("releaseDate") or "") > edition["releaseDate"]:
+            edition["releaseDate"] = t["releaseDate"]
+    return list(by_collection.values())
 
 
 class ITunesMusicService:
@@ -307,9 +420,55 @@ class ITunesMusicService:
         그대로 두면 K-POP 앨범 상세가 전부 404였다(실제로 그랬다).
         `entity=musicTrack`·`media=music`·다른 country도 전부 확인했지만 안 된다.
 
-        그래서 트랙이 비면 마지막으로 **검색**으로 채운다. 검색 API는 KR 스토어에서도
-        preview_url 을 정상으로 준다. 다만 검색은 앨범 전체를 보장하지 않는다 —
-        위 앨범에서 11곡 중 10곡이 왔다. 없는 것보다 낫다는 판단이다.
+        그래서 트랙이 비면 **검색**으로 채운다(③). 단 검색은 `country=KR` 이면 곡이 0건이라
+        (2026-11-12 재실측) US 스토어프론트로 보낸다 — `_search_album_tracks`.
+        (예전 이 자리의 "검색 API는 KR 스토어에서도 preview_url 을 정상으로 준다"는 틀렸다.)
+        검색은 앨범 전체를 보장하지 않는다 — 위 앨범에서 11곡 중 10곡이 왔다.
+        없는 것보다 낫다는 판단이다.
+
+        2026-11-12 재실측에서는 같은 Armageddon(1773694541)이 ①(country 없음)에서
+        collection 1 + track 10 으로 왔고, ②(`country=KR`)는 결과 0이었다. iTunes 쪽
+        동작이 바뀐 것으로 보이며 ①~③ 순서는 그대로 둔다(③은 ①②가 트랙을 못 줄 때만 탄다).
+
+        **2026-11-19 재실측 — 동작이 바뀐 게 아니라 ID 가 다른 앨범이었다.** aespa 는 같은
+        앨범이 스토어프론트마다 **다른 collectionId** 를 가진다(아티스트 lookup
+        `entity=album` 을 KR/country 없음으로 비교: aespa 69 vs 79건 중 43건이 KR 에만 있다).
+        Armageddon 은 KR 판 `1745285216`, 그 밖 판 `1773694541` 이다. 08-28 표의 KR 앨범은
+        KR 판이었을 것으로 보이고(재현이 그대로 된다), 11-12 는 그 밖 판을 잰 것이다.
+        모든 요청 `entity=song&limit=200`, 수치는 collection + track:
+
+        | 앨범 (collectionId) | ① country 없음 | ② `country=KR` |
+        |---------------------|----------------|----------------|
+        | aespa Armageddon KR판 (1745285216) | 결과 0 | 1 + **0** |
+        | aespa Whiplash KR판 (1772644600)   | 결과 0 | 1 + **0** |
+        | aespa iScreaM Vol.26 (1890393604)  | 결과 0 | 1 + **0** |
+        | IU Believe in Love (1577664507)    | 결과 0 | 1 + **0** |
+        | aespa Armageddon 그 밖 판 (1773694541) | 1 + 10 | 결과 0 |
+        | aespa LEMONADE (1893742002)        | 1 + 12 | 결과 0 |
+        | IU Palette (1229073300)            | 1 + 10 | 1 + 0 |
+        | NewJeans Get Up (1695951888)       | 1 + 6  | 1 + 0 |
+        | ZICO TELEVISION (1804661544)       | 1 + 5  | 1 + 0 |
+        | 대조군 Thriller (269572838)        | 1 + 9  | 1 + 0 |
+
+        - ② 는 여전히 필요하다 — KR 전용 ID 의 collection 을 주는 유일한 단계다(빼면 404).
+        - `entity=song` 에 `country=KR` 을 붙이면 트랙은 **어느 앨범이든 0** 이다(위 10건 전부).
+        - KR 전용 ID 는 ③ 검색의 `collectionId` 필터만으로는 트랙이 안 채워진다 — US 검색
+          결과는 그 밖 판 ID 로 온다(`aespa Armageddon - The 1st Album`: 18건 중 1745285216 0건 /
+          1773694541 10건, country 생략도 같다). ③ 을 US 로 보낸 수정(이슈 1548)은 그 밖 판
+          ID 에만 효과가 있었고, KR 판 ID 는 그 뒤에도 트랙 0개로 열렸다.
+
+        **2026-11-23 (이슈 20261119-1455) — KR 판은 그 밖 판에서 트랙을 빌려 온다.**
+        - ③-a 검색 결과에 `collectionId` 일치 곡이 없으면, **같은 artistId + 정규화한 앨범
+          이름 + trackCount 차이 ≤2** 인 판의 곡을 받는다(`pick_sibling_edition`). 기존 검색
+          호출을 그대로 쓰므로 추가 호출 0회. 표본 28건 중 23건이 여기서 찾혔다.
+        - ③-b 그래도 0곡이면 아티스트 앨범 목록(`lookup entity=album`, country 없음)에서 같은
+          규칙으로 그 밖 판 ID 를 찾아 `entity=song` 으로 트랙을 받는다(추가 호출 2회,
+          `_sibling_tracks_from_artist`). ③-a 와 합쳐 표본 26/28.
+        - 응답의 `album`(ID·이름·커버)은 **요청받은 KR 판 그대로**다 — 링크·저장된 ID 와
+          어긋나지 않게. 곡 이름은 `_localize_names` 가 KR lookup 을 한 번 시도하지만 그 밖 판
+          곡은 대부분 KR 에 없어(실측 23건 중 2건만 응답) 영문으로 남는다.
+        - 끝내 못 찾으면(합작처럼 artistId 가 판마다 다르거나, 그 밖 판이 아예 없으면) 지금처럼
+          트랙 0개 + 경고 로그. 라우터는 0곡 결과를 캐시하지 않는다(`routers/music.py`).
         """
         # ① country 없이 (= US 스토어). US 앨범은 여기서 트랙까지 다 온다.
         results = (
@@ -339,9 +498,18 @@ class ITunesMusicService:
 
         album = self._map_album(collection)
 
-        # ③ 그래도 트랙이 없으면 검색으로 채운다.
+        # ③ 그래도 트랙이 없으면 검색으로 채운다(같은 ID → 없으면 같은 앨범의 그 밖 판).
         if not raw_tracks:
             raw_tracks = await self._search_album_tracks(collection, market)
+
+        # ③-b 검색으로도 못 찾으면 아티스트 앨범 목록에서 그 밖 판을 찾는다.
+        if not raw_tracks:
+            raw_tracks = await self._sibling_tracks_from_artist(collection)
+            if not raw_tracks:
+                logger.warning(
+                    "앨범 %s 수록곡을 어느 판에서도 찾지 못했다 — 트랙 0개로 응답한다",
+                    album["id"],
+                )
 
         tracks = []
         for t in raw_tracks:
@@ -409,7 +577,26 @@ class ITunesMusicService:
     async def _search_album_tracks(self, collection: dict, market: str) -> list[dict]:
         """lookup 이 트랙을 안 줄 때 검색으로 수록곡을 긁어 온다.
 
-        `collectionId` 로 거르므로 다른 앨범의 동명 곡이 섞이지는 않는다.
+        **`/search` 이므로 `_search_country()` 를 거친다**(KR → US). 2026-11-12 실측
+        `/search?entity=song&term=aespa Armageddon`, 대상 앨범 collectionId 1773694541:
+
+        | country | 결과 | 대상 앨범과 일치 |
+        |---------|------|------------------|
+        | KR      | 0    | 0                |
+        | US      | 19   | 10 (11곡 중, 전부 preview_url 있음) |
+        | 생략    | 19   | 10               |
+
+        표본 하나 더(`IU Love poem`): KR 0건, US 14건(그중 `Love Poem - EP` 6곡).
+        예전에 여기 `country=market` 을 그대로 넘겨 검색이 늘 0건이었다(이슈 1548). 다만 US 로
+        바꾼 것만으로 풀리는 것은 **그 밖 판 ID** 뿐이다 — KR 판 ID 는 검색 결과에 아예 안 나온다.
+
+        거르는 순서:
+        1. `collectionId` 가 같은 곡. 다른 앨범의 동명 곡은 섞이지 않는다.
+        2. 없으면 **같은 앨범의 그 밖 판** 곡 — 같은 artistId + 정규화 이름 + trackCount 차이
+           ≤2, 판이 여럿이면 trackCount → releaseDate 로 하나(`pick_sibling_edition`). KR 판
+           ID(2026-11-20 표본 28건)는 1 에 하나도 안 걸리고 2 로 23건이 찾혔다. 같은 검색
+           응답을 다시 거를 뿐이라 추가 호출은 없다.
+
         검색어에서 " - Single" / " - EP" 같은 꼬리는 떼지 않는다 — 실측에서 붙이든
         떼든 같은 곡이 왔고, 떼면 오히려 다른 앨범이 앞자리를 차지하는 경우가 있었다.
         """
@@ -424,17 +611,63 @@ class ITunesMusicService:
                 "term": term,
                 "entity": "song",
                 "media": "music",
-                "country": market,
+                "country": _search_country(market),
                 "limit": 200,
             },
         )
-        found = [
+        songs = [r for r in data.get("results", []) if r.get("wrapperType", "track") == "track"]
+        found = [r for r in songs if str(r.get("collectionId", "")) == album_id]
+        if found:
+            return found
+
+        sibling = pick_sibling_edition(
+            collection, editions_from_tracks(songs, _record_artist_id(collection))
+        )
+        if sibling is None:
+            logger.info("앨범 %s 수록곡이 검색 결과에 없다 (term=%r)", album_id, term)
+            return []
+
+        sibling_id = str(sibling["collectionId"])
+        logger.info("앨범 %s 수록곡을 같은 앨범의 다른 판 %s 에서 빌려 온다 (검색)", album_id, sibling_id)
+        return [r for r in songs if str(r.get("collectionId", "")) == sibling_id]
+
+    async def _sibling_tracks_from_artist(self, collection: dict) -> list[dict]:
+        """아티스트 앨범 목록에서 같은 앨범의 그 밖 판을 찾아 그 판의 곡을 받는다 (추가 호출 2회).
+
+        `_search_album_tracks` 의 검색이 그 밖 판을 못 보여 줄 때의 폴백이다(실측: TWICE
+        `Breakthrough` 는 US 검색이 동명 다른 곡만 줬고, aespa `Dirty Work (Remixes)` 는 검색 0건).
+
+        - 목록 호출은 **country 를 넘기지 않는다** — KR 목록은 그 KR 판 자신만 담고 있다.
+        - 곡 호출은 `entity=song` 이라 역시 country 없이(CLAUDE.md 함정: 얹으면 트랙 0개).
+        - artistId 가 없는 레코드(Various Artists 등)는 호출하지 않고 빈 목록.
+        """
+        artist_id = _record_artist_id(collection)
+        if not artist_id:
+            return []
+
+        data = await self._request(
+            "/lookup",
+            params={"id": artist_id, "entity": "album", "limit": self.SEARCH_MAX_LIMIT},
+        )
+        albums = [r for r in data.get("results", []) if r.get("wrapperType") == "collection"]
+        sibling = pick_sibling_edition(collection, albums)
+        if sibling is None:
+            return []
+
+        sibling_id = str(sibling["collectionId"])
+        data = await self._request(
+            "/lookup",
+            params={"id": sibling_id, "entity": "song", "limit": 200},
+        )
+        tracks = [
             r for r in data.get("results", [])
-            if str(r.get("collectionId", "")) == album_id
+            if r.get("wrapperType") == "track" and str(r.get("collectionId", "")) == sibling_id
         ]
-        if not found:
-            logger.warning("앨범 %s 수록곡을 검색으로도 찾지 못했다 (term=%r)", album_id, term)
-        return found
+        logger.info(
+            "앨범 %s 수록곡을 같은 앨범의 다른 판 %s 에서 빌려 온다 (아티스트 목록, %d곡)",
+            collection.get("collectionId"), sibling_id, len(tracks),
+        )
+        return tracks
 
     async def get_artist_top_tracks(
         self, artist_id: str, market: str = "KR"

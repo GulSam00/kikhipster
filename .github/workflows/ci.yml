@@ -13,7 +13,10 @@ concurrency:
 jobs:
   backend:
     name: backend (pytest)
-    runs-on: ubuntu-latest
+    # ubuntu-latest 가 26.04 로 올라가면서 setup-python 에 3.9 빌드가 없어져 설치 단계에서 죽었다(2026-11-23).
+    # 3.9 는 Dockerfile(python:3.9-slim) 런타임과 맞추려고 유지하므로, 3.9 빌드가 있는 24.04 로 고정한다.
+    # 런타임을 올릴 때 이 줄도 같이 풀 것.
+    runs-on: ubuntu-24.04
     services:
       postgres:
         image: postgres:16-alpine
