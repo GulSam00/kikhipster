@@ -2523,3 +2523,4 @@ Spotify 연동 백엔드, 프론트 기획(`_workspace/planning.md`), QA 리뷰(
 | 2026-11-20 | docs(issues): KR 전용 앨범 ID 트랙 0개 — 사용자 경로 확인과 A/B 방향 실측 비교 | docs | 커밋 `712b373` |
 | 2026-11-23 | fix(music): KR 판 앨범 ID 상세가 트랙 0개로 열리던 문제 — 같은 앨범의 그 밖 판에서 트랙을 빌려 온다 | backend, docs | 커밋 `8435828` |
 | 2026-11-23 | docs(issues): KR 판 트랙 0개 이슈 완료 — 실제 iTunes 확인 결과, A-2 다른 스토어 트랙 later 이슈 | docs | 커밋 `e401598` |
+| 2026-11-23 | ci: backend 잡을 ubuntu-24.04 로 고정 — ubuntu-latest(26.04)에 Python 3.9 빌드 없음 | .github | 커밋 `b19516c` |
